@@ -261,42 +261,120 @@
       margin-top: auto;
     }
 
-    /* ------------------------------
-       MOBILE
-    ------------------------------ */
+    /* ==============================
+       MOBILE — ottimizzato
+    ============================== */
     @media (max-width: 680px) {
-      /* fix sfondo su iOS Safari: background-attachment: fixed non funziona */
-      .bg {
-        position: absolute;
-        background-attachment: scroll;
-      }
 
+      /* Sfondo: fix iOS Safari */
+      .bg { position: absolute; background-attachment: scroll; }
+
+      /* Layout: scroll libero, hero occupa almeno lo schermo */
       html, body { overflow: auto; }
       .page { height: auto; min-height: 100vh; }
-      header { padding: 0 16px; }
-      nav { display: none; }
+
+      /* Navbar */
+      header { padding: 0 18px; height: 56px; }
+      nav, .nav-search { display: none; }
       .hamburger { display: flex; }
 
-      /* titolo più piccolo */
-      .hero { padding: 0 16px 24px; }
-      .hero h1 { font-size: 1.7rem; }
+      /* Hero: testo centrato, più compatto */
+      .hero {
+        padding: 28px 20px 32px;
+        justify-content: center;
+        min-height: calc(100svh - 56px - 180px);
+      }
 
-      /* citazioni: testo bianco su mobile perché lo sfondo potrebbe essere scuro */
-      .hero-location { color: rgba(255,255,255,0.80); }
-      .hero-quotes .quote { color: rgba(255,255,255,0.95); }
-      .hero-quotes .refs { color: rgba(255,255,255,0.60); }
-      .hero h1 { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
+      .hero-location {
+        font-size: 0.68rem;
+        letter-spacing: 0.28em;
+        color: rgba(255,255,255,0.70);
+        margin-bottom: 8px;
+      }
 
-      /* bottoni in colonna su schermi stretti */
-      .buttons { flex-direction: column; align-items: center; gap: 10px; }
-      .buttons a { width: 220px; text-align: center; }
+      .hero h1 {
+        font-size: 2.0rem;
+        color: #fff;
+        text-shadow: 0 2px 18px rgba(0,0,0,0.65);
+        margin-bottom: 18px;
+        line-height: 1.15;
+      }
 
-      /* card in colonna */
-      .sections { grid-template-columns: 1fr; gap: 8px; padding: 8px; }
-      .section svg { width: 34px; height: 34px; }
+      /* Riquadro citazioni: più compatto, testo leggibile */
+      .hero-quotes {
+        padding: 14px 18px 12px;
+        margin-bottom: 24px;
+        background: rgba(0,0,0,0.38);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-top: 2px solid rgba(255,255,255,0.45);
+        border-radius: 10px;
+      }
+      .hero-quotes .quote {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.95);
+        line-height: 1.6;
+        margin-bottom: 4px;
+      }
+      .hero-quotes .refs {
+        font-size: 0.70rem;
+        color: rgba(255,255,255,0.50);
+        letter-spacing: 0.10em;
+        margin-top: 8px;
+      }
+
+      /* Bottoni: in colonna, larghezza piena */
+      .buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+        max-width: 280px;
+      }
+      .buttons a {
+        text-align: center;
+        padding: 13px 20px;
+        font-size: 0.95rem;
+      }
+
+      /* Card sezioni: griglia 1 colonna, più alte e leggibili */
+      .sections {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px 14px 14px;
+      }
+
+      .section {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        padding: 16px 18px;
+        gap: 14px;
+        justify-content: flex-start;
+      }
+
+      /* Icona a sinistra del testo */
+      .section svg {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        margin-top: 0;
+        order: -1;
+      }
+
+      .section h3 { font-size: 0.97rem; margin-bottom: 3px; }
+      .section p  { font-size: 0.80rem; margin-bottom: 0; }
+
+      /* Menu mobile più elegante */
+      .mob-menu a {
+        font-size: 1.6rem;
+        letter-spacing: 0.02em;
+      }
     }
 
-    /* mobile menu overlay */
+    /* Padding per non coprire con il player fisso */
+    .page { padding-bottom: 68px; }
+    @media (max-width: 680px) { .page { padding-bottom: 62px; } }
     .mob-menu {
       position: fixed; inset: 0; z-index: 90;
       background: rgba(8,5,1,0.97);
@@ -400,6 +478,366 @@
   <a href="area-privata.html" onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
   <a href="cerca.html"        onclick="document.getElementById('mob').classList.remove('open')">Cerca nel sito</a>
 </div>
+
+<!-- MUSIC PLAYER -->
+<script>
+/**
+ * player.js — Music player condiviso tra tutte le pagine
+ * Persistenza tramite localStorage: posizione e stato sopravvivono alla navigazione
+ *
+ * ── COME AGGIUNGERE BRANI ────────────────────────────────────────
+ * Aggiungi un oggetto nell'array PLAYLIST qui sotto:
+ *   { src: "nomefile.mp3", title: "Titolo", artist: "Artista", cover: "copertina.jpg" }
+ * Metti l'mp3 (e la copertina se ce l'ha) nella stessa cartella del sito.
+ * ────────────────────────────────────────────────────────────────
+ */
+
+const PLAYLIST = [
+  {
+    src:    "gioia_nel_tuo_nome.mp3",
+    title:  "Gioia nel Tuo Nome",
+    artist: "Chiesa Evangelica Maranello",
+    cover:  "cover_gioia.jpg"
+  }
+  // Aggiungi altri brani qui sotto:
+  // { src: "brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
+];
+
+/* ── SHUFFLE Fisher-Yates ── */
+function shuffle(arr) {
+  const a = [...arr.keys()]; // array di indici [0,1,2,...]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ── STORAGE HELPERS ── */
+const SK = 'cem_player'; // storage key
+
+function loadState() {
+  try { return JSON.parse(sessionStorage.getItem(SK)) || {}; } catch { return {}; }
+}
+function saveState(s) {
+  try { sessionStorage.setItem(SK, JSON.stringify(s)); } catch {}
+}
+
+/* ── BUILD PLAYER HTML ── */
+function buildPlayer() {
+  const el = document.createElement('div');
+  el.id = 'cemPlayer';
+  el.innerHTML = `
+    <audio id="cemAudio" preload="none"></audio>
+
+    <div class="cpl-info">
+      <img class="cpl-cover" id="cplCover" src="" alt="cover" onerror="this.style.display='none'">
+      <div class="cpl-meta">
+        <div class="cpl-title" id="cplTitle">—</div>
+        <div class="cpl-artist" id="cplArtist">Chiesa Evangelica Maranello</div>
+      </div>
+    </div>
+
+    <div class="cpl-controls">
+      <button class="cpl-btn" onclick="window._player.prev()" title="Precedente">⏮</button>
+      <button class="cpl-btn cpl-play" id="cplPlayBtn" onclick="window._player.toggle()" title="Play/Pausa">▶</button>
+      <button class="cpl-btn" onclick="window._player.next()" title="Successivo">⏭</button>
+    </div>
+
+    <div class="cpl-right">
+      <div class="cpl-prog-row">
+        <span class="cpl-time" id="cplCur">0:00</span>
+        <input type="range" class="cpl-bar" id="cplBar" value="0" min="0" max="100" step="0.1"
+          oninput="window._player.seek(this.value)">
+        <span class="cpl-time" id="cplDur">0:00</span>
+      </div>
+      <div class="cpl-vol-row">
+        🔊<input type="range" class="cpl-vol" id="cplVol" value="80" min="0" max="100"
+          oninput="window._player.setVol(this.value)">
+      </div>
+    </div>
+
+    <button class="cpl-close" onclick="window._player.close()" title="Chiudi">✕</button>
+  `;
+  document.body.appendChild(el);
+
+  // Pulsante riapertura
+  const btn = document.createElement('button');
+  btn.id = 'cplReopen';
+  btn.title = 'Musica';
+  btn.textContent = '🎵';
+  btn.onclick = () => window._player.reopen();
+  document.body.appendChild(btn);
+}
+
+/* ── INJECT CSS ── */
+function injectCSS() {
+  const s = document.createElement('style');
+  s.textContent = `
+    #cemPlayer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(8,5,2,0.93); backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 18px; color: #fff;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+    #cemPlayer.visible { transform: translateY(0); }
+
+    .cpl-cover {
+      width: 40px; height: 40px; border-radius: 6px; object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+    }
+    .cpl-info  { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .cpl-meta  { min-width: 0; }
+    .cpl-title  { font-size: 0.87rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cpl-artist { font-size: 0.71rem; color: rgba(255,255,255,0.42); margin-top: 1px; white-space: nowrap; }
+
+    .cpl-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .cpl-btn {
+      background: none; border: none; color: #fff; cursor: pointer;
+      font-size: 0.95rem; padding: 5px; opacity: 0.65; transition: opacity 0.2s; line-height: 1;
+    }
+    .cpl-btn:hover { opacity: 1; }
+    .cpl-play {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.28);
+      opacity: 1; font-size: 0.9rem;
+    }
+    .cpl-play:hover { background: rgba(255,255,255,0.22); }
+
+    .cpl-right { flex: 2; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .cpl-prog-row, .cpl-vol-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.68rem; color: rgba(255,255,255,0.40);
+    }
+    .cpl-bar { flex: 1; height: 3px; accent-color: rgba(255,255,255,0.75); cursor: pointer; }
+    .cpl-vol { width: 68px; height: 3px; accent-color: rgba(255,255,255,0.55); cursor: pointer; }
+    .cpl-time { white-space: nowrap; flex-shrink: 0; }
+
+    .cpl-close {
+      background: none; border: none; color: rgba(255,255,255,0.30);
+      cursor: pointer; font-size: 0.82rem; padding: 4px 6px; flex-shrink: 0;
+      transition: color 0.2s;
+    }
+    .cpl-close:hover { color: #fff; }
+
+    #cplReopen {
+      position: fixed; bottom: 14px; right: 14px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(8,5,2,0.90); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: #fff; font-size: 1.1rem; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #cplReopen:hover { background: rgba(30,18,5,0.95); }
+    #cplReopen.visible { display: flex; }
+
+    /* Padding pagina per non coprire contenuto */
+    body { padding-bottom: 68px !important; }
+
+    @media (max-width: 600px) {
+      .cpl-right  { display: none; }
+      .cpl-artist { display: none; }
+      #cemPlayer  { padding: 8px 12px; gap: 10px; }
+      body        { padding-bottom: 60px !important; }
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ── PLAYER CONTROLLER ── */
+function initPlayer() {
+  buildPlayer();
+  injectCSS();
+
+  const audio    = document.getElementById('cemAudio');
+  const playBtn  = document.getElementById('cplPlayBtn');
+  const cover    = document.getElementById('cplCover');
+  const titleEl  = document.getElementById('cplTitle');
+  const artistEl = document.getElementById('cplArtist');
+  const bar      = document.getElementById('cplBar');
+  const cur      = document.getElementById('cplCur');
+  const dur      = document.getElementById('cplDur');
+  const volEl    = document.getElementById('cplVol');
+  const player   = document.getElementById('cemPlayer');
+  const reopen   = document.getElementById('cplReopen');
+
+  // Genera ordine shuffled e recupera stato salvato
+  let order    = shuffle(PLAYLIST);
+  let posInOrder = 0;    // posizione nell'array shuffled
+  let isPlaying  = false;
+  let isClosed   = false;
+
+  const st = loadState();
+
+  // Ripristina volume
+  const savedVol = st.volume !== undefined ? st.volume : 80;
+  audio.volume = savedVol / 100;
+  volEl.value  = savedVol;
+
+  function fmt(s) {
+    if (!s || isNaN(s)) return '0:00';
+    return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+  }
+
+  function loadTrack(idx, resume) {
+    const t = PLAYLIST[idx];
+    audio.src = t.src;
+    titleEl.textContent  = t.title;
+    artistEl.textContent = t.artist || 'Chiesa Evangelica Maranello';
+    if (t.cover) { cover.src = t.cover; cover.style.display = 'block'; }
+    else cover.style.display = 'none';
+    bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+
+    if (resume && resume > 0) {
+      audio.addEventListener('loadedmetadata', () => {
+        audio.currentTime = resume;
+      }, { once: true });
+    }
+    saveState({ trackIndex: idx, time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: isPlaying });
+  }
+
+  function play() {
+    audio.play().then(() => {
+      isPlaying = true;
+      playBtn.textContent = '⏸';
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: true });
+    }).catch(() => {});
+  }
+
+  function pause() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = '▶';
+    saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: false });
+  }
+
+  // Salva stato PRIMA di lasciare la pagina (fondamentale per la continuità)
+  window.addEventListener('beforeunload', () => {
+    saveState({
+      trackIndex: order[posInOrder],
+      time:       audio.currentTime,
+      volume:     parseInt(volEl.value),
+      closed:     isClosed,
+      playing:    isPlaying
+    });
+  });
+
+  // Ripristina traccia salvata
+  let startIndex   = 0;
+  let startTime    = 0;
+  let startPlaying = false;
+  if (st.trackIndex !== undefined) {
+    startIndex   = st.trackIndex;
+    startTime    = st.time || 0;
+    startPlaying = st.playing || false;
+    const pos = order.indexOf(startIndex);
+    if (pos !== -1) posInOrder = pos;
+    else { order[0] = startIndex; posInOrder = 0; }
+  }
+
+  isClosed = st.closed || false;
+  loadTrack(order[posInOrder], startTime);
+
+  // Mostra player dopo 200ms e ripristina stato play/pausa
+  setTimeout(() => {
+    if (!isClosed) player.classList.add('visible');
+    else reopen.classList.add('visible');
+
+    // Se era in play nella pagina precedente, riprendi
+    if (startPlaying && !isClosed) {
+      play();
+    }
+  }, 200);
+
+  /* ── API pubblica ── */
+  window._player = {
+    toggle() {
+      if (!isPlaying) play(); else pause();
+    },
+    prev() {
+      posInOrder = (posInOrder - 1 + order.length) % order.length;
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    next() {
+      posInOrder = (posInOrder + 1) % order.length;
+      // se abbiamo percorso tutto l'array, rimescola di nuovo
+      if (posInOrder === 0) order = shuffle(PLAYLIST);
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    seek(v) {
+      if (audio.duration) audio.currentTime = (v / 100) * audio.duration;
+    },
+    setVol(v) {
+      audio.volume = v / 100;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(v), closed: isClosed });
+    },
+    close() {
+      player.classList.remove('visible');
+      pause();
+      isClosed = true;
+      reopen.classList.add('visible');
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: true });
+    },
+    reopen() {
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
+    },
+    // Carica e suona un brano esterno alla playlist (es. canti del culto)
+    playUrl(src, title, artist, coverSrc) {
+      audio.src = src;
+      titleEl.textContent  = title  || src;
+      artistEl.textContent = artist || '';
+      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
+      else cover.style.display = 'none';
+      bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      play();
+    }
+  };
+
+  /* ── EVENTI AUDIO ── */
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      bar.value = (audio.currentTime / audio.duration) * 100;
+      cur.textContent = fmt(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    dur.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', () => {
+    window._player.next();
+  });
+
+  // Salva posizione ogni 5 secondi
+  setInterval(() => {
+    if (isPlaying) {
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed });
+    }
+  }, 5000);
+}
+
+// Avvia quando il DOM è pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPlayer);
+} else {
+  initPlayer();
+}
+
+</script>
 
 </body>
 </html>

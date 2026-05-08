@@ -652,6 +652,19 @@ function initPlayer() {
       reopen.classList.remove('visible');
       isClosed = false;
       saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
+    },
+    // Carica e suona un brano esterno alla playlist (es. canti del culto)
+    playUrl(src, title, artist, coverSrc) {
+      audio.src = src;
+      titleEl.textContent  = title  || src;
+      artistEl.textContent = artist || '';
+      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
+      else cover.style.display = 'none';
+      bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      play();
     }
   };
 

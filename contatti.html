@@ -235,6 +235,80 @@
     }
     .mob-menu.open { opacity: 1; pointer-events: all; }
     .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+
+    /* ==============================
+       MOBILE — ottimizzato
+    ============================== */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      html, body { overflow: auto; }
+      .page { height: auto; min-height: 100vh; }
+
+      /* Navbar */
+      header { padding: 0 18px; height: 56px; }
+      nav, .nav-search { display: none; }
+      .hamburger { display: flex; }
+
+      /* Main content: più respiro */
+      main { padding: 28px 18px 48px; }
+
+      /* Titoli pagina */
+      .page-header h1 { font-size: 1.9rem; }
+      .page-header .sottotitolo { font-size: 0.92rem; }
+
+      /* Back link */
+      .back-link { margin-bottom: 28px; }
+
+      /* Riquadri generici */
+      .articolo,
+      .progetto,
+      .info-card,
+      .contatto,
+      .radio-card,
+      .comunita-section,
+      .storia-section,
+      .macrogruppo { border-radius: 8px; }
+
+      /* Bottoni link a colonna intera */
+      .btn-row { flex-direction: column; }
+      .btn-link { justify-content: center; }
+
+      /* Griglia link 1 colonna */
+      .link-grid { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Tre card culto in colonna */
+      .tre-card { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Azioni culto in colonna */
+      .azioni { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Tabella predicazioni: nascondi colonna riassunto */
+      .pred-table th:nth-child(3),
+      .pred-table td:nth-child(3) { display: none; }
+
+      /* Contatti: testo email più piccolo */
+      .contatto-valore { font-size: 0.88rem; word-break: break-all; }
+
+      /* Storia: badge anni in riga */
+      .section-header { flex-wrap: wrap; gap: 8px; }
+
+      /* Area privata: tabella attività */
+      .attivita-table th:nth-child(2),
+      .attivita-table td:nth-child(2) { display: none; }
+
+      /* Saldo: numero più piccolo */
+      .saldo-valore { font-size: 2.2rem; }
+
+      /* Spese: layout compatto */
+      .spesa-row { flex-wrap: wrap; gap: 6px; }
+
+      /* Menu mobile */
+      .mob-menu a { font-size: 1.6rem; }
+    }
+
+    /* Padding player fisso */
+    body { padding-bottom: 62px !important; }
+
   </style>
 </head>
 
@@ -331,6 +405,366 @@
   <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
   <a href="area-privata.html"  onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
 </div>
+
+<!-- MUSIC PLAYER -->
+<script>
+/**
+ * player.js — Music player condiviso tra tutte le pagine
+ * Persistenza tramite localStorage: posizione e stato sopravvivono alla navigazione
+ *
+ * ── COME AGGIUNGERE BRANI ────────────────────────────────────────
+ * Aggiungi un oggetto nell'array PLAYLIST qui sotto:
+ *   { src: "nomefile.mp3", title: "Titolo", artist: "Artista", cover: "copertina.jpg" }
+ * Metti l'mp3 (e la copertina se ce l'ha) nella stessa cartella del sito.
+ * ────────────────────────────────────────────────────────────────
+ */
+
+const PLAYLIST = [
+  {
+    src:    "gioia_nel_tuo_nome.mp3",
+    title:  "Gioia nel Tuo Nome",
+    artist: "Chiesa Evangelica Maranello",
+    cover:  "cover_gioia.jpg"
+  }
+  // Aggiungi altri brani qui sotto:
+  // { src: "brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
+];
+
+/* ── SHUFFLE Fisher-Yates ── */
+function shuffle(arr) {
+  const a = [...arr.keys()]; // array di indici [0,1,2,...]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ── STORAGE HELPERS ── */
+const SK = 'cem_player'; // storage key
+
+function loadState() {
+  try { return JSON.parse(sessionStorage.getItem(SK)) || {}; } catch { return {}; }
+}
+function saveState(s) {
+  try { sessionStorage.setItem(SK, JSON.stringify(s)); } catch {}
+}
+
+/* ── BUILD PLAYER HTML ── */
+function buildPlayer() {
+  const el = document.createElement('div');
+  el.id = 'cemPlayer';
+  el.innerHTML = `
+    <audio id="cemAudio" preload="none"></audio>
+
+    <div class="cpl-info">
+      <img class="cpl-cover" id="cplCover" src="" alt="cover" onerror="this.style.display='none'">
+      <div class="cpl-meta">
+        <div class="cpl-title" id="cplTitle">—</div>
+        <div class="cpl-artist" id="cplArtist">Chiesa Evangelica Maranello</div>
+      </div>
+    </div>
+
+    <div class="cpl-controls">
+      <button class="cpl-btn" onclick="window._player.prev()" title="Precedente">⏮</button>
+      <button class="cpl-btn cpl-play" id="cplPlayBtn" onclick="window._player.toggle()" title="Play/Pausa">▶</button>
+      <button class="cpl-btn" onclick="window._player.next()" title="Successivo">⏭</button>
+    </div>
+
+    <div class="cpl-right">
+      <div class="cpl-prog-row">
+        <span class="cpl-time" id="cplCur">0:00</span>
+        <input type="range" class="cpl-bar" id="cplBar" value="0" min="0" max="100" step="0.1"
+          oninput="window._player.seek(this.value)">
+        <span class="cpl-time" id="cplDur">0:00</span>
+      </div>
+      <div class="cpl-vol-row">
+        🔊<input type="range" class="cpl-vol" id="cplVol" value="80" min="0" max="100"
+          oninput="window._player.setVol(this.value)">
+      </div>
+    </div>
+
+    <button class="cpl-close" onclick="window._player.close()" title="Chiudi">✕</button>
+  `;
+  document.body.appendChild(el);
+
+  // Pulsante riapertura
+  const btn = document.createElement('button');
+  btn.id = 'cplReopen';
+  btn.title = 'Musica';
+  btn.textContent = '🎵';
+  btn.onclick = () => window._player.reopen();
+  document.body.appendChild(btn);
+}
+
+/* ── INJECT CSS ── */
+function injectCSS() {
+  const s = document.createElement('style');
+  s.textContent = `
+    #cemPlayer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(8,5,2,0.93); backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 18px; color: #fff;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+    #cemPlayer.visible { transform: translateY(0); }
+
+    .cpl-cover {
+      width: 40px; height: 40px; border-radius: 6px; object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+    }
+    .cpl-info  { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .cpl-meta  { min-width: 0; }
+    .cpl-title  { font-size: 0.87rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cpl-artist { font-size: 0.71rem; color: rgba(255,255,255,0.42); margin-top: 1px; white-space: nowrap; }
+
+    .cpl-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .cpl-btn {
+      background: none; border: none; color: #fff; cursor: pointer;
+      font-size: 0.95rem; padding: 5px; opacity: 0.65; transition: opacity 0.2s; line-height: 1;
+    }
+    .cpl-btn:hover { opacity: 1; }
+    .cpl-play {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.28);
+      opacity: 1; font-size: 0.9rem;
+    }
+    .cpl-play:hover { background: rgba(255,255,255,0.22); }
+
+    .cpl-right { flex: 2; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .cpl-prog-row, .cpl-vol-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.68rem; color: rgba(255,255,255,0.40);
+    }
+    .cpl-bar { flex: 1; height: 3px; accent-color: rgba(255,255,255,0.75); cursor: pointer; }
+    .cpl-vol { width: 68px; height: 3px; accent-color: rgba(255,255,255,0.55); cursor: pointer; }
+    .cpl-time { white-space: nowrap; flex-shrink: 0; }
+
+    .cpl-close {
+      background: none; border: none; color: rgba(255,255,255,0.30);
+      cursor: pointer; font-size: 0.82rem; padding: 4px 6px; flex-shrink: 0;
+      transition: color 0.2s;
+    }
+    .cpl-close:hover { color: #fff; }
+
+    #cplReopen {
+      position: fixed; bottom: 14px; right: 14px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(8,5,2,0.90); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: #fff; font-size: 1.1rem; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #cplReopen:hover { background: rgba(30,18,5,0.95); }
+    #cplReopen.visible { display: flex; }
+
+    /* Padding pagina per non coprire contenuto */
+    body { padding-bottom: 68px !important; }
+
+    @media (max-width: 600px) {
+      .cpl-right  { display: none; }
+      .cpl-artist { display: none; }
+      #cemPlayer  { padding: 8px 12px; gap: 10px; }
+      body        { padding-bottom: 60px !important; }
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ── PLAYER CONTROLLER ── */
+function initPlayer() {
+  buildPlayer();
+  injectCSS();
+
+  const audio    = document.getElementById('cemAudio');
+  const playBtn  = document.getElementById('cplPlayBtn');
+  const cover    = document.getElementById('cplCover');
+  const titleEl  = document.getElementById('cplTitle');
+  const artistEl = document.getElementById('cplArtist');
+  const bar      = document.getElementById('cplBar');
+  const cur      = document.getElementById('cplCur');
+  const dur      = document.getElementById('cplDur');
+  const volEl    = document.getElementById('cplVol');
+  const player   = document.getElementById('cemPlayer');
+  const reopen   = document.getElementById('cplReopen');
+
+  // Genera ordine shuffled e recupera stato salvato
+  let order    = shuffle(PLAYLIST);
+  let posInOrder = 0;    // posizione nell'array shuffled
+  let isPlaying  = false;
+  let isClosed   = false;
+
+  const st = loadState();
+
+  // Ripristina volume
+  const savedVol = st.volume !== undefined ? st.volume : 80;
+  audio.volume = savedVol / 100;
+  volEl.value  = savedVol;
+
+  function fmt(s) {
+    if (!s || isNaN(s)) return '0:00';
+    return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+  }
+
+  function loadTrack(idx, resume) {
+    const t = PLAYLIST[idx];
+    audio.src = t.src;
+    titleEl.textContent  = t.title;
+    artistEl.textContent = t.artist || 'Chiesa Evangelica Maranello';
+    if (t.cover) { cover.src = t.cover; cover.style.display = 'block'; }
+    else cover.style.display = 'none';
+    bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+
+    if (resume && resume > 0) {
+      audio.addEventListener('loadedmetadata', () => {
+        audio.currentTime = resume;
+      }, { once: true });
+    }
+    saveState({ trackIndex: idx, time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: isPlaying });
+  }
+
+  function play() {
+    audio.play().then(() => {
+      isPlaying = true;
+      playBtn.textContent = '⏸';
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: true });
+    }).catch(() => {});
+  }
+
+  function pause() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = '▶';
+    saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: false });
+  }
+
+  // Salva stato PRIMA di lasciare la pagina (fondamentale per la continuità)
+  window.addEventListener('beforeunload', () => {
+    saveState({
+      trackIndex: order[posInOrder],
+      time:       audio.currentTime,
+      volume:     parseInt(volEl.value),
+      closed:     isClosed,
+      playing:    isPlaying
+    });
+  });
+
+  // Ripristina traccia salvata
+  let startIndex   = 0;
+  let startTime    = 0;
+  let startPlaying = false;
+  if (st.trackIndex !== undefined) {
+    startIndex   = st.trackIndex;
+    startTime    = st.time || 0;
+    startPlaying = st.playing || false;
+    const pos = order.indexOf(startIndex);
+    if (pos !== -1) posInOrder = pos;
+    else { order[0] = startIndex; posInOrder = 0; }
+  }
+
+  isClosed = st.closed || false;
+  loadTrack(order[posInOrder], startTime);
+
+  // Mostra player dopo 200ms e ripristina stato play/pausa
+  setTimeout(() => {
+    if (!isClosed) player.classList.add('visible');
+    else reopen.classList.add('visible');
+
+    // Se era in play nella pagina precedente, riprendi
+    if (startPlaying && !isClosed) {
+      play();
+    }
+  }, 200);
+
+  /* ── API pubblica ── */
+  window._player = {
+    toggle() {
+      if (!isPlaying) play(); else pause();
+    },
+    prev() {
+      posInOrder = (posInOrder - 1 + order.length) % order.length;
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    next() {
+      posInOrder = (posInOrder + 1) % order.length;
+      // se abbiamo percorso tutto l'array, rimescola di nuovo
+      if (posInOrder === 0) order = shuffle(PLAYLIST);
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    seek(v) {
+      if (audio.duration) audio.currentTime = (v / 100) * audio.duration;
+    },
+    setVol(v) {
+      audio.volume = v / 100;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(v), closed: isClosed });
+    },
+    close() {
+      player.classList.remove('visible');
+      pause();
+      isClosed = true;
+      reopen.classList.add('visible');
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: true });
+    },
+    reopen() {
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
+    },
+    // Carica e suona un brano esterno alla playlist (es. canti del culto)
+    playUrl(src, title, artist, coverSrc) {
+      audio.src = src;
+      titleEl.textContent  = title  || src;
+      artistEl.textContent = artist || '';
+      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
+      else cover.style.display = 'none';
+      bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      play();
+    }
+  };
+
+  /* ── EVENTI AUDIO ── */
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      bar.value = (audio.currentTime / audio.duration) * 100;
+      cur.textContent = fmt(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    dur.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', () => {
+    window._player.next();
+  });
+
+  // Salva posizione ogni 5 secondi
+  setInterval(() => {
+    if (isPlaying) {
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed });
+    }
+  }, 5000);
+}
+
+// Avvia quando il DOM è pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPlayer);
+} else {
+  initPlayer();
+}
+
+</script>
 
 </body>
 </html>
