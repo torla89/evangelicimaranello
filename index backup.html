@@ -288,37 +288,37 @@
       .hero-location {
         font-size: 0.68rem;
         letter-spacing: 0.28em;
-        color: rgba(0,0,0,0.70);
+        color: rgba(255,255,255,0.70);
         margin-bottom: 8px;
       }
 
       .hero h1 {
         font-size: 2.0rem;
-        color: rgba(0,0,0,0.88);
-        text-shadow: none;
+        color: #fff;
+        text-shadow: 0 2px 18px rgba(0,0,0,0.65);
         margin-bottom: 18px;
         line-height: 1.15;
       }
 
-      /* Citazioni: nessun riquadro, testo nero sullo sfondo */
+      /* Riquadro citazioni: più compatto, testo leggibile */
       .hero-quotes {
-        padding: 0;
+        padding: 14px 18px 12px;
         margin-bottom: 24px;
-        background: none;
-        backdrop-filter: none;
-        border: none;
-        border-radius: 0;
+        background: rgba(0,0,0,0.38);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-top: 2px solid rgba(255,255,255,0.45);
+        border-radius: 10px;
       }
       .hero-quotes .quote {
         font-size: 0.88rem;
-        color: rgba(0,0,0,0.88);
-        text-shadow: none;
+        color: rgba(255,255,255,0.95);
         line-height: 1.6;
         margin-bottom: 4px;
       }
       .hero-quotes .refs {
         font-size: 0.70rem;
-        color: rgba(0,0,0,0.55);
+        color: rgba(255,255,255,0.50);
         letter-spacing: 0.10em;
         margin-top: 8px;
       }
@@ -790,19 +790,6 @@ function initPlayer() {
       reopen.classList.remove('visible');
       isClosed = false;
       saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
-    },
-    // Carica e suona un brano esterno alla playlist (es. canti del culto)
-    playUrl(src, title, artist, coverSrc) {
-      audio.src = src;
-      titleEl.textContent  = title  || src;
-      artistEl.textContent = artist || '';
-      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
-      else cover.style.display = 'none';
-      bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
-      player.classList.add('visible');
-      reopen.classList.remove('visible');
-      isClosed = false;
-      play();
     }
   };
 
