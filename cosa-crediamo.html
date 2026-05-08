@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In Cosa Crediamo – Chiesa Evangelica Maranello</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+      background: #1a0e04;
+    }
+
+    /* SFONDO */
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      z-index: 0;
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+    }
+
+    /* LAYOUT */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 52px;
+      height: 62px;
+      flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.05em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo::before {
+      content: "✝";
+      margin-right: 9px;
+      font-size: 1.2em;
+      font-weight: 300;
+    }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97em;
+      font-weight: 500;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
+    nav a:hover { opacity: 1; }
+    .nav-search {
+      background: none; border: none; color: #fff;
+      cursor: pointer; opacity: 0.88; font-size: 1.05em;
+    }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    /* CONTENUTO */
+    main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 52px 24px 64px;
+    }
+
+    /* Freccia indietro */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 40px;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* Intestazione pagina */
+    .page-header {
+      margin-bottom: 44px;
+    }
+    .page-header .label {
+      font-size: 0.75rem;
+      letter-spacing: 0.30em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+    .page-header h1 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .page-header .sottotitolo {
+      font-size: 0.97rem;
+      color: rgba(255,255,255,0.68);
+      line-height: 1.6;
+    }
+
+    /* Separatore */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      margin: 10px 0 32px;
+    }
+
+    /* Singolo articolo di fede */
+    .articolo {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      padding: 24px 26px;
+      margin-bottom: 16px;
+    }
+
+    .articolo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .articolo-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .articolo h2 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+
+    .articolo p {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* Bottone documento */
+    .doc-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 32px;
+      padding: 13px 24px;
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .doc-btn:hover {
+      background: rgba(0,0,0,0.38);
+      border-color: rgba(255,255,255,0.55);
+    }
+
+    /* MOBILE */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .nav-search { display: none; }
+      .hamburger { display: flex; }
+      main { padding: 32px 16px 48px; }
+    }
+
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.4rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+  </style>
+</head>
+
+<body>
+<div class="bg"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">chiesa evangelica Maranello</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chi-siamo.html">Chi Siamo</a>
+      <a href="cosa-crediamo.html" class="active">In Cosa Crediamo</a>
+      <a href="contatti.html">Contattaci</a>
+      <a href="area-privata.html">Area Privata</a>
+    </nav>
+    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- CONTENUTO -->
+  <main>
+
+    <a href="index.html" class="back-link">← Home</a>
+
+    <div class="page-header">
+      <p class="label">✝️ La nostra fede</p>
+      <h1>In cosa crediamo</h1>
+      <p class="sottotitolo">Le convinzioni fondamentali della Chiesa Evangelica "dei Fratelli" di Maranello, fondate sulla Parola di Dio.</p>
+    </div>
+
+    <hr class="divider">
+
+    <div class="articolo">
+      <div class="articolo-header">
+        <span class="articolo-icon">🕊️</span>
+        <h2>La Trinità</h2>
+      </div>
+      <p>Dio è unico ed esiste come Trinità: Padre, Figlio e Spirito Santo. Gesù Cristo, vero Dio e vero uomo, ha dato la sua vita sulla croce ed è risorto per la salvezza dell'umanità; Egli è l'unico mediatore tra Dio e gli uomini. Lo Spirito Santo opera nei credenti, guidandoli nel cammino di santificazione e distribuendo i doni spirituali secondo la volontà di Dio.</p>
+    </div>
+
+    <div class="articolo">
+      <div class="articolo-header">
+        <span class="articolo-icon">🙏</span>
+        <h2>La salvezza</h2>
+      </div>
+      <p>L'uomo, creato a immagine di Dio, è separato da Lui a causa del peccato e non è in grado di salvarsi con le proprie forze. La salvezza è un dono della grazia di Dio e si riceve mediante la fede in Gesù Cristo: è necessario credere in Lui, ravvedersi del proprio peccato e accettare personalmente il Suo sacrificio sulla croce come unica via di riconciliazione con Dio.</p>
+    </div>
+
+    <div class="articolo">
+      <div class="articolo-header">
+        <span class="articolo-icon">📖</span>
+        <h2>La Bibbia</h2>
+      </div>
+      <p>La Bibbia è la Parola di Dio ispirata, verità assoluta e autorità suprema per la fede e la vita del credente. Nessuna autorità umana, nessun papa o ministro religioso, può essere posta al di sopra di essa. La vera conoscenza di Dio non deriva dall'intelligenza o dalla sapienza umana, ma dalla rivelazione divina contenuta nelle Scritture e resa viva dallo Spirito Santo.</p>
+    </div>
+
+    <div class="articolo">
+      <div class="articolo-header">
+        <span class="articolo-icon">💧</span>
+        <h2>Il Battesimo</h2>
+      </div>
+      <p>Il Battesimo è un importante segno pubblico e consapevole dell'accettazione personale del sacrificio di Gesù Cristo. Non è un mezzo di salvezza, ma una testimonianza di fede e di obbedienza, mediante la quale il credente dichiara di identificarsi con la morte e la risurrezione di Cristo, abbandonando la vecchia vita per camminare in una nuova vita.</p>
+    </div>
+
+    <div class="articolo">
+      <div class="articolo-header">
+        <span class="articolo-icon">🍞</span>
+        <h2>La Cena del Signore</h2>
+      </div>
+      <p>La Cena del Signore è stata istituita da Gesù come memoriale del Suo sacrificio. Il pane e il vino ricordano il Suo corpo dato e il Suo sangue versato per la redenzione dell'umanità; essa è un segno spirituale che richiama i credenti a ricordare con gratitudine l'opera compiuta sulla croce e a vivere nella comunione con Cristo e tra loro.</p>
+    </div>
+
+    <div class="articolo">
+      <div class="articolo-header">
+        <span class="articolo-icon">⚖️</span>
+        <h2>La salvezza e il suo rifiuto</h2>
+      </div>
+      <p>Crediamo che chi rifiuta di credere in Gesù Cristo e di accettare il Suo sacrificio non può ottenere la salvezza e rimane separato da Dio, andando incontro a un destino eterno diverso da quello riservato a coloro che, per fede, appartengono a Cristo e vivono nella certezza della vita eterna.</p>
+    </div>
+
+    <a href="credo_-_documento_ufficiale.pdf" target="_blank" class="doc-btn">📄 Documento ufficiale →</a>
+
+  </main>
+
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob">
+  <a href="index.html"          onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="chi-siamo.html"      onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
+  <a href="cosa-crediamo.html"  onclick="document.getElementById('mob').classList.remove('open')">In Cosa Crediamo</a>
+  <a href="contatti.html"       onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+  <a href="area-privata.html"   onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
+</div>
+
+</body>
+</html>

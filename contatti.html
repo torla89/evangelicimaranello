@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contattaci – Chiesa Evangelica Maranello</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+      background: #1a0e04;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      z-index: 0;
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 52px;
+      height: 62px;
+      flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.05em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo::before {
+      content: "✝";
+      margin-right: 9px;
+      font-size: 1.2em;
+      font-weight: 300;
+    }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97em;
+      font-weight: 500;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
+    nav a:hover { opacity: 1; }
+    .nav-search {
+      background: none; border: none; color: #fff;
+      cursor: pointer; opacity: 0.88; font-size: 1.05em;
+    }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    /* CONTENUTO */
+    main {
+      flex: 1;
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 52px 24px 64px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 40px;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    .page-header {
+      margin-bottom: 44px;
+    }
+    .page-header .label {
+      font-size: 0.75rem;
+      letter-spacing: 0.30em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+    .page-header h1 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .page-header .sottotitolo {
+      font-size: 0.97rem;
+      color: rgba(255,255,255,0.68);
+      line-height: 1.6;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      margin: 10px 0 32px;
+    }
+
+    /* Card contatto */
+    .contatto {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .contatto:hover {
+      background: rgba(0,0,0,0.38);
+      border-color: rgba(255,255,255,0.45);
+    }
+
+    .contatto-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      width: 48px;
+      text-align: center;
+    }
+
+    .contatto-body { flex: 1; }
+    .contatto-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.50);
+      margin-bottom: 4px;
+    }
+    .contatto-valore {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      word-break: break-all;
+    }
+    .contatto-desc {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 3px;
+    }
+
+    .contatto-arrow {
+      font-size: 1rem;
+      opacity: 0.45;
+      flex-shrink: 0;
+    }
+
+    /* Sezione comunicazioni ufficiali — visivamente separata */
+    .sezione-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+      margin: 30px 0 12px;
+    }
+
+    /* Link non cliccabile (Facebook da aggiungere) */
+    .contatto.presto {
+      opacity: 0.55;
+      cursor: default;
+      pointer-events: none;
+    }
+    .badge-presto {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: rgba(255,255,255,0.55);
+      flex-shrink: 0;
+    }
+
+    /* MOBILE */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .nav-search { display: none; }
+      .hamburger { display: flex; }
+      main { padding: 32px 16px 48px; }
+      .contatto-valore { font-size: 0.95rem; }
+    }
+
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.4rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+  </style>
+</head>
+
+<body>
+<div class="bg"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">chiesa evangelica Maranello</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chi-siamo.html">Chi Siamo</a>
+      <a href="cosa-crediamo.html">In Cosa Crediamo</a>
+      <a href="contatti.html" class="active">Contattaci</a>
+      <a href="area-privata.html">Area Privata</a>
+    </nav>
+    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- CONTENUTO -->
+  <main>
+
+    <a href="index.html" class="back-link">← Home</a>
+
+    <div class="page-header">
+      <p class="label">Siamo qui per te</p>
+      <h1>Contattaci</h1>
+      <p class="sottotitolo">Scrivici o chiamaci per qualsiasi informazione — sulle riunioni, sulla fede, o semplicemente per conoscerci.</p>
+    </div>
+
+    <hr class="divider">
+
+    <!-- WhatsApp -->
+    <a href="https://wa.me/393771977272" target="_blank" class="contatto">
+      <div class="contatto-icon">💬</div>
+      <div class="contatto-body">
+        <div class="contatto-label">WhatsApp</div>
+        <div class="contatto-valore">+39 377 197 7272</div>
+        <div class="contatto-desc">Scrivici un messaggio, ti risponderemo appena possibile</div>
+      </div>
+      <div class="contatto-arrow">→</div>
+    </a>
+
+    <!-- Email generale -->
+    <a href="mailto:chiesaevangelicamaranello@outlook.it" class="contatto">
+      <div class="contatto-icon">✉️</div>
+      <div class="contatto-body">
+        <div class="contatto-label">Email</div>
+        <div class="contatto-valore">chiesaevangelicamaranello@outlook.it</div>
+        <div class="contatto-desc">Per informazioni generali, domande sulla fede o per conoscerci</div>
+      </div>
+      <div class="contatto-arrow">→</div>
+    </a>
+
+    <!-- Facebook -->
+    <div class="contatto presto">
+      <div class="contatto-icon">📘</div>
+      <div class="contatto-body">
+        <div class="contatto-label">Facebook</div>
+        <div class="contatto-valore">Pagina Facebook</div>
+        <div class="contatto-desc">Link disponibile a breve</div>
+      </div>
+      <div class="badge-presto">In arrivo</div>
+    </div>
+
+    <!-- Separatore comunicazioni ufficiali -->
+    <p class="sezione-label">Comunicazioni ufficiali</p>
+
+    <!-- Email ufficiale -->
+    <a href="mailto:direzione@pec.evangelicimaranello.it" class="contatto">
+      <div class="contatto-icon">📄</div>
+      <div class="contatto-body">
+        <div class="contatto-label">PEC — Direzione</div>
+        <div class="contatto-valore">direzione@pec.evangelicimaranello.it</div>
+        <div class="contatto-desc">Per comunicazioni formali e corrispondenza ufficiale</div>
+      </div>
+      <div class="contatto-arrow">→</div>
+    </a>
+
+  </main>
+
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob">
+  <a href="index.html"         onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="chi-siamo.html"     onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
+  <a href="cosa-crediamo.html" onclick="document.getElementById('mob').classList.remove('open')">In Cosa Crediamo</a>
+  <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+  <a href="area-privata.html"  onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
+</div>
+
+</body>
+</html>

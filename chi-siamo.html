@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Siamo – Chiesa Evangelica Maranello</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+      background: #1a0e04;
+    }
+
+    /* ------------------------------
+       SFONDO — fisso, stesso della home
+    ------------------------------ */
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      z-index: 0;
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      /* più scuro rispetto alla home per far risaltare il contenuto */
+      background: rgba(0,0,0,0.72);
+    }
+
+    /* ------------------------------
+       LAYOUT
+    ------------------------------ */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ------------------------------
+       HEADER — identico alla home
+    ------------------------------ */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 52px;
+      height: 62px;
+      flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.05em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo::before {
+      content: "✝";
+      margin-right: 9px;
+      font-size: 1.2em;
+      font-weight: 300;
+    }
+
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97em;
+      font-weight: 500;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
+    nav a:hover { opacity: 1; }
+
+    .nav-search {
+      background: none; border: none; color: #fff;
+      cursor: pointer; opacity: 0.88; font-size: 1.05em;
+    }
+
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    /* ------------------------------
+       CONTENUTO
+    ------------------------------ */
+    main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 52px 24px 64px;
+    }
+
+    /* Titolo pagina */
+    .page-title {
+      margin-bottom: 40px;
+    }
+    .page-title h1 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+      margin-bottom: 6px;
+    }
+    .page-title h1 em {
+      font-style: italic;
+      color: rgba(255,255,255,0.88);
+    }
+    .page-title .autori {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.02em;
+    }
+    .page-title .autori a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: underline;
+    }
+
+    /* Sezioni storiche */
+    .storia-section {
+      margin-bottom: 36px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .anni {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .anno {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.90);
+    }
+
+    .section-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+
+    .storia-section p {
+      font-size: 0.97rem;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.88);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .storia-section p em { font-style: italic; }
+
+    /* Sezione La comunità */
+    .comunita-section {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      padding: 28px 28px 24px;
+      margin-bottom: 40px;
+    }
+    .comunita-section h2 {
+      font-size: 0.75rem;
+      letter-spacing: 0.30em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .comunita-nome {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .comunita-section p {
+      font-size: 0.97rem;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.88);
+      margin-bottom: 10px;
+    }
+    .comunita-section p:last-child { margin-bottom: 0; }
+    .comunita-section p em { font-style: italic; }
+
+    /* Separatore */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      margin: 36px 0;
+    }
+
+    /* Nota in fondo */
+    .nota {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.70);
+      line-height: 1.6;
+    }
+    .nota strong { color: rgba(255,255,255,0.90); }
+
+    /* Bottoni documento */
+    .doc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .doc-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 24px;
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .doc-btn:hover {
+      background: rgba(0,0,0,0.38);
+      border-color: rgba(255,255,255,0.55);
+    }
+
+    /* Bottone torna alla home */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 40px;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* ------------------------------
+       MOBILE
+    ------------------------------ */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .nav-search { display: none; }
+      .hamburger { display: flex; }
+      main { padding: 32px 16px 48px; }
+      .section-header { flex-wrap: wrap; }
+    }
+
+    /* mobile menu */
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.4rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+  </style>
+</head>
+
+<body>
+<div class="bg"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">chiesa evangelica Maranello</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chi-siamo.html" class="active">Chi Siamo</a>
+      <a href="contatti.html">Contattaci</a>
+      <a href="area-privata.html">Area Privata</a>
+      <a href="cerca.html">Cerca nel sito</a>
+    </nav>
+    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- CONTENUTO -->
+  <main>
+
+    <a href="index.html" class="back-link">← Home</a>
+
+    <!-- LA COMUNITÀ -->
+    <div class="comunita-section">
+      <h2>La comunità</h2>
+      <p class="comunita-nome">Chiesa Evangelica "dei Fratelli" di Maranello</p>
+      <p>
+        Apparteniamo al movimento dei <em>"Fratelli"</em>, una tradizione cristiana nata nell'Ottocento
+        con una convinzione radicale: ogni credente ha accesso diretto a Dio attraverso Gesù Cristo,
+        senza bisogno di sacerdoti, papi o figure di autorità umana. Nessun intermediario tra l'uomo e Dio —
+        solo la Parola.
+      </p>
+      <p>
+        È Gesù stesso a dirlo: <em>"Nessuno viene al Padre se non per mezzo di me."</em> (Giovanni 14:6) —
+        non una chiesa, non un sacerdote, non una tradizione. Solo Lui.
+      </p>
+      <p>
+        La nostra unica autorità è la Bibbia. Ci riuniamo come persone semplici per leggerla, studiarla
+        e discuterla liberamente insieme, con l'unico scopo di comprenderla e glorificare Gesù Cristo.
+        Una piccola luce a Maranello, animata dalla gioia di condividere il Vangelo.
+      </p>
+      <p>
+        Siamo una comunità giovane, e con quella leggerezza ci stiamo muovendo. Portiamo avanti
+        tante attività pensate per i ragazzi, perché crediamo che il Vangelo abbia ancora molto
+        da dire alle nuove generazioni. Lo stiamo condividendo con semplicità, senza forzature,
+        convinti che chi cerca troverà.
+      </p>
+      <a href="Statuto_firmato.pdf" target="_blank" class="doc-btn" style="margin-top:20px;">📄 Statuto ufficiale →</a>
+      <a href="Atto_costitutivo_firmato.pdf" target="_blank" class="doc-btn" style="margin-top:10px;">📄 Atto costitutivo →</a>
+    </div>
+
+    <hr class="divider">
+
+    <div class="page-title">
+      <h1>Storia della Chiesa Evangelica<br><em>dei Fratelli nel Modenese</em></h1>
+      <p class="autori">Scritta da <a href="#">Silvano Casolari</a> · aggiornata da Arturo Wiens · riveduta da Pier Marcello Tacconi</p>
+    </div>
+
+    <!-- 1943 -->
+    <div class="storia-section">
+      <div class="section-header">
+        <div class="anni"><span class="anno">1943</span></div>
+        <h2>Le origini</h2>
+      </div>
+      <p>
+        Tutto inizia durante la Seconda Guerra Mondiale, quando due famiglie modenesi — Barozzini e Paltrinieri —
+        rientrano dalla Francia già convertite al protestantesimo. Nonostante la guerra, iniziano a riunirsi nelle case
+        private per leggere la Bibbia, cosa all'epoca proibita e rischiosa. Le prime riunioni evangeliche nascono a
+        Casa Sasso, presso S. Venanzio di Serramazzoni.
+      </p>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 1946–1955 -->
+    <div class="storia-section">
+      <div class="section-header">
+        <div class="anni"><span class="anno">1946</span><span class="anno">1955</span></div>
+        <h2>I primi battesimi e la crescita</h2>
+      </div>
+      <p>
+        Nel 1946 le riunioni diventano regolari e arrivano i primi battesimi. Nel 1947 si organizza la prima
+        manifestazione pubblica a Maranello. La comunità cresce tra difficoltà: discriminazione lavorativa, derisione
+        pubblica, persino l'intervento dei Carabinieri per bloccare un funerale evangelico.
+      </p>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 1955–1967 -->
+    <div class="storia-section">
+      <div class="section-header">
+        <div class="anni"><span class="anno">1955</span><span class="anno">1967</span></div>
+        <h2>L'arrivo dei missionari americani</h2>
+      </div>
+      <p>
+        Nel 1955 arriva dagli USA Arturo Wiens con la famiglia, poi nel 1960 la coppia Abramo e Mary Unrau dal
+        Canada. Si aprono sale evangeliche a Modena, Pavullo e Vignola. Nel 1961 nasce la prima radio evangelica
+        <em>"Voce Bella Bibbia"</em> su Radio Montecarlo.
+      </p>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 1967–2003 -->
+    <div class="storia-section">
+      <div class="section-header">
+        <div class="anni"><span class="anno">1967</span><span class="anno">2003</span></div>
+        <h2>L'espansione</h2>
+      </div>
+      <p>
+        La comunità raddoppia tra il 1967 e il 1977. Arrivano altri missionari e si aprono chiese in tutta la provincia.
+        Nascono iniziative editoriali come il calendario <em>"Una Parola Per Oggi"</em> che nel 2003 raggiunge 150.000 copie.
+        Al momento della scrittura, su 47 comuni della provincia di Modena, in 36 c'è almeno un credente evangelico.
+      </p>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Nota -->
+    <div class="nota">
+      <strong>Nota:</strong> Il documento completo include anche testimonianze personali vivide — come la famiglia nascosta nella
+      stalla dai tedeschi, o il rifugio dalle bombe abbandonato per fede e saltato in aria poco dopo.
+    </div>
+
+    <!-- Link documenti -->
+    <div class="doc-links">
+      <a href="origini-chiesa-fratelli-modenese.pdf" target="_blank" class="doc-btn">📄 Documento originale — Silvano Casolari →</a>
+      <a href="storia-chiesa-evangelica-fratelli-modenese.pdf" target="_blank" class="doc-btn">💬 Documento aggiornato e revisionato →</a>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob">
+  <a href="index.html"        onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="chi-siamo.html"    onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
+  <a href="contatti.html"     onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+  <a href="area-privata.html" onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
+  <a href="cerca.html"        onclick="document.getElementById('mob').classList.remove('open')">Cerca nel sito</a>
+</div>
+
+</body>
+</html>

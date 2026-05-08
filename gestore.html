@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Sito — Chiesa Evangelica Maranello</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0d0906;
+      --surface:   rgba(255,255,255,0.05);
+      --surface2:  rgba(255,255,255,0.09);
+      --border:    rgba(255,255,255,0.12);
+      --border2:   rgba(255,255,255,0.22);
+      --gold:      #c9933a;
+      --gold-lt:   #e8b86d;
+      --white:     #f0ece4;
+      --muted:     rgba(240,236,228,0.45);
+      --green:     #5cb87a;
+      --blue:      #6aaddf;
+      --red:       #df6a6a;
+      --amber:     #e0a84a;
+      --radius:    12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    /* Sfondo ambientale */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 80%, rgba(150,80,20,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 80% 10%, rgba(100,60,10,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 20px 60px; }
+
+    /* ── HEADER ── */
+    .app-header {
+      padding: 36px 0 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .app-header-left { display: flex; align-items: center; gap: 14px; }
+    .header-cross { font-size: 1.6rem; color: var(--gold); }
+    .header-title { font-family: 'Lora', serif; font-size: 1.4rem; font-weight: 700; }
+    .header-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; letter-spacing: 0.05em; }
+
+    .file-status {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.80rem; color: var(--muted);
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+    .dot.ok    { background: var(--green); }
+    .dot.warn  { background: var(--amber); animation: blink 1.4s ease infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 6px; margin-bottom: 28px;
+      border-bottom: 1px solid var(--border); padding-bottom: 0;
+    }
+    .tab {
+      padding: 10px 18px; font-size: 0.88rem; font-weight: 600;
+      color: var(--muted); background: none; border: none;
+      border-bottom: 2px solid transparent; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.02em; margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--white); }
+    .tab.active { color: var(--gold-lt); border-bottom-color: var(--gold); }
+
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 0.70rem; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px; margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border2); }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 14px;
+    }
+    .card-title { font-weight: 700; font-size: 0.97rem; }
+    .card-sub   { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── FORM ELEMENTS ── */
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 0.73rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%; background: rgba(0,0,0,0.30);
+      border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--white); font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.93rem; padding: 10px 13px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--gold);
+    }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(240,236,228,0.25); }
+    .field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .field select option { background: #1a1208; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 8px; font-size: 0.86rem;
+      font-weight: 600; cursor: pointer; border: none;
+      transition: all 0.2s; letter-spacing: 0.02em;
+    }
+    .btn-primary {
+      background: var(--gold); color: #1a0e04;
+    }
+    .btn-primary:hover { background: var(--gold-lt); }
+
+    .btn-ghost {
+      background: var(--surface2); border: 1px solid var(--border2); color: var(--white);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.14); }
+
+    .btn-danger {
+      background: rgba(223,106,106,0.15); border: 1px solid rgba(223,106,106,0.30); color: var(--red);
+    }
+    .btn-danger:hover { background: rgba(223,106,106,0.28); }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+
+    .btn-row-end { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+    .btn-row-start { display: flex; gap: 8px; margin-top: 6px; }
+
+    /* ── BADGE STATO ── */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.70rem; font-weight: 600; letter-spacing: 0.05em;
+    }
+    .badge-completata { background: rgba(92,184,122,0.15); border: 1px solid rgba(92,184,122,0.35); color: var(--green); }
+    .badge-in_corso   { background: rgba(106,173,223,0.15); border: 1px solid rgba(106,173,223,0.35); color: var(--blue); }
+    .badge-in_attesa  { background: rgba(224,168,74,0.15);  border: 1px solid rgba(224,168,74,0.35);  color: var(--amber); }
+    .badge-annullata  { background: rgba(223,106,106,0.15); border: 1px solid rgba(223,106,106,0.35); color: var(--red); }
+
+    /* ── SALDO DISPLAY ── */
+    .saldo-big {
+      font-family: 'Lora', serif; font-size: 3rem; font-weight: 700;
+      color: var(--white); letter-spacing: -0.02em; margin: 10px 0 4px;
+    }
+    .saldo-meta { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── LIST ITEMS ── */
+    .list-item {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; padding: 14px 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 8px;
+    }
+    .list-item-info { flex: 1; min-width: 0; }
+    .list-item-title { font-weight: 700; font-size: 0.95rem; }
+    .list-item-sub   { font-size: 0.80rem; color: var(--muted); margin-top: 2px; }
+    .list-item-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: rgba(20,14,5,0.95); border: 1px solid var(--gold);
+      border-radius: 10px; padding: 12px 22px;
+      font-size: 0.88rem; color: var(--gold-lt);
+      transition: transform 0.3s; z-index: 999; white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── MODAL ── */
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(5,3,1,0.85); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .modal-bg.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #1a120a; border: 1px solid var(--border2); border-radius: var(--radius);
+      padding: 28px 26px; width: 100%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal h3 { font-family: 'Lora', serif; font-size: 1.2rem; margin-bottom: 20px; }
+
+    /* ── SAVE BAR ── */
+    .save-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(10,7,3,0.95); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .save-bar-msg { font-size: 0.85rem; color: var(--muted); }
+    .save-bar-msg strong { color: var(--amber); }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center; padding: 36px 20px;
+      color: var(--muted); font-size: 0.90rem;
+    }
+    .empty .emoji { font-size: 2rem; margin-bottom: 10px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .field-row, .field-row-3 { grid-template-columns: 1fr; }
+      .app-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <div class="app-header-left">
+      <span class="header-cross">✝</span>
+      <div>
+        <div class="header-title">Gestione Sito</div>
+        <div class="header-sub">Chiesa Evangelica Maranello</div>
+      </div>
+    </div>
+    <div class="file-status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Nessun file caricato</span>
+    </div>
+  </div>
+
+  <!-- CARICA FILE -->
+  <div class="card" id="loadCard">
+    <div class="section-label">📂 Carica file</div>
+    <p style="font-size:0.90rem;color:var(--muted);margin-bottom:16px;">
+      Seleziona il file <strong style="color:var(--white);">dati.json</strong> dalla cartella del sito per iniziare a modificarlo.
+    </p>
+    <label class="btn btn-ghost" style="cursor:pointer;">
+      📂 Apri dati.json
+      <input type="file" accept=".json" id="fileInput" style="display:none;" onchange="loadFile(this)">
+    </label>
+  </div>
+
+  <!-- TABS (nascosti finché non c'è file) -->
+  <div id="mainApp" style="display:none;">
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('saldo',this)">💰 Saldo</button>
+      <button class="tab" onclick="switchTab('spese',this)">📋 Spese</button>
+      <button class="tab" onclick="switchTab('riunioni',this)">🏛️ Riunioni</button>
+      <button class="tab" onclick="switchTab('predicazioni',this)">📅 Predicazioni</button>
+      <button class="tab" onclick="switchTab('attivita',this)">🎯 Attività</button>
+    </div>
+
+    <!-- ══ SALDO ══ -->
+    <div class="panel active" id="panel-saldo">
+      <div class="section-label">Situazione economica</div>
+      <div class="card">
+        <div class="saldo-big" id="saldoDisplay">€ 0,00</div>
+        <div class="saldo-meta" id="saldoMeta">Aggiornato il —</div>
+        <div style="margin-top:20px;">
+          <div class="field-row">
+            <div class="field">
+              <label>Nuovo saldo (€)</label>
+              <input type="number" id="nuovoSaldo" step="0.01" placeholder="es. 1250.00">
+            </div>
+            <div class="field">
+              <label>Aggiungi allo storico grafico?</label>
+              <select id="aggiungiStorico">
+                <option value="si">Sì — aggiorna il grafico</option>
+                <option value="no">No — solo aggiorna il numero</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row-start">
+            <button class="btn btn-primary" onclick="aggiornaSaldo()">💾 Aggiorna saldo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SPESE ══ -->
+    <div class="panel" id="panel-spese">
+      <div class="section-label">Spese fisse</div>
+      <div id="speseList"></div>
+      <div class="btn-row-start" style="margin-top:4px;">
+        <button class="btn btn-ghost" onclick="openSpesaModal()">＋ Aggiungi spesa</button>
+      </div>
+    </div>
+
+    <!-- ══ RIUNIONI ══ -->
+    <div class="panel" id="panel-riunioni">
+      <div class="section-label">Decisioni riunione di chiesa</div>
+      <div id="riunioniList"></div>
+      <div class="btn-row-start" style="margin-top:4px;">
+        <button class="btn btn-ghost" onclick="openRiunioneModal()">＋ Aggiungi riunione</button>
+      </div>
+    </div>
+
+    <!-- ══ PREDICAZIONI ══ -->
+    <div class="panel" id="panel-predicazioni">
+      <div class="section-label">Calendario predicazioni</div>
+      <div id="predicazioniList"></div>
+      <div class="btn-row-start" style="margin-top:4px;">
+        <button class="btn btn-ghost" onclick="openPredModal()">＋ Aggiungi predicazione</button>
+      </div>
+    </div>
+
+    <!-- ══ ATTIVITÀ ══ -->
+    <div class="panel" id="panel-attivita">
+      <div class="section-label">Attività promosse dall'associazione</div>
+      <div id="attivitaList"></div>
+      <div class="btn-row-start" style="margin-top:4px;">
+        <button class="btn btn-ghost" onclick="openAttModal()">＋ Aggiungi attività</button>
+      </div>
+    </div>
+
+  </div><!-- /#mainApp -->
+</div><!-- /.app -->
+
+<!-- SAVE BAR — sempre visibile -->
+<div class="save-bar" id="saveBar">
+  <div class="save-bar-msg" id="saveBarMsg">Carica un file <strong>dati.json</strong> per iniziare</div>
+  <div style="display:flex;gap:10px;flex-shrink:0;">
+    <button class="btn btn-ghost" id="btnSalva" onclick="saveFile()" disabled
+      title="Salva dati.json con backup automatico">
+      💾 Salva dati.json
+    </button>
+    <button class="btn btn-primary" id="btnGithub" onclick="pubblicaSuGithub()" disabled
+      title="Salva e pubblica su GitHub">
+      🚀 Salva e Pubblica
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══ MODAL ISTRUZIONI GITHUB ══ -->
+<div class="modal-bg" id="modal-github">
+  <div class="modal">
+    <h3>🚀 Pubblica su GitHub</h3>
+    <p style="font-size:0.88rem;color:var(--muted);line-height:1.7;margin-bottom:16px;">
+      Hai già scaricato il nuovo <strong style="color:var(--white)">dati.json</strong>?<br>
+      Segui questi passaggi:
+    </p>
+    <div style="background:rgba(0,0,0,0.35);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Passaggi</div>
+      <ol style="font-size:0.87rem;color:var(--white);line-height:2;padding-left:18px;">
+        <li>Clicca <strong>💾 Salva dati.json</strong> qui sopra (se non l'hai già fatto)</li>
+        <li>Apri <strong>PowerShell</strong> nella cartella del sito</li>
+        <li>Lancia: <code style="background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:4px;font-size:0.85rem;">.\aggiorna_sito.ps1</code></li>
+        <li>Lo script farà backup, copia il file e pubblica su GitHub</li>
+      </ol>
+    </div>
+    <p style="font-size:0.80rem;color:var(--muted);margin-bottom:16px;">
+      💡 Lo script <strong style="color:var(--white)">aggiorna_sito.ps1</strong> deve trovarsi nella cartella:<br>
+      <code style="font-size:0.78rem;color:var(--gold-lt);">C:\Users\torla\OneDrive\Documenti\Chiesa\sito web evangelicimaranello</code>
+    </p>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('github')">Chiudi</button>
+      <button class="btn btn-primary" onclick="saveFile();closeModal('github')">💾 Salva ora</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SPESA ══ -->
+<div class="modal-bg" id="modal-spesa">
+  <div class="modal">
+    <h3 id="modalSpesaTitle">Nuova spesa fissa</h3>
+    <input type="hidden" id="spesaEditIdx" value="-1">
+    <div class="field"><label>Nome</label><input type="text" id="spesaNome" placeholder="es. Hosting Aruba"></div>
+    <div class="field-row">
+      <div class="field"><label>Importo (€)</label><input type="number" id="spesaImporto" step="0.01" placeholder="12.00"></div>
+      <div class="field">
+        <label>Scadenza</label>
+        <input type="text" id="spesaScadenza" placeholder="es. 2027-06-01 oppure mensile-15">
+      </div>
+    </div>
+    <div class="field">
+      <label>Stato rinnovo</label>
+      <select id="spesaTipoRinnovo">
+        <option value="automatico">✅ Automatico</option>
+        <option value="mensile">🔵 Mensile</option>
+        <option value="disattivato">🔴 Disattivato</option>
+      </select>
+    </div>
+    <div class="field"><label>Note (opzionale)</label><input type="text" id="spesaNote" placeholder=""></div>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('spesa')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaSpesa()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL RIUNIONE ══ -->
+<div class="modal-bg" id="modal-riunione">
+  <div class="modal">
+    <h3 id="modalRiunioneTitle">Nuova riunione</h3>
+    <input type="hidden" id="riunioneEditIdx" value="-1">
+    <div class="field-row">
+      <div class="field"><label>Data</label><input type="date" id="riunioneData"></div>
+      <div class="field"><label>Titolo</label><input type="text" id="riunioneTitolo" placeholder="Riunione di chiesa del…"></div>
+    </div>
+    <div class="field">
+      <label>Verbale / Decisioni</label>
+      <textarea id="riunioneTesto" rows="8" placeholder="Inserisci il testo del verbale…"></textarea>
+    </div>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('riunione')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaRiunione()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL PREDICAZIONE ══ -->
+<div class="modal-bg" id="modal-predicazione">
+  <div class="modal">
+    <h3 id="modalPredTitle">Nuova predicazione</h3>
+    <input type="hidden" id="predEditIdx" value="-1">
+    <div class="field-row">
+      <div class="field"><label>Data</label><input type="date" id="predData"></div>
+      <div class="field"><label>Predicatore</label><input type="text" id="predPredicatore" placeholder="es. Enrico Torlai"></div>
+    </div>
+    <div class="field"><label>Riassunto</label><textarea id="predRiassunto" rows="4" placeholder="Breve sintesi della predicazione…"></textarea></div>
+    <div class="field"><label>Nome file PDF (opzionale)</label><input type="text" id="predPdf" placeholder="es. pred_20260511.pdf"></div>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ATTIVITÀ ══ -->
+<div class="modal-bg" id="modal-attivita">
+  <div class="modal">
+    <h3 id="modalAttTitle">Nuova attività</h3>
+    <input type="hidden" id="attEditIdx" value="-1">
+    <div class="field"><label>Nome attività</label><input type="text" id="attNome" placeholder="es. Calendario 2028"></div>
+    <div class="field"><label>Descrizione</label><textarea id="attDesc" rows="3" placeholder="Breve descrizione…"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Responsabile</label><input type="text" id="attResp" placeholder="es. Marika"></div>
+      <div class="field">
+        <label>Stato</label>
+        <select id="attStato">
+          <option value="in_corso">🔵 In corso</option>
+          <option value="in_attesa">🟡 In attesa</option>
+          <option value="completata">🟢 Completata</option>
+          <option value="annullata">🔴 Annullata</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('attivita')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaAtt()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let dati = null;
+  let dirty = false;
+
+  function parsaECarica(jsonStr, filename) {
+    try {
+      dati = JSON.parse(jsonStr);
+      if (!dati.storico_saldo)  dati.storico_saldo  = [];
+      if (!dati.spese_fisse)    dati.spese_fisse    = [];
+      if (!dati.riunioni)       dati.riunioni       = [];
+      if (!dati.predicazioni)   dati.predicazioni   = [];
+      if (!dati.attivita)       dati.attivita       = [];
+      renderAll();
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('loadCard').style.display = 'none';
+      document.getElementById('btnSalva').disabled  = false;
+      document.getElementById('btnGithub').disabled = false;
+      setStatus('ok', `${filename} caricato`);
+      setSaveMsg('neutral', 'File caricato — modifica e poi salva');
+      toast('✅ File caricato');
+    } catch(e) {
+      setStatus('warn', 'Errore parsing JSON');
+      toast('❌ Errore nel file JSON');
+    }
+  }
+
+  /* ── LOAD FILE (manuale, fallback) ── */
+  function loadFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => parsaECarica(e.target.result, file.name);
+    reader.readAsText(file);
+  }
+
+  /* ── RENDER ALL ── */
+  function renderAll() {
+    renderSaldo();
+    renderSpese();
+    renderRiunioni();
+    renderPredicazioni();
+    renderAttivita();
+  }
+
+  /* ── SALDO ── */
+  function renderSaldo() {
+    document.getElementById('saldoDisplay').textContent =
+      '€ ' + parseFloat(dati.saldo || 0).toLocaleString('it-IT', {minimumFractionDigits: 2});
+    document.getElementById('saldoMeta').textContent =
+      dati.aggiornato_il ? `Aggiornato il ${formatData(dati.aggiornato_il)}` : '—';
+    document.getElementById('nuovoSaldo').value = dati.saldo || 0;
+  }
+
+  function aggiornaSaldo() {
+    const val = parseFloat(document.getElementById('nuovoSaldo').value);
+    if (isNaN(val)) { toast('⚠ Inserisci un valore numerico'); return; }
+    dati.saldo = Math.round(val * 100) / 100;
+    dati.aggiornato_il = today();
+    if (document.getElementById('aggiungiStorico').value === 'si') {
+      dati.storico_saldo = dati.storico_saldo.filter(s => s.data !== today());
+      dati.storico_saldo.push({ data: today(), saldo: dati.saldo });
+      dati.storico_saldo.sort((a,b) => a.data.localeCompare(b.data));
+    }
+    renderSaldo(); markDirty(); toast('✅ Saldo aggiornato');
+  }
+
+  /* ── SPESE ── */
+  function renderSpese() {
+    const c = document.getElementById('speseList');
+    if (!dati.spese_fisse.length) { c.innerHTML = emptyState('Nessuna spesa inserita'); return; }
+    c.innerHTML = dati.spese_fisse.map((s, i) => {
+      const badgeRinnovo = s.tipo_rinnovo === 'disattivato'
+        ? `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;background:rgba(223,106,106,0.15);border:1px solid rgba(223,106,106,0.40);color:var(--red);">Disattivato</span>`
+        : s.tipo_rinnovo === 'mensile'
+          ? `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:600;background:rgba(106,173,223,0.12);border:1px solid rgba(106,173,223,0.30);color:var(--blue);">Mensile</span>`
+          : `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:600;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);color:var(--muted);">Automatico</span>`;
+      return `
+      <div class="list-item" style="${s.tipo_rinnovo === 'disattivato' ? 'opacity:0.55;' : ''}">
+        <div class="list-item-info">
+          <div class="list-item-title" style="display:flex;align-items:center;gap:8px;">
+            ${s.nome} ${badgeRinnovo}
+          </div>
+          <div class="list-item-sub">€ ${parseFloat(s.importo).toFixed(2)} — ${labelScad(s.scadenza)}${s.note ? ' · ' + s.note : ''}</div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editSpesa(${i})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('spese_fisse',${i})">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openSpesaModal(idx = -1) {
+    document.getElementById('spesaEditIdx').value = idx;
+    if (idx >= 0) {
+      const s = dati.spese_fisse[idx];
+      document.getElementById('spesaNome').value          = s.nome;
+      document.getElementById('spesaImporto').value       = s.importo;
+      document.getElementById('spesaScadenza').value      = s.scadenza;
+      document.getElementById('spesaNote').value          = s.note || '';
+      document.getElementById('spesaTipoRinnovo').value   = s.tipo_rinnovo || 'automatico';
+      document.getElementById('modalSpesaTitle').textContent = 'Modifica spesa';
+    } else {
+      document.getElementById('spesaNome').value          = '';
+      document.getElementById('spesaImporto').value       = '';
+      document.getElementById('spesaScadenza').value      = '';
+      document.getElementById('spesaNote').value          = '';
+      document.getElementById('spesaTipoRinnovo').value   = 'automatico';
+      document.getElementById('modalSpesaTitle').textContent = 'Nuova spesa fissa';
+    }
+    document.getElementById('modal-spesa').classList.add('open');
+  }
+  function editSpesa(i) { openSpesaModal(i); }
+
+  function salvaSpesa() {
+    const nome = document.getElementById('spesaNome').value.trim();
+    const imp  = parseFloat(document.getElementById('spesaImporto').value);
+    const scad = document.getElementById('spesaScadenza').value.trim();
+    if (!nome || isNaN(imp)) { toast('⚠ Compila nome e importo'); return; }
+    const obj = { nome, importo: imp, tipo_rinnovo: document.getElementById('spesaTipoRinnovo').value, scadenza: scad, note: document.getElementById('spesaNote').value.trim() };
+    const idx = parseInt(document.getElementById('spesaEditIdx').value);
+    if (idx >= 0) dati.spese_fisse[idx] = obj;
+    else dati.spese_fisse.push(obj);
+    renderSpese(); closeModal('spesa'); markDirty(); toast('✅ Spesa salvata');
+  }
+
+  /* ── RIUNIONI ── */
+  function renderRiunioni() {
+    const c = document.getElementById('riunioniList');
+    if (!dati.riunioni.length) { c.innerHTML = emptyState('Nessuna riunione inserita'); return; }
+    c.innerHTML = [...dati.riunioni].sort((a,b) => b.data.localeCompare(a.data)).map((r, i) => `
+      <div class="list-item">
+        <div class="list-item-info">
+          <div class="list-item-title">${r.titolo || formatData(r.data)}</div>
+          <div class="list-item-sub">${formatData(r.data)} · ${r.testo ? r.testo.substring(0,80) + '…' : '<em>Verbale vuoto</em>'}</div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editRiunione(${dati.riunioni.indexOf(r)})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('riunioni',${dati.riunioni.indexOf(r)})">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function openRiunioneModal(idx = -1) {
+    document.getElementById('riunioneEditIdx').value = idx;
+    if (idx >= 0) {
+      const r = dati.riunioni[idx];
+      document.getElementById('riunioneData').value   = r.data;
+      document.getElementById('riunioneTitolo').value = r.titolo;
+      document.getElementById('riunioneTesto').value  = r.testo;
+      document.getElementById('modalRiunioneTitle').textContent = 'Modifica riunione';
+    } else {
+      document.getElementById('riunioneData').value   = today();
+      document.getElementById('riunioneTitolo').value = '';
+      document.getElementById('riunioneTesto').value  = '';
+      document.getElementById('modalRiunioneTitle').textContent = 'Nuova riunione';
+    }
+    document.getElementById('modal-riunione').classList.add('open');
+  }
+  function editRiunione(i) { openRiunioneModal(i); }
+
+  function salvaRiunione() {
+    const data   = document.getElementById('riunioneData').value;
+    const titolo = document.getElementById('riunioneTitolo').value.trim();
+    const testo  = document.getElementById('riunioneTesto').value.trim();
+    if (!data) { toast('⚠ Inserisci la data'); return; }
+    const obj = { data, titolo: titolo || `Riunione del ${formatData(data)}`, testo };
+    const idx = parseInt(document.getElementById('riunioneEditIdx').value);
+    if (idx >= 0) dati.riunioni[idx] = obj;
+    else dati.riunioni.unshift(obj);
+    dati.riunioni.sort((a,b) => b.data.localeCompare(a.data));
+    renderRiunioni(); closeModal('riunione'); markDirty(); toast('✅ Riunione salvata');
+  }
+
+  /* ── PREDICAZIONI ── */
+  function renderPredicazioni() {
+    const c = document.getElementById('predicazioniList');
+    if (!dati.predicazioni.length) { c.innerHTML = emptyState('Nessuna predicazione inserita'); return; }
+    c.innerHTML = [...dati.predicazioni].sort((a,b) => b.data.localeCompare(a.data)).map((p, i) => `
+      <div class="list-item">
+        <div class="list-item-info">
+          <div class="list-item-title">${p.predicatore || '<em style="color:var(--muted)">Predicatore non specificato</em>'}</div>
+          <div class="list-item-sub">${formatData(p.data)}${p.riassunto ? ' · ' + p.riassunto.substring(0,70) + '…' : ''}${p.pdf ? ' 📄' : ''}</div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editPred(${dati.predicazioni.indexOf(p)})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('predicazioni',${dati.predicazioni.indexOf(p)})">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function openPredModal(idx = -1) {
+    document.getElementById('predEditIdx').value = idx;
+    if (idx >= 0) {
+      const p = dati.predicazioni[idx];
+      document.getElementById('predData').value         = p.data;
+      document.getElementById('predPredicatore').value  = p.predicatore || '';
+      document.getElementById('predRiassunto').value    = p.riassunto || '';
+      document.getElementById('predPdf').value          = p.pdf || '';
+      document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
+    } else {
+      document.getElementById('predData').value         = today();
+      document.getElementById('predPredicatore').value  = '';
+      document.getElementById('predRiassunto').value    = '';
+      document.getElementById('predPdf').value          = '';
+      document.getElementById('modalPredTitle').textContent = 'Nuova predicazione';
+    }
+    document.getElementById('modal-predicazione').classList.add('open');
+  }
+  function editPred(i) { openPredModal(i); }
+
+  function salvaPred() {
+    const data = document.getElementById('predData').value;
+    if (!data) { toast('⚠ Inserisci la data'); return; }
+    const obj = {
+      data,
+      predicatore: document.getElementById('predPredicatore').value.trim(),
+      riassunto:   document.getElementById('predRiassunto').value.trim(),
+      pdf:         document.getElementById('predPdf').value.trim()
+    };
+    const idx = parseInt(document.getElementById('predEditIdx').value);
+    if (idx >= 0) dati.predicazioni[idx] = obj;
+    else dati.predicazioni.unshift(obj);
+    dati.predicazioni.sort((a,b) => b.data.localeCompare(a.data));
+    renderPredicazioni(); closeModal('predicazione'); markDirty(); toast('✅ Predicazione salvata');
+  }
+
+  /* ── ATTIVITÀ ── */
+  function renderAttivita() {
+    const c = document.getElementById('attivitaList');
+    if (!dati.attivita.length) { c.innerHTML = emptyState('Nessuna attività inserita'); return; }
+    c.innerHTML = dati.attivita.map((a, i) => `
+      <div class="list-item">
+        <div class="list-item-info">
+          <div class="list-item-title" style="display:flex;align-items:center;gap:8px;">
+            ${a.nome} <span class="badge badge-${a.stato}">${labelStato(a.stato)}</span>
+          </div>
+          <div class="list-item-sub">${a.responsabile} · ${a.descrizione ? a.descrizione.substring(0,80) + '…' : ''}</div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editAtt(${i})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('attivita',${i})">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function openAttModal(idx = -1) {
+    document.getElementById('attEditIdx').value = idx;
+    if (idx >= 0) {
+      const a = dati.attivita[idx];
+      document.getElementById('attNome').value  = a.nome;
+      document.getElementById('attDesc').value  = a.descrizione || '';
+      document.getElementById('attResp').value  = a.responsabile || '';
+      document.getElementById('attStato').value = a.stato || 'in_corso';
+      document.getElementById('modalAttTitle').textContent = 'Modifica attività';
+    } else {
+      document.getElementById('attNome').value  = '';
+      document.getElementById('attDesc').value  = '';
+      document.getElementById('attResp').value  = '';
+      document.getElementById('attStato').value = 'in_corso';
+      document.getElementById('modalAttTitle').textContent = 'Nuova attività';
+    }
+    document.getElementById('modal-attivita').classList.add('open');
+  }
+  function editAtt(i) { openAttModal(i); }
+
+  function salvaAtt() {
+    const nome = document.getElementById('attNome').value.trim();
+    if (!nome) { toast('⚠ Inserisci il nome dell\'attività'); return; }
+    const obj = {
+      nome,
+      descrizione:  document.getElementById('attDesc').value.trim(),
+      responsabile: document.getElementById('attResp').value.trim(),
+      stato:        document.getElementById('attStato').value
+    };
+    const idx = parseInt(document.getElementById('attEditIdx').value);
+    if (idx >= 0) dati.attivita[idx] = obj;
+    else dati.attivita.push(obj);
+    renderAttivita(); closeModal('attivita'); markDirty(); toast('✅ Attività salvata');
+  }
+
+  /* ── DELETE ── */
+  function deleteItem(section, idx) {
+    if (!confirm('Eliminare questo elemento?')) return;
+    dati[section].splice(idx, 1);
+    renderAll(); markDirty(); toast('🗑 Eliminato');
+  }
+
+  /* ── MODAL HELPERS ── */
+  function openModal(name) {
+    document.getElementById('modal-' + name).classList.add('open');
+  }
+  function closeModal(name) {
+    document.getElementById('modal-' + name).classList.remove('open');
+  }
+  // Chiudi modal cliccando fuori
+  document.querySelectorAll('.modal-bg').forEach(bg => {
+    bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+  });
+
+  /* ── TABS ── */
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  /* ── SALVA/PUBBLICA tramite bridge Python ── */
+
+  // Rileva se siamo dentro pywebview (app desktop) o browser normale
+  const IS_APP = typeof window.pywebview !== 'undefined' && typeof window.pywebview.api !== 'undefined';
+
+  async function saveFile() {
+    if (!dati) return;
+    const json = JSON.stringify(dati, null, 2);
+
+    if (IS_APP || typeof window.pywebview !== 'undefined') {
+      // modalità app desktop: invia a Python
+      try {
+        const result = await window.pywebview.api.salva_json(json);
+        if (result === 'ok') {
+          dirty = false;
+          setSaveMsg('ok', '✅ dati.json salvato con backup');
+          toast('✅ Salvato!');
+        } else {
+          toast('❌ Errore: ' + result);
+        }
+      } catch(e) {
+        toast('❌ Bridge non disponibile: ' + e);
+      }
+    } else {
+      // modalità browser: scarica il file
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'dati.json';
+      a.click();
+      dirty = false;
+      setSaveMsg('ok', '✅ File scaricato — ora lancia aggiorna_sito.ps1 per pubblicare');
+      toast('✅ dati.json scaricato');
+    }
+  }
+
+  async function pubblicaSuGithub() {
+    if (!dati) return;
+    const json = JSON.stringify(dati, null, 2);
+
+    if (typeof window.pywebview !== 'undefined') {
+      // Prima salva
+      setSaveMsg('warn', '💾 Salvataggio in corso...');
+      try {
+        const r = await window.pywebview.api.salva_json(json);
+        if (r !== 'ok') { toast('❌ Errore salvataggio: ' + r); return; }
+      } catch(e) { toast('❌ ' + e); return; }
+
+      // Poi apri log overlay e lancia git push
+      document.getElementById('logOverlay').classList.add('open');
+      document.getElementById('logContent').textContent = '';
+
+      try {
+        // git push streaming via polling
+        await window.pywebview.api.git_push_start();
+        pollLog();
+      } catch(e) {
+        appendLog('❌ Errore: ' + e);
+      }
+    } else {
+      // Fallback browser: mostra istruzioni
+      mostraIstruzioniGit();
+    }
+  }
+
+  async function pollLog() {
+    try {
+      const line = await window.pywebview.api.git_push_poll();
+      if (line === '__DONE__') {
+        appendLog(''); appendLog('🎉 Tutto fatto!');
+        document.getElementById('logCloseBtn').style.display = 'inline-block';
+        setSaveMsg('ok', '✅ Pubblicato su GitHub');
+        dirty = false;
+        return;
+      }
+      if (line === '__ERROR__') {
+        document.getElementById('logCloseBtn').style.display = 'inline-block';
+        setSaveMsg('warn', '❌ Errore durante la pubblicazione');
+        return;
+      }
+      if (line) appendLog(line);
+      setTimeout(pollLog, 150);
+    } catch(e) {
+      appendLog('❌ ' + e);
+    }
+  }
+
+  function appendLog(line) {
+    const el = document.getElementById('logContent');
+    el.textContent += line + '\n';
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function mostraIstruzioniGit() {
+    document.getElementById('modal-github').classList.add('open');
+  }
+
+  /* ── HELPERS ── */
+  function markDirty() {
+    dirty = true;
+    setSaveMsg('warn', '⚠ Modifiche non salvate — clicca "Salva dati.json" quando hai finito');
+  }
+
+  function setSaveMsg(type, msg) {
+    const el = document.getElementById('saveBarMsg');
+    el.innerHTML = msg;
+    el.style.color = type === 'warn' ? 'var(--amber)' : type === 'ok' ? 'var(--green)' : 'var(--muted)';
+  }
+
+  function setStatus(type, msg) {
+    document.getElementById('statusDot').className = 'dot ' + type;
+    document.getElementById('statusText').textContent = msg;
+  }
+
+  function today() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  function formatData(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-');
+    const mesi = ['','gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+    return `${parseInt(d)} ${mesi[parseInt(m)]} ${y}`;
+  }
+
+  function labelScad(s) {
+    if (!s) return '—';
+    if (s.startsWith('mensile-')) return `ogni ${s.split('-')[1]} del mese`;
+    if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return `scade ${formatData(s)}`;
+    return s;
+  }
+
+  function labelStato(s) {
+    return { completata:'Completata', in_corso:'In corso', in_attesa:'In attesa', annullata:'Annullata' }[s] || s;
+  }
+
+  function emptyState(msg) {
+    return `<div class="empty"><div class="emoji">📭</div>${msg}</div>`;
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Avvisa se si chiude con modifiche non salvate
+  window.addEventListener('beforeunload', e => {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>
+
+<!-- LOG OVERLAY git push -->
+<div class="modal-bg" id="logOverlay">
+  <div class="modal" style="max-width:560px;">
+    <h3>🚀 Pubblicazione su GitHub</h3>
+    <pre id="logContent" style="
+      background:rgba(0,0,0,0.40);border:1px solid var(--border);border-radius:8px;
+      padding:14px;font-family:'Consolas',monospace;font-size:0.82rem;
+      color:var(--white);min-height:160px;max-height:260px;overflow-y:auto;
+      white-space:pre-wrap;margin:14px 0;"></pre>
+    <div class="btn-row-end">
+      <button id="logCloseBtn" class="btn btn-primary" style="display:none;"
+        onclick="document.getElementById('logOverlay').classList.remove('open')">
+        ✓ Chiudi
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

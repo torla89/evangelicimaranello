@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il Nostro Culto – Chiesa Evangelica Maranello</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+      background: #1a0e04;
+    }
+
+    .bg {
+      position: fixed; inset: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      z-index: 0;
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+    .bg::after {
+      content: ""; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.72);
+    }
+
+    .page { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 52px; height: 62px; flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+    }
+    .logo { display: flex; align-items: center; font-size: 1.05em; font-weight: 500; text-decoration: none; color: #fff; }
+    .logo::before { content: "✝"; margin-right: 9px; font-size: 1.2em; font-weight: 300; }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a { color: #fff; text-decoration: none; font-size: 0.97em; font-weight: 500; opacity: 0.85; transition: opacity 0.2s; }
+    nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
+    nav a:hover { opacity: 1; }
+    .nav-search { background: none; border: none; color: #fff; cursor: pointer; opacity: 0.88; font-size: 1.05em; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    /* MAIN */
+    main { flex: 1; max-width: 820px; width: 100%; margin: 0 auto; padding: 52px 24px 64px; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-bottom: 40px; color: rgba(255,255,255,0.65);
+      text-decoration: none; font-size: 0.88rem; transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    .page-header { margin-bottom: 44px; }
+    .page-header .label { font-size: 0.75rem; letter-spacing: 0.30em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+    .page-header h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+    .page-header .sottotitolo { font-size: 0.97rem; color: rgba(255,255,255,0.68); line-height: 1.6; }
+
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 10px 0 32px; }
+
+    /* Card info riunione */
+    .info-card {
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22); border-radius: 10px;
+      padding: 24px 26px; margin-bottom: 16px;
+    }
+    .info-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .info-card-icon { font-size: 1.3rem; }
+    .info-card h2 { font-size: 1.05rem; font-weight: 700; }
+    .info-card p { font-size: 0.95rem; line-height: 1.75; color: rgba(255,255,255,0.82); }
+    .info-card p em { font-style: italic; color: rgba(255,255,255,0.95); }
+
+    /* Tre card struttura culto */
+    .tre-card { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 28px 0; }
+    .step-card {
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22); border-radius: 10px;
+      padding: 20px 18px; position: relative;
+    }
+    .step-num {
+      position: absolute; top: 14px; right: 16px;
+      font-size: 2rem; font-weight: 700; color: rgba(255,255,255,0.08); line-height: 1;
+    }
+    .step-icon { font-size: 1.4rem; margin-bottom: 10px; }
+    .step-card h3 { font-size: 0.98rem; font-weight: 700; margin-bottom: 8px; }
+    .step-card p { font-size: 0.84rem; color: rgba(255,255,255,0.70); line-height: 1.55; }
+
+    /* Bottoni innario / predicazioni */
+    .azioni { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px; }
+    .azione-btn {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.35); border-radius: 10px;
+      padding: 18px 20px; text-decoration: none; color: #fff;
+      transition: background 0.25s, border-color 0.25s; cursor: pointer;
+    }
+    .azione-btn:hover { background: rgba(0,0,0,0.40); border-color: rgba(255,255,255,0.55); }
+    .azione-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .azione-label { font-size: 0.70rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 3px; }
+    .azione-titolo { font-size: 1.02rem; font-weight: 700; }
+    .azione-desc { font-size: 0.80rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+    /* Overlay predicazioni */
+    .overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(5,3,1,0.96); backdrop-filter: blur(10px);
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      overflow-y: auto;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .overlay-inner { max-width: 820px; width: 100%; margin: 0 auto; padding: 40px 24px 60px; }
+    .overlay-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .overlay-header h2 { font-size: 1.5rem; font-weight: 700; }
+    .overlay-close {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px; color: #fff; padding: 8px 16px; cursor: pointer; font-size: 0.88rem;
+      transition: background 0.2s;
+    }
+    .overlay-close:hover { background: rgba(255,255,255,0.16); }
+
+    /* Tabella predicazioni */
+    .pred-table { width: 100%; border-collapse: collapse; }
+    .pred-table th {
+      font-size: 0.70rem; letter-spacing: 0.20em; text-transform: uppercase;
+      color: rgba(255,255,255,0.40); text-align: left;
+      padding: 0 12px 12px 0; border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .pred-table td {
+      font-size: 0.92rem; color: rgba(255,255,255,0.85);
+      padding: 14px 12px 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+      vertical-align: top;
+    }
+    .pred-table tr:last-child td { border-bottom: none; }
+    .pred-data { font-size: 0.78rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.50); white-space: nowrap; }
+    .pred-predicatore { font-weight: 700; color: #fff; }
+    .pred-riassunto { font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-top: 3px; }
+    .pred-vuoto { color: rgba(255,255,255,0.28); font-style: italic; font-size: 0.82rem; }
+
+    .btn-pdf {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 6px; color: rgba(255,255,255,0.75); padding: 5px 12px;
+      font-size: 0.78rem; text-decoration: none; transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-pdf:hover { background: rgba(0,0,0,0.40); color: #fff; }
+
+    /* MOBILE */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .nav-search { display: none; }
+      .hamburger { display: flex; }
+      main { padding: 32px 16px 48px; }
+      .tre-card { grid-template-columns: 1fr; }
+      .azioni { grid-template-columns: 1fr; }
+      .pred-table th:nth-child(3), .pred-table td:nth-child(3) { display: none; }
+    }
+
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2.4rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+
+    /* ==============================
+       MOBILE — ottimizzato
+    ============================== */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      html, body { overflow: auto; }
+      .page { height: auto; min-height: 100vh; }
+
+      /* Navbar */
+      header { padding: 0 18px; height: 56px; }
+      nav, .nav-search { display: none; }
+      .hamburger { display: flex; }
+
+      /* Main content: più respiro */
+      main { padding: 28px 18px 48px; }
+
+      /* Titoli pagina */
+      .page-header h1 { font-size: 1.9rem; }
+      .page-header .sottotitolo { font-size: 0.92rem; }
+
+      /* Back link */
+      .back-link { margin-bottom: 28px; }
+
+      /* Riquadri generici */
+      .articolo,
+      .progetto,
+      .info-card,
+      .contatto,
+      .radio-card,
+      .comunita-section,
+      .storia-section,
+      .macrogruppo { border-radius: 8px; }
+
+      /* Bottoni link a colonna intera */
+      .btn-row { flex-direction: column; }
+      .btn-link { justify-content: center; }
+
+      /* Griglia link 1 colonna */
+      .link-grid { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Tre card culto in colonna */
+      .tre-card { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Azioni culto in colonna */
+      .azioni { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Tabella predicazioni: nascondi colonna riassunto */
+      .pred-table th:nth-child(3),
+      .pred-table td:nth-child(3) { display: none; }
+
+      /* Contatti: testo email più piccolo */
+      .contatto-valore { font-size: 0.88rem; word-break: break-all; }
+
+      /* Storia: badge anni in riga */
+      .section-header { flex-wrap: wrap; gap: 8px; }
+
+      /* Area privata: tabella attività */
+      .attivita-table th:nth-child(2),
+      .attivita-table td:nth-child(2) { display: none; }
+
+      /* Saldo: numero più piccolo */
+      .saldo-valore { font-size: 2.2rem; }
+
+      /* Spese: layout compatto */
+      .spesa-row { flex-wrap: wrap; gap: 6px; }
+
+      /* Menu mobile */
+      .mob-menu a { font-size: 1.6rem; }
+    }
+
+    /* Padding player fisso */
+    body { padding-bottom: 62px !important; }
+
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">chiesa evangelica Maranello</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chi-siamo.html">Chi Siamo</a>
+      <a href="cosa-crediamo.html">In Cosa Crediamo</a>
+      <a href="culto.html" class="active">Il Culto</a>
+      <a href="contatti.html">Contattaci</a>
+    </nav>
+    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <a href="index.html" class="back-link">← Home</a>
+
+    <div class="page-header">
+      <p class="label">⛪ Il nostro culto</p>
+      <h1>Cosa facciamo</h1>
+      <p class="sottotitolo">Ogni domenica alle 16:00 ci ritroviamo per un incontro di circa un'ora, semplice e aperto a tutti — ragazzi, bambini e chiunque si avvicini alla fede per la prima volta.</p>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Ci riuniamo nelle case -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <span class="info-card-icon">🏠</span>
+        <h2>Ci riuniamo nelle case</h2>
+      </div>
+      <p>Non abbiamo una chiesa intesa come edificio. Ci incontriamo nelle case, proprio come facevano i primi cristiani. La chiesa non è un luogo — siamo noi, le persone che la compongono.</p>
+      <p style="margin-top:10px;">Siamo una piccola comunità, e lo siamo con gioia. Gesù stesso ha detto: <em>"Dove due o tre sono riuniti nel mio nome, lì sono io in mezzo a loro"</em> (Matteo 18:20). Non servono grandi edifici o grandi numeri per incontrarsi con Dio — basta la sincerità del cuore e la fedeltà alla Sua Parola.</p>
+    </div>
+
+    <!-- Tre step culto -->
+    <div class="tre-card">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">🎵</div>
+        <h3>Cantiamo insieme</h3>
+        <p>Il culto inizia con un momento di lode e adorazione attraverso i canti. La musica è uno dei modi più belli per avvicinarsi a Dio e vivere la comunione fraterna.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">📖</div>
+        <h3>Parliamo della Bibbia</h3>
+        <p>Affrontiamo i temi più fondamentali e pratici della fede cristiana in modo chiaro e accessibile, senza linguaggio complicato. Partiamo sempre dalla Parola di Dio.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">🌱</div>
+        <h3>Per tutti, soprattutto i più giovani</h3>
+        <p>Il nostro culto è pensato con un cuore speciale per ragazzi, bambini e chi si avvicina alla fede per la prima volta. Un ambiente accogliente, senza barriere.</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Un luogo tutto nostro -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <span class="info-card-icon">🔍</span>
+        <h2>Un luogo dedicato alla comunità</h2>
+      </div>
+      <p>
+        Ci riuniamo nelle case con gioia, ma sentiamo la crescita della comunità e il desiderio
+        di avere uno spazio dedicato — un luogo aperto a tutti, dove chiunque possa entrare,
+        sedersi, leggere la Bibbia e sentirsi a casa.
+      </p>
+      <p style="margin-top:10px;">
+        Stiamo cercando una piccola saletta a Maranello dove poter tenere il culto domenicale
+        e ospitare una <em>biblioteca cristiana</em> — un angolo di libri, Bibbie e risorse
+        spirituali accessibili gratuitamente a chiunque voglia approfondire e condividere la fede.
+      </p>
+      <p style="margin-top:10px;">
+        Se conosci uno spazio disponibile o vuoi semplicemente saperne di più, scrivici —
+        ogni indicazione è benvenuta.
+      </p>
+      <p style="margin-top:10px;">
+        Segui la nostra pagina Facebook — a breve disponibile — per rimanere aggiornato
+        su tutti gli sviluppi relativi a questo progetto.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+        <a href="contatti.html" style="
+          display:inline-flex;align-items:center;gap:8px;
+          background:rgba(0,0,0,0.22);backdrop-filter:blur(2px);
+          border:1px solid rgba(255,255,255,0.30);border-radius:10px;
+          color:#fff;text-decoration:none;padding:10px 18px;
+          font-size:0.88rem;font-weight:600;transition:background 0.25s;">
+          ✉️ Contattaci
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61584977437002" target="_blank" style="
+          display:inline-flex;align-items:center;gap:8px;
+          background:rgba(0,0,0,0.22);backdrop-filter:blur(2px);
+          border:1px solid rgba(255,255,255,0.30);border-radius:10px;
+          color:#fff;text-decoration:none;padding:10px 18px;
+          font-size:0.88rem;font-weight:600;transition:background 0.25s;">
+          📘 Seguici su Facebook
+        </a>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Bottoni azioni -->
+    <div class="azioni">
+      <a href="innario.pdf" target="_blank" class="azione-btn">
+        <div class="azione-icon">🎶</div>
+        <div>
+          <div class="azione-label">Lode e adorazione</div>
+          <div class="azione-titolo">Innario dei canti</div>
+          <div class="azione-desc">Canti nn. 2–213 usati nel culto</div>
+        </div>
+      </a>
+      <div class="azione-btn" onclick="apriPredicazioni()">
+        <div class="azione-icon">📅</div>
+        <div>
+          <div class="azione-label">Programma</div>
+          <div class="azione-titolo">Calendario delle predicazioni</div>
+          <div class="azione-desc">Data, predicatore e riassunto</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- OVERLAY PREDICAZIONI -->
+<div class="overlay" id="overlay-pred">
+  <div class="overlay-inner">
+    <div class="overlay-header">
+      <h2>📅 Calendario delle predicazioni</h2>
+      <button class="overlay-close" onclick="chiudiPredicazioni()">✕ Chiudi</button>
+    </div>
+    <div id="pred-container">
+      <p style="color:rgba(255,255,255,0.45);font-size:0.9rem;">Caricamento...</p>
+    </div>
+
+    <!-- Archivio storico -->
+    <div style="
+      margin-top:32px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.12);
+      border-left:3px solid rgba(200,150,60,0.60);
+      border-radius:10px;
+      padding:20px 22px;">
+      <div style="font-size:0.70rem;letter-spacing:0.25em;text-transform:uppercase;
+                  color:rgba(255,255,255,0.38);margin-bottom:8px;">📦 Archivio storico</div>
+      <p style="font-size:0.96rem;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.3;">
+        Le predicazioni del passato — presto disponibili
+      </p>
+      <p style="font-size:0.90rem;color:rgba(255,255,255,0.72);line-height:1.75;">
+        Nel corso degli anni, molti fratelli e sorelle si sono impegnati con fedeltà a portare
+        avanti la Parola di Dio nella nostra comunità. Le loro predicazioni rappresentano
+        un patrimonio prezioso di fede, insegnamento e testimonianza che non vogliamo andasse perso.
+      </p>
+      <p style="font-size:0.90rem;color:rgba(255,255,255,0.72);line-height:1.75;margin-top:8px;">
+        Stiamo lavorando per raccogliere e rendere disponibile l'intero archivio delle
+        predicazioni degli anni precedenti — perché ogni parola pronunciata per edificare
+        la chiesa merita di essere custodita e condivisa.
+      </p>
+      <p style="font-size:0.82rem;color:rgba(200,150,60,0.80);margin-top:12px;font-style:italic;">
+        Segui la nostra pagina Facebook per sapere quando saranno disponibili.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob">
+  <a href="index.html"         onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="chi-siamo.html"     onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
+  <a href="cosa-crediamo.html" onclick="document.getElementById('mob').classList.remove('open')">In Cosa Crediamo</a>
+  <a href="culto.html"         onclick="document.getElementById('mob').classList.remove('open')">Il Culto</a>
+  <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+</div>
+
+<script>
+  function apriPredicazioni() {
+    document.getElementById('overlay-pred').classList.add('open');
+    caricaPredicazioni();
+  }
+  function chiudiPredicazioni() {
+    document.getElementById('overlay-pred').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiPredicazioni(); });
+
+  async function caricaPredicazioni() {
+    const c = document.getElementById('pred-container');
+    try {
+      const res  = await fetch('dati.json?t=' + Date.now());
+      const dati = await res.json();
+      const pred = dati.predicazioni || [];
+
+      if (pred.length === 0) {
+        c.innerHTML = '<p style="color:rgba(255,255,255,0.40);font-size:0.9rem;">Nessuna predicazione inserita.</p>';
+        return;
+      }
+
+      let html = `
+        <table class="pred-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Predicatore</th>
+              <th>Riassunto</th>
+              <th>PDF</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      pred.forEach(p => {
+        html += `<tr>
+          <td><div class="pred-data">${formatData(p.data)}</div></td>
+          <td>${p.predicatore
+            ? `<div class="pred-predicatore">${p.predicatore}</div>`
+            : `<div class="pred-vuoto">—</div>`}
+          </td>
+          <td>${p.riassunto
+            ? `<div class="pred-riassunto">${p.riassunto}</div>`
+            : `<div class="pred-vuoto">Non ancora disponibile</div>`}
+          </td>
+          <td>${p.pdf
+            ? `<a href="${p.pdf}" target="_blank" class="btn-pdf">📄 Apri</a>`
+            : `<span class="pred-vuoto">—</span>`}
+          </td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      c.innerHTML = html;
+
+    } catch(e) {
+      c.innerHTML = '<p style="color:rgba(255,120,120,0.8);font-size:0.88rem;">Impossibile caricare dati.json</p>';
+    }
+  }
+
+  function formatData(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-');
+    const mesi = ['','gennaio','febbraio','marzo','aprile','maggio','giugno',
+                  'luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    return `${parseInt(d)} ${mesi[parseInt(m)]} ${y}`;
+  }
+</script>
+<!-- MUSIC PLAYER -->
+<script>
+/**
+ * player.js — Music player condiviso tra tutte le pagine
+ * Persistenza tramite localStorage: posizione e stato sopravvivono alla navigazione
+ *
+ * ── COME AGGIUNGERE BRANI ────────────────────────────────────────
+ * Aggiungi un oggetto nell'array PLAYLIST qui sotto:
+ *   { src: "nomefile.mp3", title: "Titolo", artist: "Artista", cover: "copertina.jpg" }
+ * Metti l'mp3 (e la copertina se ce l'ha) nella stessa cartella del sito.
+ * ────────────────────────────────────────────────────────────────
+ */
+
+const PLAYLIST = [
+  {
+    src:    "gioia_nel_tuo_nome.mp3",
+    title:  "Gioia nel Tuo Nome",
+    artist: "Chiesa Evangelica Maranello",
+    cover:  "cover_gioia.jpg"
+  }
+  // Aggiungi altri brani qui sotto:
+  // { src: "brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
+];
+
+/* ── SHUFFLE Fisher-Yates ── */
+function shuffle(arr) {
+  const a = [...arr.keys()]; // array di indici [0,1,2,...]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ── STORAGE HELPERS ── */
+const SK = 'cem_player'; // storage key
+
+function loadState() {
+  try { return JSON.parse(sessionStorage.getItem(SK)) || {}; } catch { return {}; }
+}
+function saveState(s) {
+  try { sessionStorage.setItem(SK, JSON.stringify(s)); } catch {}
+}
+
+/* ── BUILD PLAYER HTML ── */
+function buildPlayer() {
+  const el = document.createElement('div');
+  el.id = 'cemPlayer';
+  el.innerHTML = `
+    <audio id="cemAudio" preload="none"></audio>
+
+    <div class="cpl-info">
+      <img class="cpl-cover" id="cplCover" src="" alt="cover" onerror="this.style.display='none'">
+      <div class="cpl-meta">
+        <div class="cpl-title" id="cplTitle">—</div>
+        <div class="cpl-artist" id="cplArtist">Chiesa Evangelica Maranello</div>
+      </div>
+    </div>
+
+    <div class="cpl-controls">
+      <button class="cpl-btn" onclick="window._player.prev()" title="Precedente">⏮</button>
+      <button class="cpl-btn cpl-play" id="cplPlayBtn" onclick="window._player.toggle()" title="Play/Pausa">▶</button>
+      <button class="cpl-btn" onclick="window._player.next()" title="Successivo">⏭</button>
+    </div>
+
+    <div class="cpl-right">
+      <div class="cpl-prog-row">
+        <span class="cpl-time" id="cplCur">0:00</span>
+        <input type="range" class="cpl-bar" id="cplBar" value="0" min="0" max="100" step="0.1"
+          oninput="window._player.seek(this.value)">
+        <span class="cpl-time" id="cplDur">0:00</span>
+      </div>
+      <div class="cpl-vol-row">
+        🔊<input type="range" class="cpl-vol" id="cplVol" value="80" min="0" max="100"
+          oninput="window._player.setVol(this.value)">
+      </div>
+    </div>
+
+    <button class="cpl-close" onclick="window._player.close()" title="Chiudi">✕</button>
+  `;
+  document.body.appendChild(el);
+
+  // Pulsante riapertura
+  const btn = document.createElement('button');
+  btn.id = 'cplReopen';
+  btn.title = 'Musica';
+  btn.textContent = '🎵';
+  btn.onclick = () => window._player.reopen();
+  document.body.appendChild(btn);
+}
+
+/* ── INJECT CSS ── */
+function injectCSS() {
+  const s = document.createElement('style');
+  s.textContent = `
+    #cemPlayer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(8,5,2,0.93); backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 18px; color: #fff;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+    #cemPlayer.visible { transform: translateY(0); }
+
+    .cpl-cover {
+      width: 40px; height: 40px; border-radius: 6px; object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+    }
+    .cpl-info  { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .cpl-meta  { min-width: 0; }
+    .cpl-title  { font-size: 0.87rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cpl-artist { font-size: 0.71rem; color: rgba(255,255,255,0.42); margin-top: 1px; white-space: nowrap; }
+
+    .cpl-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .cpl-btn {
+      background: none; border: none; color: #fff; cursor: pointer;
+      font-size: 0.95rem; padding: 5px; opacity: 0.65; transition: opacity 0.2s; line-height: 1;
+    }
+    .cpl-btn:hover { opacity: 1; }
+    .cpl-play {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.28);
+      opacity: 1; font-size: 0.9rem;
+    }
+    .cpl-play:hover { background: rgba(255,255,255,0.22); }
+
+    .cpl-right { flex: 2; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .cpl-prog-row, .cpl-vol-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.68rem; color: rgba(255,255,255,0.40);
+    }
+    .cpl-bar { flex: 1; height: 3px; accent-color: rgba(255,255,255,0.75); cursor: pointer; }
+    .cpl-vol { width: 68px; height: 3px; accent-color: rgba(255,255,255,0.55); cursor: pointer; }
+    .cpl-time { white-space: nowrap; flex-shrink: 0; }
+
+    .cpl-close {
+      background: none; border: none; color: rgba(255,255,255,0.30);
+      cursor: pointer; font-size: 0.82rem; padding: 4px 6px; flex-shrink: 0;
+      transition: color 0.2s;
+    }
+    .cpl-close:hover { color: #fff; }
+
+    #cplReopen {
+      position: fixed; bottom: 14px; right: 14px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(8,5,2,0.90); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: #fff; font-size: 1.1rem; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #cplReopen:hover { background: rgba(30,18,5,0.95); }
+    #cplReopen.visible { display: flex; }
+
+    /* Padding pagina per non coprire contenuto */
+    body { padding-bottom: 68px !important; }
+
+    @media (max-width: 600px) {
+      .cpl-right  { display: none; }
+      .cpl-artist { display: none; }
+      #cemPlayer  { padding: 8px 12px; gap: 10px; }
+      body        { padding-bottom: 60px !important; }
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ── PLAYER CONTROLLER ── */
+function initPlayer() {
+  buildPlayer();
+  injectCSS();
+
+  const audio    = document.getElementById('cemAudio');
+  const playBtn  = document.getElementById('cplPlayBtn');
+  const cover    = document.getElementById('cplCover');
+  const titleEl  = document.getElementById('cplTitle');
+  const artistEl = document.getElementById('cplArtist');
+  const bar      = document.getElementById('cplBar');
+  const cur      = document.getElementById('cplCur');
+  const dur      = document.getElementById('cplDur');
+  const volEl    = document.getElementById('cplVol');
+  const player   = document.getElementById('cemPlayer');
+  const reopen   = document.getElementById('cplReopen');
+
+  // Genera ordine shuffled e recupera stato salvato
+  let order    = shuffle(PLAYLIST);
+  let posInOrder = 0;    // posizione nell'array shuffled
+  let isPlaying  = false;
+  let isClosed   = false;
+
+  const st = loadState();
+
+  // Ripristina volume
+  const savedVol = st.volume !== undefined ? st.volume : 80;
+  audio.volume = savedVol / 100;
+  volEl.value  = savedVol;
+
+  function fmt(s) {
+    if (!s || isNaN(s)) return '0:00';
+    return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+  }
+
+  function loadTrack(idx, resume) {
+    const t = PLAYLIST[idx];
+    audio.src = t.src;
+    titleEl.textContent  = t.title;
+    artistEl.textContent = t.artist || 'Chiesa Evangelica Maranello';
+    if (t.cover) { cover.src = t.cover; cover.style.display = 'block'; }
+    else cover.style.display = 'none';
+    bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+
+    if (resume && resume > 0) {
+      audio.addEventListener('loadedmetadata', () => {
+        audio.currentTime = resume;
+      }, { once: true });
+    }
+    saveState({ trackIndex: idx, time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: isPlaying });
+  }
+
+  function play() {
+    audio.play().then(() => {
+      isPlaying = true;
+      playBtn.textContent = '⏸';
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: true });
+    }).catch(() => {});
+  }
+
+  function pause() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = '▶';
+    saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: false });
+  }
+
+  // Salva stato PRIMA di lasciare la pagina (fondamentale per la continuità)
+  window.addEventListener('beforeunload', () => {
+    saveState({
+      trackIndex: order[posInOrder],
+      time:       audio.currentTime,
+      volume:     parseInt(volEl.value),
+      closed:     isClosed,
+      playing:    isPlaying
+    });
+  });
+
+  // Ripristina traccia salvata
+  let startIndex   = 0;
+  let startTime    = 0;
+  let startPlaying = false;
+  if (st.trackIndex !== undefined) {
+    startIndex   = st.trackIndex;
+    startTime    = st.time || 0;
+    startPlaying = st.playing || false;
+    const pos = order.indexOf(startIndex);
+    if (pos !== -1) posInOrder = pos;
+    else { order[0] = startIndex; posInOrder = 0; }
+  }
+
+  isClosed = st.closed || false;
+  loadTrack(order[posInOrder], startTime);
+
+  // Mostra player dopo 200ms e ripristina stato play/pausa
+  setTimeout(() => {
+    if (!isClosed) player.classList.add('visible');
+    else reopen.classList.add('visible');
+
+    // Se era in play nella pagina precedente, riprendi
+    if (startPlaying && !isClosed) {
+      play();
+    }
+  }, 200);
+
+  /* ── API pubblica ── */
+  window._player = {
+    toggle() {
+      if (!isPlaying) play(); else pause();
+    },
+    prev() {
+      posInOrder = (posInOrder - 1 + order.length) % order.length;
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    next() {
+      posInOrder = (posInOrder + 1) % order.length;
+      // se abbiamo percorso tutto l'array, rimescola di nuovo
+      if (posInOrder === 0) order = shuffle(PLAYLIST);
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    seek(v) {
+      if (audio.duration) audio.currentTime = (v / 100) * audio.duration;
+    },
+    setVol(v) {
+      audio.volume = v / 100;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(v), closed: isClosed });
+    },
+    close() {
+      player.classList.remove('visible');
+      pause();
+      isClosed = true;
+      reopen.classList.add('visible');
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: true });
+    },
+    reopen() {
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
+    }
+  };
+
+  /* ── EVENTI AUDIO ── */
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      bar.value = (audio.currentTime / audio.duration) * 100;
+      cur.textContent = fmt(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    dur.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', () => {
+    window._player.next();
+  });
+
+  // Salva posizione ogni 5 secondi
+  setInterval(() => {
+    if (isPlaying) {
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed });
+    }
+  }, 5000);
+}
+
+// Avvia quando il DOM è pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPlayer);
+} else {
+  initPlayer();
+}
+
+</script>
+
+</body>
+</html>

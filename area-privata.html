@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Area Privata – Chiesa Evangelica Maranello</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+      background: #1a0e04;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      z-index: 0;
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 52px;
+      height: 62px;
+      flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.05em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo::before {
+      content: "✝";
+      margin-right: 9px;
+      font-size: 1.2em;
+      font-weight: 300;
+    }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97em;
+      font-weight: 500;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+    nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
+    nav a:hover { opacity: 1; }
+    .nav-search {
+      background: none; border: none; color: #fff;
+      cursor: pointer; opacity: 0.88; font-size: 1.05em;
+    }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    /* ── LOGIN BOX ── */
+    #schermata-login {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .login-box {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-box .lock { font-size: 2.2rem; margin-bottom: 16px; }
+
+    .login-box h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .login-box .sub {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 32px;
+    }
+
+    .campo {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 0.97rem;
+      outline: none;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .campo::placeholder { color: rgba(255,255,255,0.35); }
+    .campo:focus { border-color: rgba(255,255,255,0.55); }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.97rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s;
+      margin-top: 6px;
+    }
+    .btn-login:hover {
+      background: rgba(0,0,0,0.40);
+      border-color: rgba(255,255,255,0.55);
+    }
+
+    .errore {
+      color: rgba(255,120,120,0.90);
+      font-size: 0.85rem;
+      margin-top: 14px;
+      min-height: 20px;
+    }
+
+    /* ── AREA RISERVATA ── */
+    #schermata-contenuto {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 52px 24px 64px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 40px;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    .page-header { margin-bottom: 44px; }
+    .page-header .label {
+      font-size: 0.75rem;
+      letter-spacing: 0.30em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+    .page-header h1 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .page-header .sottotitolo {
+      font-size: 0.97rem;
+      color: rgba(255,255,255,0.68);
+      line-height: 1.6;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      margin: 10px 0 32px;
+    }
+
+    /* Placeholder contenuto */
+    .contenuto-box {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      padding: 32px;
+      text-align: center;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .contenuto-box .icon { font-size: 2rem; margin-bottom: 12px; }
+
+    /* Bottone logout */
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 32px;
+      padding: 11px 24px;
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s;
+    }
+    .btn-logout:hover {
+      background: rgba(0,0,0,0.38);
+      color: #fff;
+    }
+
+    /* Macrogruppi */
+    .macrogruppo {
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .macrogruppo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      cursor: pointer;
+      user-select: none;
+    }
+    .macrogruppo-header:hover { background: rgba(255,255,255,0.04); }
+    .macrogruppo-icon { font-size: 1.3rem; }
+    .macrogruppo-header h2 { font-size: 1.08rem; font-weight: 700; flex: 1; }
+    .macrogruppo-toggle { font-size: 0.8rem; opacity: 0.45; transition: transform 0.3s; }
+    .macrogruppo-toggle.aperto { transform: rotate(180deg); }
+    .macrogruppo-body { padding: 22px 24px; display: none; }
+    .macrogruppo-body.aperto { display: block; }
+
+    /* Saldo */
+    .saldo-box {
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+    .saldo-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 8px;
+    }
+    .saldo-valore {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .saldo-data {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 6px;
+      margin-bottom: 20px;
+    }
+    .grafico-wrap {
+      position: relative;
+      height: 120px;
+      margin: 0 0 8px;
+    }
+    .grafico-wrap canvas { width: 100% !important; }
+
+    /* Spese fisse */
+    .spesa-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      gap: 12px;
+    }
+    .spesa-row:last-child { border-bottom: none; }
+    .spesa-nome { font-size: 0.95rem; font-weight: 600; flex: 1; }
+    .spesa-note { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .spesa-importo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .spesa-scadenza {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+      white-space: nowrap;
+      text-align: right;
+    }
+    .badge-scadenza {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-top: 3px;
+    }
+    .badge-presto   { background: rgba(255,180,0,0.18);  border: 1px solid rgba(255,180,0,0.35);  color: #ffd060; }
+    .badge-ok       { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.45); }
+    .badge-mensile  { background: rgba(100,180,255,0.12); border: 1px solid rgba(100,180,255,0.25); color: #8ecfff; }
+
+    /* Riunioni */
+    .riunione {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 16px 0;
+    }
+    .riunione:last-child { border-bottom: none; }
+    .riunione-data {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 5px;
+    }
+    .riunione-titolo {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .riunione-testo {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.78);
+      white-space: pre-line;
+    }
+    .riunione-vuoto {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.30);
+      font-style: italic;
+    }
+
+    .errore-caricamento {
+      color: rgba(255,120,120,0.8);
+      font-size: 0.88rem;
+      padding: 12px 0;
+    }
+
+    /* Canti */
+    .canto-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .canto-row:last-child { border-bottom: none; }
+    .canto-num {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.35);
+      width: 28px;
+      text-align: right;
+      flex-shrink: 0;
+      font-family: monospace;
+    }
+    .canto-titolo {
+      flex: 1;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.88);
+    }
+    .canto-play {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 50%;
+      width: 34px; height: 34px;
+      color: #fff; font-size: 0.85rem;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .canto-play:hover { background: rgba(255,255,255,0.18); }
+    .canto-play.playing {
+      background: rgba(212,168,85,0.25);
+      border-color: rgba(212,168,85,0.50);
+    }
+    .canto-no-file {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.25);
+      flex-shrink: 0;
+    }
+
+    /* Tabella attività */
+    .attivita-table { width: 100%; border-collapse: collapse; }
+    .attivita-table th {
+      font-size: 0.70rem;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+      text-align: left;
+      padding: 0 10px 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .attivita-table td {
+      font-size: 0.90rem;
+      color: rgba(255,255,255,0.85);
+      padding: 13px 10px 13px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      vertical-align: top;
+    }
+    .attivita-table tr:last-child td { border-bottom: none; }
+    .attivita-nome { font-weight: 700; color: #fff; }
+    .attivita-desc { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 3px; }
+
+    .badge-stato {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .stato-completata  { background: rgba(80,200,120,0.15); border: 1px solid rgba(80,200,120,0.35); color: #6ddbA0; }
+    .stato-in_corso    { background: rgba(100,180,255,0.12); border: 1px solid rgba(100,180,255,0.30); color: #8ecfff; }
+    .stato-in_attesa   { background: rgba(255,180,0,0.12);  border: 1px solid rgba(255,180,0,0.28);  color: #ffd060; }
+    .stato-annullata   { background: rgba(255,80,80,0.10);  border: 1px solid rgba(255,80,80,0.25);  color: #ff9090; }
+
+    /* MOBILE */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .nav-search { display: none; }
+      .hamburger { display: flex; }
+      main { padding: 32px 16px 48px; }
+      .login-box { padding: 32px 22px; }
+    }
+
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.4rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+
+    /* ==============================
+       MOBILE — ottimizzato
+    ============================== */
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      html, body { overflow: auto; }
+      .page { height: auto; min-height: 100vh; }
+
+      /* Navbar */
+      header { padding: 0 18px; height: 56px; }
+      nav, .nav-search { display: none; }
+      .hamburger { display: flex; }
+
+      /* Main content: più respiro */
+      main { padding: 28px 18px 48px; }
+
+      /* Titoli pagina */
+      .page-header h1 { font-size: 1.9rem; }
+      .page-header .sottotitolo { font-size: 0.92rem; }
+
+      /* Back link */
+      .back-link { margin-bottom: 28px; }
+
+      /* Riquadri generici */
+      .articolo,
+      .progetto,
+      .info-card,
+      .contatto,
+      .radio-card,
+      .comunita-section,
+      .storia-section,
+      .macrogruppo { border-radius: 8px; }
+
+      /* Bottoni link a colonna intera */
+      .btn-row { flex-direction: column; }
+      .btn-link { justify-content: center; }
+
+      /* Griglia link 1 colonna */
+      .link-grid { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Tre card culto in colonna */
+      .tre-card { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Azioni culto in colonna */
+      .azioni { grid-template-columns: 1fr; gap: 10px; }
+
+      /* Tabella predicazioni: nascondi colonna riassunto */
+      .pred-table th:nth-child(3),
+      .pred-table td:nth-child(3) { display: none; }
+
+      /* Contatti: testo email più piccolo */
+      .contatto-valore { font-size: 0.88rem; word-break: break-all; }
+
+      /* Storia: badge anni in riga */
+      .section-header { flex-wrap: wrap; gap: 8px; }
+
+      /* Area privata: tabella attività */
+      .attivita-table th:nth-child(2),
+      .attivita-table td:nth-child(2) { display: none; }
+
+      /* Saldo: numero più piccolo */
+      .saldo-valore { font-size: 2.2rem; }
+
+      /* Spese: layout compatto */
+      .spesa-row { flex-wrap: wrap; gap: 6px; }
+
+      /* Menu mobile */
+      .mob-menu a { font-size: 1.6rem; }
+    }
+
+    /* Padding player fisso */
+    body { padding-bottom: 62px !important; }
+
+  </style>
+</head>
+
+<body>
+<div class="bg"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">chiesa evangelica Maranello</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chi-siamo.html">Chi Siamo</a>
+      <a href="cosa-crediamo.html">In Cosa Crediamo</a>
+      <a href="contatti.html">Contattaci</a>
+      <a href="area-privata.html" class="active">Area Privata</a>
+    </nav>
+    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- SCHERMATA LOGIN -->
+  <div id="schermata-login">
+    <div class="login-box">
+      <div class="lock">🔒</div>
+      <h2>Area Privata</h2>
+      <p class="sub">Accesso riservato ai membri della comunità</p>
+
+      <input  type="text"     id="username" class="campo" placeholder="Nome utente" autocomplete="username" />
+      <input  type="password" id="password" class="campo" placeholder="Password"   autocomplete="current-password" />
+      <button class="btn-login" onclick="login()">Accedi</button>
+      <p class="errore" id="msg-errore"></p>
+    </div>
+  </div>
+
+  <!-- SCHERMATA CONTENUTO (visibile dopo login) -->
+  <div id="schermata-contenuto">
+    <main>
+      <a href="index.html" class="back-link">← Home</a>
+
+      <div class="page-header">
+        <p class="label">🔓 Accesso effettuato</p>
+        <h1>Area Privata</h1>
+        <p class="sottotitolo">Benvenuto. Qui trovi i documenti e le comunicazioni riservate ai membri della comunità.</p>
+      </div>
+
+      <hr class="divider">
+
+      <!-- MACROGRUPPO 1: SITUAZIONE ECONOMICA -->
+      <div class="macrogruppo">
+        <div class="macrogruppo-header" onclick="toggleMacrogruppo(this)">
+          <span class="macrogruppo-icon">💰</span>
+          <h2>Situazione Economica</h2>
+          <span class="macrogruppo-toggle">▼</span>
+        </div>
+        <div class="macrogruppo-body">
+          <div class="saldo-box">
+            <div class="saldo-label">Saldo conto corrente</div>
+            <div class="saldo-valore" id="saldo-valore">—</div>
+            <div class="saldo-data" id="saldo-data"></div>
+            <div class="grafico-wrap">
+              <canvas id="grafico-saldo"></canvas>
+            </div>
+          </div>
+          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.10);margin:20px 0;">
+          <div style="font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.40);margin-bottom:14px;">Spese fisse</div>
+          <div id="spese-container"><p class="errore-caricamento">Caricamento...</p></div>
+        </div>
+      </div>
+
+      <!-- MACROGRUPPO 2: RIUNIONI -->
+      <div class="macrogruppo">
+        <div class="macrogruppo-header" onclick="toggleMacrogruppo(this)">
+          <span class="macrogruppo-icon">📋</span>
+          <h2>Decisioni Riunione di Chiesa</h2>
+          <span class="macrogruppo-toggle">▼</span>
+        </div>
+        <div class="macrogruppo-body">
+          <div id="riunioni-container"><p class="errore-caricamento">Caricamento...</p></div>
+        </div>
+      </div>
+
+      <!-- MACROGRUPPO 3: ATTIVITÀ -->
+      <div class="macrogruppo">
+        <div class="macrogruppo-header" onclick="toggleMacrogruppo(this)">
+          <span class="macrogruppo-icon">🎯</span>
+          <h2>Attività Promosse dall'Associazione</h2>
+          <span class="macrogruppo-toggle">▼</span>
+        </div>
+        <div class="macrogruppo-body">
+          <div id="attivita-container"><p class="errore-caricamento">Caricamento...</p></div>
+        </div>
+      </div>
+
+      <!-- MACROGRUPPO 4: CANTI -->
+      <div class="macrogruppo">
+        <div class="macrogruppo-header" onclick="toggleMacrogruppo(this)">
+          <span class="macrogruppo-icon">🎵</span>
+          <h2>Guida ai Canti</h2>
+          <span class="macrogruppo-toggle">▼</span>
+        </div>
+        <div class="macrogruppo-body">
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-bottom:16px;line-height:1.6;">
+            Clicca ▶ su un canto per ascoltarlo direttamente nel player in basso.
+            Aggiungi i file MP3 nella cartella del sito con il nome indicato.
+          </p>
+          <div id="canti-container">
+            <!-- Canti inseriti manualmente qui sotto -->
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="logout()">🔒 Esci dall'area privata</button>
+    </main>
+  </div>
+
+</div><!-- /.page -->
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob">
+  <a href="index.html"         onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="chi-siamo.html"     onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
+  <a href="cosa-crediamo.html" onclick="document.getElementById('mob').classList.remove('open')">In Cosa Crediamo</a>
+  <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+  <a href="area-privata.html"  onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
+</div>
+
+<script>
+  // ── CREDENZIALI ──────────────────────────────────────────────
+  // Le password sono cifrate con SHA-256 — non modificare il formato
+  const UTENTI = [
+    { username: "socio", passwordHash: "28d898220a66fb9ee698eaaf8128f848783115008ba1c857eb291c4389f326b2" }
+  ];
+  // ─────────────────────────────────────────────────────────────
+
+  // Controlla se già loggato (sessione attiva)
+  if (sessionStorage.getItem("loggedIn") === "true") {
+    mostraContenuto();
+  }
+
+  async function login() {
+    const u = document.getElementById("username").value.trim();
+    const p = document.getElementById("password").value;
+    const errore = document.getElementById("msg-errore");
+
+    // Calcola hash SHA-256 della password inserita
+    const encoder = new TextEncoder();
+    const data = encoder.encode(p);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    const trovato = UTENTI.find(x => x.username === u && x.passwordHash === hashHex);
+
+    if (trovato) {
+      sessionStorage.setItem("loggedIn", "true");
+      errore.textContent = "";
+      mostraContenuto();
+    } else {
+      errore.textContent = "Nome utente o password non corretti.";
+      document.getElementById("password").value = "";
+    }
+  }
+
+  // ── CANTI ────────────────────────────────────────────────────
+  // Per aggiungere un canto: { num: "2", titolo: "Vieni con noi", src: "canti/02.mp3" }
+  // Lascia src vuoto ("") se il file non è ancora disponibile.
+  const CANTI = [
+    { num: "2",   titolo: "Vieni con noi",                    src: "" },
+    { num: "3",   titolo: "Voi tutti giubilate",              src: "" },
+    { num: "4",   titolo: "Lodate tutti insieme",             src: "" },
+    { num: "5",   titolo: "Dai la mano",                      src: "" },
+    { num: "9",   titolo: "Grande tu sei",                    src: "" },
+    { num: "11",  titolo: "Cercate prima il regno di Dio",    src: "" },
+    { num: "12",  titolo: "Questo è il dì",                   src: "" },
+    { num: "14",  titolo: "Dalla nascita del sol",            src: "" },
+    { num: "15",  titolo: "Entrerò nelle sue porte",          src: "" },
+    { num: "23",  titolo: "Grazie Signore",                   src: "" },
+    { num: "24",  titolo: "Ti loderò Signor",                 src: "" },
+    { num: "26",  titolo: "Ti amo dell'amor del Signor",      src: "" },
+    { num: "27",  titolo: "Tu sei lodato",                    src: "" },
+    { num: "30",  titolo: "A Dio sia la gloria",              src: "" },
+    { num: "33",  titolo: "Siam riuniti tutti qui",           src: "" },
+    { num: "46",  titolo: "Gloria e potenza",                 src: "" },
+    { num: "47",  titolo: "Re dei re",                        src: "" },
+    { num: "51",  titolo: "Il suo nome è grande",             src: "" },
+    { num: "57",  titolo: "Padre ti adoro",                   src: "" },
+    { num: "59",  titolo: "Sii esaltato",                     src: "" },
+    { num: "64",  titolo: "È verso te che guardo",            src: "" },
+    { num: "67",  titolo: "Il vasellaio tu sei Signor",       src: "" },
+    { num: "68",  titolo: "Il tempio di Dio",                 src: "" },
+    { num: "69",  titolo: "O Gesù",                           src: "" },
+    { num: "70",  titolo: "Solo a te Signor",                 src: "" },
+    { num: "72",  titolo: "Gerico cadrà",                     src: "" },
+    { num: "75",  titolo: "Un nuovo comandamento",            src: "" },
+    { num: "87",  titolo: "Di gioia salterem",                src: "" },
+    { num: "94",  titolo: "Maestà",                           src: "" },
+    { num: "98",  titolo: "Benedite Dio",                     src: "" },
+    { num: "100", titolo: "Chi lassù nel ciel",               src: "" },
+    { num: "104", titolo: "Adoriamo il Signor",               src: "" },
+    { num: "110", titolo: "Gesù dolce musica",                src: "" },
+    { num: "114", titolo: "Gesù t'innalziamo",                src: "" },
+    { num: "116", titolo: "Dammi le ali della lode",          src: "" },
+    { num: "119", titolo: "Io posso ogni cosa",               src: "" },
+    { num: "120", titolo: "Quando su di me",                  src: "" },
+    { num: "121", titolo: "Grazie",                           src: "" },
+    { num: "122", titolo: "Redentor del mondo",               src: "" },
+    { num: "123", titolo: "Per quel sangue",                  src: "" },
+    { num: "124", titolo: "Lasciati andare",                  src: "" },
+    { num: "125", titolo: "Una nuova vita",                   src: "" },
+    { num: "126", titolo: "Non c'è niente di più bello",      src: "" },
+    { num: "128", titolo: "La famiglia di Dio è qua",         src: "" },
+    { num: "129", titolo: "Maranata",                         src: "" },
+    { num: "130", titolo: "Quale amico in Cristo abbiamo",    src: "" },
+    { num: "133", titolo: "Egli è esaltato",                  src: "" },
+    { num: "148", titolo: "Splendi Gesù",                     src: "" },
+    { num: "164", titolo: "Mi fai riposare",                  src: "" },
+    { num: "166", titolo: "Sei tu",                           src: "" },
+    { num: "172", titolo: "Come il cervo",                    src: "" },
+    { num: "173", titolo: "Loderò l'Eterno",                  src: "" },
+    { num: "174", titolo: "Il tuo nome innalzo o Dio",        src: "" },
+    { num: "175", titolo: "Re servitore",                     src: "" },
+    { num: "176", titolo: "Narrano i ciel",                   src: "" },
+    { num: "177", titolo: "Come le aquile",                   src: "" },
+    { num: "178", titolo: "Per adorarti",                     src: "" },
+    { num: "179", titolo: "Tu sei la mia vita",               src: "" },
+    { num: "181", titolo: "Tu sei re",                        src: "" },
+    { num: "182", titolo: "Tu hai dipinto i cieli",           src: "" },
+    { num: "184", titolo: "Dio è buono",                      src: "" },
+    { num: "186", titolo: "La tua destra",                    src: "" },
+    { num: "187", titolo: "A te",                             src: "" },
+    { num: "189", titolo: "Gesù ha preso la vita mia",        src: "" },
+    { num: "190", titolo: "Alleluia tutto nuovo fa il Signor", src: "" },
+    { num: "191", titolo: "Nessuno è come te",                src: "" },
+    { num: "192", titolo: "Sei tu la mia vita",               src: "" },
+    { num: "193", titolo: "Sono qui",                         src: "" },
+    { num: "194", titolo: "Splendi su di noi",                src: "" },
+    { num: "196", titolo: "Sarò con te",                      src: "" },
+    { num: "197", titolo: "Cammino con lui",                  src: "" },
+    { num: "198", titolo: "Ti amo Gesù",                      src: "" },
+    { num: "199", titolo: "Non temere",                       src: "" },
+    { num: "200", titolo: "Signor Gesù, la chiesa",           src: "" },
+    { num: "201", titolo: "Sei tu, Cristo, pan di vita",      src: "" },
+    { num: "202", titolo: "Quanto è dolce, quanto è buono",   src: "" },
+    { num: "203", titolo: "Gesù volge a noi la voce",         src: "" },
+    { num: "204", titolo: "L'amor del Padre io veggo",        src: "" },
+    { num: "205", titolo: "Il Signor ci chiamerà con sé",     src: "" },
+    { num: "206", titolo: "Bisogno ho di te sempre",          src: "" },
+    { num: "207", titolo: "Chi più di Cristo potrebbe amarmi", src: "" },
+    { num: "208", titolo: "Eleviam col cuor",                  src: "" },
+    { num: "209", titolo: "Lottiam, lottiam col Cristo",       src: "" },
+    { num: "210", titolo: "Tieni in tua man",                  src: "" },
+    { num: "211", titolo: "Infuria, Signor, la procella",      src: "" },
+    { num: "212", titolo: "Fammi brillare, Signor",            src: "" },
+    { num: "213", titolo: "I cieli raccontano la gloria",      src: "" }
+  ];
+
+  let cantoCorrente = null;
+
+  function renderCanti() {
+    const c = document.getElementById('canti-container');
+    if (!c) return;
+    c.innerHTML = CANTI.map((canto, i) => `
+      <div class="canto-row" id="canto-row-${i}">
+        <span class="canto-num">${canto.num}</span>
+        <span class="canto-titolo">${canto.titolo}</span>
+        ${canto.src
+          ? `<button class="canto-play" id="canto-btn-${i}"
+               onclick="suonaCanto(${i})" title="Ascolta">▶</button>`
+          : `<span class="canto-no-file">MP3 non disponibile</span>`
+        }
+      </div>`).join('');
+  }
+
+  function suonaCanto(i) {
+    const canto = CANTI[i];
+    if (!canto.src) return;
+
+    // Aggiorna icone
+    if (cantoCorrente !== null) {
+      const prevBtn = document.getElementById(`canto-btn-${cantoCorrente}`);
+      if (prevBtn) prevBtn.textContent = '▶', prevBtn.classList.remove('playing');
+    }
+
+    const btn = document.getElementById(`canto-btn-${i}`);
+
+    // Se stesso canto → toggle play/pausa
+    if (cantoCorrente === i && window._player) {
+      window._player.toggle();
+      btn.textContent = btn.classList.contains('playing') ? '▶' : '⏸';
+      btn.classList.toggle('playing');
+      return;
+    }
+
+    cantoCorrente = i;
+    if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
+
+    // Carica e avvia nel player
+    if (window._player) {
+      window._player.playUrl(canto.src, `${canto.num}. ${canto.titolo}`, 'Canzoniere', '');
+    }
+  }
+
+  // Render canti all'apertura del macrogruppo
+  document.addEventListener('DOMContentLoaded', renderCanti);
+
+  function toggleMacrogruppo(header) {
+    const body   = header.nextElementSibling;
+    const toggle = header.querySelector(".macrogruppo-toggle");
+    body.classList.toggle("aperto");
+    toggle.classList.toggle("aperto");
+  }
+
+  async function caricaDati() {
+    try {
+      const res  = await fetch("dati.json?t=" + Date.now());
+      const dati = await res.json();
+      renderSaldo(dati);
+      renderSpese(dati.spese_fisse);
+      renderRiunioni(dati.riunioni);
+      renderAttivita(dati.attivita);
+    } catch(e) {
+      document.getElementById("spese-container").innerHTML =
+        '<p class="errore-caricamento">Impossibile caricare dati.json</p>';
+      document.getElementById("riunioni-container").innerHTML =
+        '<p class="errore-caricamento">Impossibile caricare dati.json</p>';
+      document.getElementById("attivita-container").innerHTML =
+        '<p class="errore-caricamento">Impossibile caricare dati.json</p>';
+    }
+  }
+
+  function renderSaldo(dati) {
+    document.getElementById("saldo-valore").textContent =
+      "€ " + parseFloat(dati.saldo).toLocaleString("it-IT", {minimumFractionDigits: 2});
+    document.getElementById("saldo-data").textContent =
+      dati.aggiornato_il ? "Aggiornato il " + formatData(dati.aggiornato_il) : "";
+
+    // Grafico storico saldo
+    const storico = dati.storico_saldo || [];
+    if (storico.length < 2) {
+      // con un solo punto non ha senso il grafico
+      document.querySelector(".grafico-wrap").style.display = "none";
+      return;
+    }
+    const labels  = storico.map(s => formatDataBreve(s.data));
+    const valori  = storico.map(s => s.saldo);
+    const ctx     = document.getElementById("grafico-saldo").getContext("2d");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          data: valori,
+          borderColor: "rgba(255,255,255,0.70)",
+          backgroundColor: "rgba(255,255,255,0.06)",
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(255,255,255,0.90)",
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: {
+            label: ctx => "€ " + parseFloat(ctx.parsed.y).toLocaleString("it-IT", {minimumFractionDigits: 2})
+          }
+        }},
+        scales: {
+          x: { ticks: { color: "rgba(255,255,255,0.40)", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.06)" } },
+          y: { ticks: { color: "rgba(255,255,255,0.40)", font: { size: 10 },
+                        callback: v => "€ " + v.toLocaleString("it-IT") },
+               grid: { color: "rgba(255,255,255,0.06)" } }
+        }
+      }
+    });
+  }
+
+  function formatDataBreve(iso) {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-");
+    return `${parseInt(d)}/${parseInt(m)}/${y.slice(2)}`;
+  }
+
+  function renderSpese(spese) {
+    if (!spese || spese.length === 0) {
+      document.getElementById("spese-container").innerHTML =
+        '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;">Nessuna spesa inserita.</p>';
+      return;
+    }
+    const oggi = new Date();
+    let html = "";
+    spese.forEach(s => {
+      const badge = badgeScadenza(s.scadenza, oggi);
+      html += `
+        <div class="spesa-row">
+          <div>
+            <div class="spesa-nome">${s.nome}</div>
+            ${s.note ? `<div class="spesa-note">${s.note}</div>` : ""}
+            <div>${badge}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div class="spesa-importo">€ ${parseFloat(s.importo).toFixed(2)}</div>
+            <div class="spesa-scadenza">${labelScadenza(s.scadenza)}</div>
+          </div>
+        </div>`;
+    });
+    document.getElementById("spese-container").innerHTML = html;
+  }
+
+  function badgeScadenza(scadenza, oggi) {
+    if (scadenza && scadenza.startsWith("mensile")) {
+      return '<span class="badge-scadenza badge-mensile">Mensile</span>';
+    }
+    if (scadenza && scadenza.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const diff = (new Date(scadenza) - oggi) / (1000*60*60*24);
+      if (diff < 90) return '<span class="badge-scadenza badge-presto">In scadenza</span>';
+    }
+    return '<span class="badge-scadenza badge-ok">Automatico</span>';
+  }
+
+  function labelScadenza(scadenza) {
+    if (!scadenza) return "";
+    if (scadenza.startsWith("mensile-")) {
+      return "Ogni " + scadenza.split("-")[1] + " del mese";
+    }
+    if (scadenza.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return "Scade il " + formatData(scadenza);
+    }
+    return scadenza;
+  }
+
+  function renderRiunioni(riunioni) {
+    if (!riunioni || riunioni.length === 0) {
+      document.getElementById("riunioni-container").innerHTML =
+        '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;">Nessuna riunione inserita.</p>';
+      return;
+    }
+    let html = "";
+    riunioni.forEach(r => {
+      html += `
+        <div class="riunione">
+          <div class="riunione-data">${formatData(r.data)}</div>
+          <div class="riunione-titolo">${r.titolo}</div>
+          ${r.testo
+            ? `<div class="riunione-testo">${r.testo}</div>`
+            : `<div class="riunione-vuoto">Verbale non ancora inserito.</div>`}
+        </div>`;
+    });
+    document.getElementById("riunioni-container").innerHTML = html;
+  }
+
+  function renderAttivita(attivita) {
+    if (!attivita || attivita.length === 0) {
+      document.getElementById("attivita-container").innerHTML =
+        '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;">Nessuna attività inserita.</p>';
+      return;
+    }
+    const labelStato = {
+      completata: "Completata",
+      in_corso:   "In corso",
+      in_attesa:  "In attesa",
+      annullata:  "Annullata"
+    };
+    let html = `
+      <table class="attivita-table">
+        <thead>
+          <tr>
+            <th>Attività</th>
+            <th>Responsabile</th>
+            <th>Stato</th>
+          </tr>
+        </thead>
+        <tbody>`;
+    attivita.forEach(a => {
+      const stato = a.stato || "in_attesa";
+      html += `
+        <tr>
+          <td>
+            <div class="attivita-nome">${a.nome}</div>
+            ${a.descrizione ? `<div class="attivita-desc">${a.descrizione}</div>` : ""}
+          </td>
+          <td>${a.responsabile || "—"}</td>
+          <td><span class="badge-stato stato-${stato}">${labelStato[stato] || stato}</span></td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById("attivita-container").innerHTML = html;
+  }
+
+  function formatData(iso) {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-");
+    const mesi = ["","gennaio","febbraio","marzo","aprile","maggio","giugno",
+                  "luglio","agosto","settembre","ottobre","novembre","dicembre"];
+    return `${parseInt(d)} ${mesi[parseInt(m)]} ${y}`;
+  }
+
+  function mostraContenuto() {
+    document.getElementById("schermata-login").style.display    = "none";
+    document.getElementById("schermata-contenuto").style.display = "flex";
+    caricaDati();
+  }
+
+  function logout() {
+    sessionStorage.removeItem("loggedIn");
+    document.getElementById("schermata-login").style.display    = "flex";
+    document.getElementById("schermata-contenuto").style.display = "none";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+  }
+
+  // Login anche premendo Invio
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && document.getElementById("schermata-login").style.display !== "none") {
+      login();
+    }
+  });
+</script>
+
+<!-- MUSIC PLAYER -->
+<script>
+/**
+ * player.js — Music player condiviso tra tutte le pagine
+ * Persistenza tramite localStorage: posizione e stato sopravvivono alla navigazione
+ *
+ * ── COME AGGIUNGERE BRANI ────────────────────────────────────────
+ * Aggiungi un oggetto nell'array PLAYLIST qui sotto:
+ *   { src: "nomefile.mp3", title: "Titolo", artist: "Artista", cover: "copertina.jpg" }
+ * Metti l'mp3 (e la copertina se ce l'ha) nella stessa cartella del sito.
+ * ────────────────────────────────────────────────────────────────
+ */
+
+const PLAYLIST = [
+  {
+    src:    "gioia_nel_tuo_nome.mp3",
+    title:  "Gioia nel Tuo Nome",
+    artist: "Chiesa Evangelica Maranello",
+    cover:  "cover_gioia.jpg"
+  }
+  // Aggiungi altri brani qui sotto:
+  // { src: "brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
+];
+
+/* ── SHUFFLE Fisher-Yates ── */
+function shuffle(arr) {
+  const a = [...arr.keys()]; // array di indici [0,1,2,...]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ── STORAGE HELPERS ── */
+const SK = 'cem_player'; // storage key
+
+function loadState() {
+  try { return JSON.parse(sessionStorage.getItem(SK)) || {}; } catch { return {}; }
+}
+function saveState(s) {
+  try { sessionStorage.setItem(SK, JSON.stringify(s)); } catch {}
+}
+
+/* ── BUILD PLAYER HTML ── */
+function buildPlayer() {
+  const el = document.createElement('div');
+  el.id = 'cemPlayer';
+  el.innerHTML = `
+    <audio id="cemAudio" preload="none"></audio>
+
+    <div class="cpl-info">
+      <img class="cpl-cover" id="cplCover" src="" alt="cover" onerror="this.style.display='none'">
+      <div class="cpl-meta">
+        <div class="cpl-title" id="cplTitle">—</div>
+        <div class="cpl-artist" id="cplArtist">Chiesa Evangelica Maranello</div>
+      </div>
+    </div>
+
+    <div class="cpl-controls">
+      <button class="cpl-btn" onclick="window._player.prev()" title="Precedente">⏮</button>
+      <button class="cpl-btn cpl-play" id="cplPlayBtn" onclick="window._player.toggle()" title="Play/Pausa">▶</button>
+      <button class="cpl-btn" onclick="window._player.next()" title="Successivo">⏭</button>
+    </div>
+
+    <div class="cpl-right">
+      <div class="cpl-prog-row">
+        <span class="cpl-time" id="cplCur">0:00</span>
+        <input type="range" class="cpl-bar" id="cplBar" value="0" min="0" max="100" step="0.1"
+          oninput="window._player.seek(this.value)">
+        <span class="cpl-time" id="cplDur">0:00</span>
+      </div>
+      <div class="cpl-vol-row">
+        🔊<input type="range" class="cpl-vol" id="cplVol" value="80" min="0" max="100"
+          oninput="window._player.setVol(this.value)">
+      </div>
+    </div>
+
+    <button class="cpl-close" onclick="window._player.close()" title="Chiudi">✕</button>
+  `;
+  document.body.appendChild(el);
+
+  // Pulsante riapertura
+  const btn = document.createElement('button');
+  btn.id = 'cplReopen';
+  btn.title = 'Musica';
+  btn.textContent = '🎵';
+  btn.onclick = () => window._player.reopen();
+  document.body.appendChild(btn);
+}
+
+/* ── INJECT CSS ── */
+function injectCSS() {
+  const s = document.createElement('style');
+  s.textContent = `
+    #cemPlayer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(8,5,2,0.93); backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 18px; color: #fff;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+    #cemPlayer.visible { transform: translateY(0); }
+
+    .cpl-cover {
+      width: 40px; height: 40px; border-radius: 6px; object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+    }
+    .cpl-info  { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .cpl-meta  { min-width: 0; }
+    .cpl-title  { font-size: 0.87rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cpl-artist { font-size: 0.71rem; color: rgba(255,255,255,0.42); margin-top: 1px; white-space: nowrap; }
+
+    .cpl-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .cpl-btn {
+      background: none; border: none; color: #fff; cursor: pointer;
+      font-size: 0.95rem; padding: 5px; opacity: 0.65; transition: opacity 0.2s; line-height: 1;
+    }
+    .cpl-btn:hover { opacity: 1; }
+    .cpl-play {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.28);
+      opacity: 1; font-size: 0.9rem;
+    }
+    .cpl-play:hover { background: rgba(255,255,255,0.22); }
+
+    .cpl-right { flex: 2; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .cpl-prog-row, .cpl-vol-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.68rem; color: rgba(255,255,255,0.40);
+    }
+    .cpl-bar { flex: 1; height: 3px; accent-color: rgba(255,255,255,0.75); cursor: pointer; }
+    .cpl-vol { width: 68px; height: 3px; accent-color: rgba(255,255,255,0.55); cursor: pointer; }
+    .cpl-time { white-space: nowrap; flex-shrink: 0; }
+
+    .cpl-close {
+      background: none; border: none; color: rgba(255,255,255,0.30);
+      cursor: pointer; font-size: 0.82rem; padding: 4px 6px; flex-shrink: 0;
+      transition: color 0.2s;
+    }
+    .cpl-close:hover { color: #fff; }
+
+    #cplReopen {
+      position: fixed; bottom: 14px; right: 14px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(8,5,2,0.90); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: #fff; font-size: 1.1rem; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #cplReopen:hover { background: rgba(30,18,5,0.95); }
+    #cplReopen.visible { display: flex; }
+
+    /* Padding pagina per non coprire contenuto */
+    body { padding-bottom: 68px !important; }
+
+    @media (max-width: 600px) {
+      .cpl-right  { display: none; }
+      .cpl-artist { display: none; }
+      #cemPlayer  { padding: 8px 12px; gap: 10px; }
+      body        { padding-bottom: 60px !important; }
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ── PLAYER CONTROLLER ── */
+function initPlayer() {
+  buildPlayer();
+  injectCSS();
+
+  const audio    = document.getElementById('cemAudio');
+  const playBtn  = document.getElementById('cplPlayBtn');
+  const cover    = document.getElementById('cplCover');
+  const titleEl  = document.getElementById('cplTitle');
+  const artistEl = document.getElementById('cplArtist');
+  const bar      = document.getElementById('cplBar');
+  const cur      = document.getElementById('cplCur');
+  const dur      = document.getElementById('cplDur');
+  const volEl    = document.getElementById('cplVol');
+  const player   = document.getElementById('cemPlayer');
+  const reopen   = document.getElementById('cplReopen');
+
+  // Genera ordine shuffled e recupera stato salvato
+  let order    = shuffle(PLAYLIST);
+  let posInOrder = 0;    // posizione nell'array shuffled
+  let isPlaying  = false;
+  let isClosed   = false;
+
+  const st = loadState();
+
+  // Ripristina volume
+  const savedVol = st.volume !== undefined ? st.volume : 80;
+  audio.volume = savedVol / 100;
+  volEl.value  = savedVol;
+
+  function fmt(s) {
+    if (!s || isNaN(s)) return '0:00';
+    return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+  }
+
+  function loadTrack(idx, resume) {
+    const t = PLAYLIST[idx];
+    audio.src = t.src;
+    titleEl.textContent  = t.title;
+    artistEl.textContent = t.artist || 'Chiesa Evangelica Maranello';
+    if (t.cover) { cover.src = t.cover; cover.style.display = 'block'; }
+    else cover.style.display = 'none';
+    bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+
+    if (resume && resume > 0) {
+      audio.addEventListener('loadedmetadata', () => {
+        audio.currentTime = resume;
+      }, { once: true });
+    }
+    saveState({ trackIndex: idx, time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: isPlaying });
+  }
+
+  function play() {
+    audio.play().then(() => {
+      isPlaying = true;
+      playBtn.textContent = '⏸';
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: true });
+    }).catch(() => {});
+  }
+
+  function pause() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = '▶';
+    saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: false });
+  }
+
+  // Salva stato PRIMA di lasciare la pagina (fondamentale per la continuità)
+  window.addEventListener('beforeunload', () => {
+    saveState({
+      trackIndex: order[posInOrder],
+      time:       audio.currentTime,
+      volume:     parseInt(volEl.value),
+      closed:     isClosed,
+      playing:    isPlaying
+    });
+  });
+
+  // Ripristina traccia salvata
+  let startIndex   = 0;
+  let startTime    = 0;
+  let startPlaying = false;
+  if (st.trackIndex !== undefined) {
+    startIndex   = st.trackIndex;
+    startTime    = st.time || 0;
+    startPlaying = st.playing || false;
+    const pos = order.indexOf(startIndex);
+    if (pos !== -1) posInOrder = pos;
+    else { order[0] = startIndex; posInOrder = 0; }
+  }
+
+  isClosed = st.closed || false;
+  loadTrack(order[posInOrder], startTime);
+
+  // Mostra player dopo 200ms e ripristina stato play/pausa
+  setTimeout(() => {
+    if (!isClosed) player.classList.add('visible');
+    else reopen.classList.add('visible');
+
+    // Se era in play nella pagina precedente, riprendi
+    if (startPlaying && !isClosed) {
+      play();
+    }
+  }, 200);
+
+  /* ── API pubblica ── */
+  window._player = {
+    toggle() {
+      if (!isPlaying) play(); else pause();
+    },
+    prev() {
+      posInOrder = (posInOrder - 1 + order.length) % order.length;
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    next() {
+      posInOrder = (posInOrder + 1) % order.length;
+      // se abbiamo percorso tutto l'array, rimescola di nuovo
+      if (posInOrder === 0) order = shuffle(PLAYLIST);
+      loadTrack(order[posInOrder], 0);
+      if (isPlaying) play();
+    },
+    seek(v) {
+      if (audio.duration) audio.currentTime = (v / 100) * audio.duration;
+    },
+    setVol(v) {
+      audio.volume = v / 100;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(v), closed: isClosed });
+    },
+    close() {
+      player.classList.remove('visible');
+      pause();
+      isClosed = true;
+      reopen.classList.add('visible');
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: true });
+    },
+    reopen() {
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
+    },
+    // Carica e suona un brano esterno alla playlist (es. canti del culto)
+    playUrl(src, title, artist, coverSrc) {
+      audio.src = src;
+      titleEl.textContent  = title  || src;
+      artistEl.textContent = artist || '';
+      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
+      else cover.style.display = 'none';
+      bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
+      player.classList.add('visible');
+      reopen.classList.remove('visible');
+      isClosed = false;
+      play();
+    }
+  };
+
+  /* ── EVENTI AUDIO ── */
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      bar.value = (audio.currentTime / audio.duration) * 100;
+      cur.textContent = fmt(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    dur.textContent = fmt(audio.duration);
+  });
+
+  audio.addEventListener('ended', () => {
+    window._player.next();
+  });
+
+  // Salva posizione ogni 5 secondi
+  setInterval(() => {
+    if (isPlaying) {
+      saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed });
+    }
+  }, 5000);
+}
+
+// Avvia quando il DOM è pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPlayer);
+} else {
+  initPlayer();
+}
+
+</script>
+
+</body>
+</html>

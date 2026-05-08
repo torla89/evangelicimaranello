@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chiesa Evangelica Maranello</title>
+
+  <style>
+    /* ------------------------------
+       BASE — pagina = esattamente 100vh, niente scroll
+    ------------------------------ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+    }
+
+    /* ------------------------------
+       SFONDO — copre tutto, fisso
+    ------------------------------ */
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      z-index: 0;
+      /* aumenta luminosità e saturazione dell'immagine */
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+
+    /* Overlay minimo: solo un velo in cima per leggere la navbar,
+       e un velo in fondo per le card — il centro è quasi puro */
+    .bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.22) 0%,
+        rgba(0,0,0,0.00) 18%,
+        rgba(0,0,0,0.00) 62%,
+        rgba(0,0,0,0.32) 100%
+      );
+    }
+
+    /* ------------------------------
+       WRAPPER — flex column, tutta la viewport
+    ------------------------------ */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ------------------------------
+       HEADER
+    ------------------------------ */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 52px;
+      height: 62px;
+      flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.05em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .logo::before {
+      content: "✝";
+      margin-right: 9px;
+      font-size: 1.2em;
+      font-weight: 300;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97em;
+      font-weight: 500;
+      opacity: 0.92;
+      transition: opacity 0.2s;
+    }
+    nav a.active {
+      border-bottom: 1.5px solid #fff;
+      padding-bottom: 2px;
+    }
+    nav a:hover { opacity: 1; }
+
+    .nav-search {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 0;
+      opacity: 0.88;
+      line-height: 1;
+      font-size: 1.05em;
+    }
+
+    /* hamburger mobile */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    /* ------------------------------
+       HERO — occupa tutto lo spazio tra header e cards
+    ------------------------------ */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20px 60px; /* spinge il testo un po' verso l'alto, lasciando spazio visivo prima delle card */
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 3.8vw, 3.2rem);
+      font-weight: 700;
+      color: rgba(0,0,0,0.88);
+      margin-bottom: 22px;
+      text-shadow: none;
+      line-height: 1.15;
+    }
+
+    .hero-location {
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.75);
+      margin-bottom: 10px;
+      text-shadow: none;
+    }
+
+    /* Blocco citazioni — niente sfondo, testo nero */
+    .hero-quotes {
+      padding: 0;
+      margin-bottom: 32px;
+      max-width: 560px;
+      text-align: center;
+      background: none;
+      border: none;
+      backdrop-filter: none;
+    }
+
+    .hero-quotes .quote {
+      font-style: italic;
+      font-size: clamp(0.92rem, 1.4vw, 1.08rem);
+      color: rgba(0,0,0,0.88);
+      text-shadow: none;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+    .hero-quotes .quote:last-of-type { margin-bottom: 12px; }
+
+    .hero-quotes .refs {
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      color: rgba(0,0,0,0.60);
+      text-transform: uppercase;
+      font-style: normal;
+      margin-bottom: 0;
+    }
+
+    /* Bottoni — trasparenti, bordo bianco, come nel target */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .buttons a {
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 38px;
+      background-color: rgba(0,0,0,0.22);
+      font-weight: 600;
+      font-size: 1.0em;
+      letter-spacing: 0.05em;
+      backdrop-filter: blur(2px);
+      border-radius: 10px;
+      transition: background-color 0.25s, border-color 0.25s;
+      white-space: nowrap;
+    }
+    .buttons a:hover {
+      background-color: rgba(0,0,0,0.38);
+      border-color: rgba(255,255,255,0.55);
+    }
+
+    .sections {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      padding: 0 20px 16px;
+      flex-shrink: 0;
+    }
+
+    .section {
+      padding: 18px 20px;
+      text-align: center;
+      background-color: rgba(0,0,0,0.22);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 10px;
+      transition: background-color 0.25s, border-color 0.25s;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .section:hover { background-color: rgba(0,0,0,0.38); border-color: rgba(255,255,255,0.55); }
+
+    .section h3 {
+      font-size: 1.05em;
+      font-weight: 700;
+      margin-bottom: 7px;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+
+    .section p {
+      font-size: 0.84em;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.82);
+      margin-bottom: 14px;
+    }
+
+    /* Icone SVG bianche */
+    .section svg {
+      width: 42px;
+      height: 42px;
+      fill: rgba(255,255,255,0.80);
+      margin-top: auto;
+    }
+
+    /* ------------------------------
+       MOBILE
+    ------------------------------ */
+    @media (max-width: 680px) {
+      /* fix sfondo su iOS Safari: background-attachment: fixed non funziona */
+      .bg {
+        position: absolute;
+        background-attachment: scroll;
+      }
+
+      html, body { overflow: auto; }
+      .page { height: auto; min-height: 100vh; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .hamburger { display: flex; }
+
+      /* titolo più piccolo */
+      .hero { padding: 0 16px 24px; }
+      .hero h1 { font-size: 1.7rem; }
+
+      /* citazioni: testo bianco su mobile perché lo sfondo potrebbe essere scuro */
+      .hero-location { color: rgba(255,255,255,0.80); }
+      .hero-quotes .quote { color: rgba(255,255,255,0.95); }
+      .hero-quotes .refs { color: rgba(255,255,255,0.60); }
+      .hero h1 { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
+
+      /* bottoni in colonna su schermi stretti */
+      .buttons { flex-direction: column; align-items: center; gap: 10px; }
+      .buttons a { width: 220px; text-align: center; }
+
+      /* card in colonna */
+      .sections { grid-template-columns: 1fr; gap: 8px; padding: 8px; }
+      .section svg { width: 34px; height: 34px; }
+    }
+
+    /* mobile menu overlay */
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.4rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+  </style>
+</head>
+
+<body>
+
+<div class="bg"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">chiesa evangelica Maranello</div>
+    <nav>
+      <a href="index.html" class="active">Home</a>
+      <a href="contatti.html">Contattaci</a>
+      <a href="area-privata.html">Area Privata</a>
+      <a href="cerca.html">Cerca nel sito</a>
+    </nav>
+    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-location">Maranello</div>
+    <h1>Una comunità, fondata sulla Parola</h1>
+    <div class="hero-quotes">
+      <p class="quote">"Su questa roccia edificherò la mia chiesa."</p>
+      <p class="quote">"Quella roccia era Cristo."</p>
+      <p class="quote">"Nessuno può porre altro fondamento da quello già posto, che è Gesù Cristo."</p>
+      <p class="refs">Matteo 16:18 &nbsp;·&nbsp; 1 Corinzi 10:4 &nbsp;·&nbsp; 1 Corinzi 3:11</p>
+    </div>
+    <div class="buttons">
+      <a href="chi-siamo.html">Chi Siamo</a>
+      <a href="cosa-crediamo.html">In Cosa Crediamo</a>
+    </div>
+  </section>
+
+  <!-- CARD SECTION — incollata in fondo -->
+  <div class="sections">
+
+    <a href="culto.html" class="section">
+      <h3>Il Nostro Culto</h3>
+      <p>Orari e informazioni sulle nostre celebrazioni</p>
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="29" y="1"  width="6"  height="13" rx="1"/>
+        <rect x="24" y="5"  width="16" height="3"  rx="1"/>
+        <polygon points="6,31 32,13 58,31 58,33 6,33"/>
+        <rect x="10" y="33" width="44" height="27" rx="1"/>
+        <rect x="27" y="39" width="10" height="21" rx="1"/>
+        <rect x="14" y="36" width="11" height="10" rx="1"/>
+        <rect x="39" y="36" width="11" height="10" rx="1"/>
+      </svg>
+    </a>
+
+    <a href="comunita.html" class="section">
+      <h3>Attività e Progetti della Comunità</h3>
+      <p>Le iniziative e i servizi dedicati alla nostra missione</p>
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 18 c-2-6-10-6-10 0 0 5 10 12 10 12 s10-7 10-12 c0-6-8-6-10 0z"/>
+        <path d="M42 18 c-2-6-10-6-10 0 0 5 10 12 10 12 s10-7 10-12 c0-6-8-6-10 0z"/>
+        <path d="M8 46 q6-10 16-10 l16 0 q10 0 16 10" fill="none" stroke="rgba(255,255,255,0.82)" stroke-width="3.5" stroke-linecap="round"/>
+        <rect x="8" y="46" width="48" height="10" rx="2" fill="rgba(255,255,255,0.18)"/>
+      </svg>
+    </a>
+
+    <a href="risorse.html" class="section">
+      <h3>Risorse e Link Utili</h3>
+      <p>Approfondimenti e materiali a tua disposizione</p>
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4"  y="16" width="9"  height="32" rx="2"/>
+        <rect x="15" y="20" width="9"  height="28" rx="2"/>
+        <rect x="26" y="24" width="9"  height="24" rx="2"/>
+        <rect x="37" y="12" width="23" height="22" rx="2"/>
+        <rect x="44" y="34" width="9"  height="4"  rx="1"/>
+        <rect x="40" y="38" width="17" height="2"  rx="1"/>
+      </svg>
+    </a>
+
+  </div>
+
+</div><!-- /.page -->
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mob">
+  <a href="index.html"        onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="contatti.html"     onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+  <a href="area-privata.html" onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
+  <a href="cerca.html"        onclick="document.getElementById('mob').classList.remove('open')">Cerca nel sito</a>
+</div>
+
+</body>
+</html>
