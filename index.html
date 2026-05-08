@@ -266,8 +266,13 @@
     ============================== */
     @media (max-width: 680px) {
 
-      /* Sfondo: fix iOS Safari */
-      .bg { position: absolute; background-attachment: scroll; }
+      /* Sfondo: fix iOS Safari + copertura completa */
+      .bg {
+        position: fixed;
+        background-attachment: scroll;
+        min-height: 100%;
+      }
+      html, body { background: #1a0e04; overflow: auto; }
 
       /* Layout: scroll libero, hero occupa almeno lo schermo */
       html, body { overflow: auto; }
