@@ -89,7 +89,7 @@
       "nome": "Podcast Ellero",
       "descrizione": "Miglioramento della qualità dei podcast di Ellero Balzani, divisione in segmenti da 15 minuti e pubblicazione su Spotify e sull'app/sito.",
       "responsabile": "Enrico (aiuto Daniele)",
-      "stato": "in_corso"
+      "stato": "completata"
     },
     {
       "nome": "Pagina social OgniTipoDiInsegnamento",
@@ -101,13 +101,13 @@
       "nome": "Pagina social Evangelici Maranello",
       "descrizione": "Creazione di una pagina Facebook per promuovere le attività della chiesa di Maranello.",
       "responsabile": "Marica",
-      "stato": "in_corso"
+      "stato": "completata"
     },
     {
       "nome": "Sito web evangelicimaranello.it",
       "descrizione": "Creazione del sito web ufficiale della chiesa evangelica di Maranello.",
       "responsabile": "Daniele",
-      "stato": "in_corso"
+      "stato": "completata"
     },
     {
       "nome": "Creazione musica cristiana",
