@@ -1059,9 +1059,10 @@
     const oggi = new Date();
     let html = "";
     spese.forEach(s => {
-      const badge = badgeScadenza(s.scadenza, oggi);
+      const badge = badgeScadenza(s.scadenza, oggi, s.tipo_rinnovo);
+      const disattivata = s.tipo_rinnovo === 'disattivato';
       html += `
-        <div class="spesa-row">
+        <div class="spesa-row" style="${disattivata ? 'opacity:0.5;' : ''}">
           <div>
             <div class="spesa-nome">${s.nome}</div>
             ${s.note ? `<div class="spesa-note">${s.note}</div>` : ""}
@@ -1076,7 +1077,10 @@
     document.getElementById("spese-container").innerHTML = html;
   }
 
-  function badgeScadenza(scadenza, oggi) {
+  function badgeScadenza(scadenza, oggi, tipo_rinnovo) {
+    if (tipo_rinnovo === 'disattivato') {
+      return '<span class="badge-scadenza" style="background:rgba(223,106,106,0.15);border:1px solid rgba(223,106,106,0.35);color:#df6a6a;">Disattivato</span>';
+    }
     if (scadenza && scadenza.startsWith("mensile")) {
       return '<span class="badge-scadenza badge-mensile">Mensile</span>';
     }
