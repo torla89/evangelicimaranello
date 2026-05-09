@@ -701,12 +701,7 @@
     const p = document.getElementById("password").value;
     const errore = document.getElementById("msg-errore");
 
-    // Calcola hash SHA-256 della password inserita
-    const encoder = new TextEncoder();
-    const data = encoder.encode(p);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    const hashHex = sha256(p);
 
     const trovato = UTENTI.find(x => x.username === u && x.passwordHash === hashHex);
 
@@ -720,97 +715,200 @@
     }
   }
 
+  // SHA-256 in puro JavaScript (funziona anche su http://)
+  function sha256(str) {
+    function rightRotate(value, amount) {
+      return (value >>> amount) | (value << (32 - amount));
+    }
+    const mathPow = Math.pow;
+    const maxWord = mathPow(2, 32);
+    let result = '';
+    const words = [];
+    const asciiBitLength = str.length * 8;
+    let hash = [], k = [];
+    let primeCounter = 0;
+    const isComposite = {};
+    for (let candidate = 2; primeCounter < 64; candidate++) {
+      if (!isComposite[candidate]) {
+        for (let i = candidate * candidate; i < 313; i += candidate) isComposite[i] = true;
+        hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+        k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+      }
+    }
+    str += '\x80';
+    while (str.length % 64 - 56) str += '\x00';
+    for (let i = 0; i < str.length; i++) {
+      const j = str.charCodeAt(i);
+      if (j >> 8) return '';
+      words[i >> 2] |= j << ((3 - i) % 4) * 8;
+    }
+    words[words.length] = ((asciiBitLength / maxWord) | 0);
+    words[words.length] = (asciiBitLength | 0);
+    for (let j = 0; j < words.length;) {
+      const w = words.slice(j, j += 16);
+      const oldHash = [...hash];
+      for (let i = 0; i < 64; i++) {
+        const i2 = i + j - 16;
+        const w15 = w[i - 15], w2 = w[i - 2];
+        const a = hash[0], e = hash[4];
+        const temp1 = hash[7]
+          + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+          + ((e & hash[5]) ^ (~e & hash[6]))
+          + k[i]
+          + (w[i] = (i < 16) ? w[i] : (
+              w[i - 16]
+              + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+              + w[i - 7]
+              + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+            ) | 0);
+        const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+          + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [temp1 + temp2 | 0, a, hash[1], hash[2], e + temp1 | 0, hash[3], hash[4], hash[5]];
+      }
+      for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+    for (let i = 0; i < 8; i++) {
+      for (let j = 3; j >= 0; j--) {
+        result += ((hash[i] >> (j * 8)) & 255).toString(16).padStart(2, '0');
+      }
+    }
+    return result;
+  }
+
   // ── CANTI ────────────────────────────────────────────────────
   // Per aggiungere un canto: { num: "2", titolo: "Vieni con noi", src: "canti/02.mp3" }
   // Lascia src vuoto ("") se il file non è ancora disponibile.
   const CANTI = [
-    { num: "2",   titolo: "Vieni con noi",                    src: "" },
-    { num: "3",   titolo: "Voi tutti giubilate",              src: "" },
-    { num: "4",   titolo: "Lodate tutti insieme",             src: "" },
-    { num: "5",   titolo: "Dai la mano",                      src: "" },
-    { num: "9",   titolo: "Grande tu sei",                    src: "" },
-    { num: "11",  titolo: "Cercate prima il regno di Dio",    src: "" },
-    { num: "12",  titolo: "Questo è il dì",                   src: "" },
-    { num: "14",  titolo: "Dalla nascita del sol",            src: "" },
-    { num: "15",  titolo: "Entrerò nelle sue porte",          src: "" },
-    { num: "23",  titolo: "Grazie Signore",                   src: "" },
-    { num: "24",  titolo: "Ti loderò Signor",                 src: "" },
-    { num: "26",  titolo: "Ti amo dell'amor del Signor",      src: "" },
-    { num: "27",  titolo: "Tu sei lodato",                    src: "" },
-    { num: "30",  titolo: "A Dio sia la gloria",              src: "" },
-    { num: "33",  titolo: "Siam riuniti tutti qui",           src: "" },
-    { num: "46",  titolo: "Gloria e potenza",                 src: "" },
-    { num: "47",  titolo: "Re dei re",                        src: "" },
-    { num: "51",  titolo: "Il suo nome è grande",             src: "" },
-    { num: "57",  titolo: "Padre ti adoro",                   src: "" },
-    { num: "59",  titolo: "Sii esaltato",                     src: "" },
-    { num: "64",  titolo: "È verso te che guardo",            src: "" },
-    { num: "67",  titolo: "Il vasellaio tu sei Signor",       src: "" },
-    { num: "68",  titolo: "Il tempio di Dio",                 src: "" },
-    { num: "69",  titolo: "O Gesù",                           src: "" },
-    { num: "70",  titolo: "Solo a te Signor",                 src: "" },
-    { num: "72",  titolo: "Gerico cadrà",                     src: "" },
-    { num: "75",  titolo: "Un nuovo comandamento",            src: "" },
-    { num: "87",  titolo: "Di gioia salterem",                src: "" },
-    { num: "94",  titolo: "Maestà",                           src: "" },
-    { num: "98",  titolo: "Benedite Dio",                     src: "" },
-    { num: "100", titolo: "Chi lassù nel ciel",               src: "" },
-    { num: "104", titolo: "Adoriamo il Signor",               src: "" },
-    { num: "110", titolo: "Gesù dolce musica",                src: "" },
-    { num: "114", titolo: "Gesù t'innalziamo",                src: "" },
-    { num: "116", titolo: "Dammi le ali della lode",          src: "" },
-    { num: "119", titolo: "Io posso ogni cosa",               src: "" },
-    { num: "120", titolo: "Quando su di me",                  src: "" },
-    { num: "121", titolo: "Grazie",                           src: "" },
-    { num: "122", titolo: "Redentor del mondo",               src: "" },
-    { num: "123", titolo: "Per quel sangue",                  src: "" },
-    { num: "124", titolo: "Lasciati andare",                  src: "" },
-    { num: "125", titolo: "Una nuova vita",                   src: "" },
-    { num: "126", titolo: "Non c'è niente di più bello",      src: "" },
-    { num: "128", titolo: "La famiglia di Dio è qua",         src: "" },
-    { num: "129", titolo: "Maranata",                         src: "" },
-    { num: "130", titolo: "Quale amico in Cristo abbiamo",    src: "" },
-    { num: "133", titolo: "Egli è esaltato",                  src: "" },
-    { num: "148", titolo: "Splendi Gesù",                     src: "" },
-    { num: "164", titolo: "Mi fai riposare",                  src: "" },
-    { num: "166", titolo: "Sei tu",                           src: "" },
-    { num: "172", titolo: "Come il cervo",                    src: "" },
-    { num: "173", titolo: "Loderò l'Eterno",                  src: "" },
-    { num: "174", titolo: "Il tuo nome innalzo o Dio",        src: "" },
-    { num: "175", titolo: "Re servitore",                     src: "" },
-    { num: "176", titolo: "Narrano i ciel",                   src: "" },
-    { num: "177", titolo: "Come le aquile",                   src: "" },
-    { num: "178", titolo: "Per adorarti",                     src: "" },
-    { num: "179", titolo: "Tu sei la mia vita",               src: "" },
-    { num: "181", titolo: "Tu sei re",                        src: "" },
-    { num: "182", titolo: "Tu hai dipinto i cieli",           src: "" },
-    { num: "184", titolo: "Dio è buono",                      src: "" },
-    { num: "186", titolo: "La tua destra",                    src: "" },
-    { num: "187", titolo: "A te",                             src: "" },
-    { num: "189", titolo: "Gesù ha preso la vita mia",        src: "" },
-    { num: "190", titolo: "Alleluia tutto nuovo fa il Signor", src: "" },
-    { num: "191", titolo: "Nessuno è come te",                src: "" },
-    { num: "192", titolo: "Sei tu la mia vita",               src: "" },
-    { num: "193", titolo: "Sono qui",                         src: "" },
-    { num: "194", titolo: "Splendi su di noi",                src: "" },
-    { num: "196", titolo: "Sarò con te",                      src: "" },
-    { num: "197", titolo: "Cammino con lui",                  src: "" },
-    { num: "198", titolo: "Ti amo Gesù",                      src: "" },
-    { num: "199", titolo: "Non temere",                       src: "" },
-    { num: "200", titolo: "Signor Gesù, la chiesa",           src: "" },
-    { num: "201", titolo: "Sei tu, Cristo, pan di vita",      src: "" },
-    { num: "202", titolo: "Quanto è dolce, quanto è buono",   src: "" },
-    { num: "203", titolo: "Gesù volge a noi la voce",         src: "" },
-    { num: "204", titolo: "L'amor del Padre io veggo",        src: "" },
-    { num: "205", titolo: "Il Signor ci chiamerà con sé",     src: "" },
-    { num: "206", titolo: "Bisogno ho di te sempre",          src: "" },
-    { num: "207", titolo: "Chi più di Cristo potrebbe amarmi", src: "" },
-    { num: "208", titolo: "Eleviam col cuor",                  src: "" },
-    { num: "209", titolo: "Lottiam, lottiam col Cristo",       src: "" },
-    { num: "210", titolo: "Tieni in tua man",                  src: "" },
-    { num: "211", titolo: "Infuria, Signor, la procella",      src: "" },
-    { num: "212", titolo: "Fammi brillare, Signor",            src: "" },
-    { num: "213", titolo: "I cieli raccontano la gloria",      src: "" }
+    { num: "1", titolo: "T\'adoriamo e celebriamo", src: "canti/001 - T\'adoriamo e celebriamo.mp3" },
+    { num: "2", titolo: "Vieni con noi", src: "canti/002 - Vieni con noi.mp3" },
+    { num: "3", titolo: "Voi tutti giubilate - Voi tutti gli abitanti", src: "canti/003 - Voi tutti giubilate - Voi tutti gli abitanti.mp3" },
+    { num: "4", titolo: "Lodate tutti insieme", src: "canti/004 - Lodate tutti insieme.mp3" },
+    { num: "5", titolo: "Dai la mano", src: "canti/005 - Dai la mano.mp3" },
+    { num: "6", titolo: "Cantiam lode a Dio", src: "canti/006 - Cantiam lode a Dio.mp3" },
+    { num: "7", titolo: "Lode al nome di Gesù - Lode a te Gesù", src: "canti/007 - Lode al nome di Gesù - Lode a te Gesù.mp3" },
+    { num: "8", titolo: "Cantate al Signor", src: "canti/008 - Cantate al Signor.mp3" },
+    { num: "9", titolo: "Grande tu sei", src: "canti/009 - Grande tu sei.mp3" },
+    { num: "10", titolo: "Su, lodiamo il Signor", src: "canti/010 - Su, lodiamo il Signor.mp3" },
+    { num: "11", titolo: "Cercate prima il regno di Dio", src: "canti/011 - Cercate prima il regno di Dio.mp3" },
+    { num: "12", titolo: "Questo è il dì", src: "canti/012 - Questo è il dì.mp3" },
+    { num: "13", titolo: "Liberamente - Un po\' di fede", src: "canti/013 - Liberamente - Un po\' di fede.mp3" },
+    { num: "14", titolo: "Dalla nascita del sol", src: "canti/014 - Dalla nascita del sol.mp3" },
+    { num: "15", titolo: "Entrerò nelle sue porte", src: "canti/015 - Entrerò nelle sue porte.mp3" },
+    { num: "16", titolo: "Benedici il Signor", src: "canti/016 - Benedici il Signor.mp3" },
+    { num: "17", titolo: "Gesù vogliam dirti grazie", src: "canti/017 - Gesù vogliam dirti grazie.mp3" },
+    { num: "18", titolo: "Vai, vai non ti fermar", src: "canti/018 - Vai, vai non ti fermar.mp3" },
+    { num: "19", titolo: "Canta alleluia al Signor", src: "canti/019 - Canta alleluia al Signor.mp3" },
+    { num: "20", titolo: "Canterò un bel canto", src: "canti/020 - Canterò un bel canto.mp3" },
+    { num: "21", titolo: "Con le mani alzate", src: "canti/021 - Con le mani alzate.mp3" },
+    { num: "22", titolo: "Grazie a te", src: "canti/022 - Grazie a te.mp3" },
+    { num: "23", titolo: "Grazie Signor", src: "canti/023 - Grazie Signor.mp3" },
+    { num: "24", titolo: "Ti loderò Signor", src: "canti/024 - Ti loderò Signor.mp3" },
+    { num: "25", titolo: "Dio ti lodo", src: "canti/025 - Dio ti lodo.mp3" },
+    { num: "26", titolo: "Ti amo dell\'amor del Signor", src: "canti/026 - Ti amo dell\'amor del Signor.mp3" },
+    { num: "27", titolo: "Tu sei lodato", src: "canti/027 - Tu sei lodato.mp3" },
+    { num: "28", titolo: "Grazie", src: "canti/028 - Grazie.mp3" },
+    { num: "29", titolo: "Alleluia, amen", src: "canti/029 - Alleluia, amen.mp3" },
+    { num: "30", titolo: "A Dio sia la gloria", src: "canti/030 - A Dio sia la gloria.mp3" },
+    { num: "31", titolo: "Che la gloria del Signor - La gloria del Signore", src: "canti/031 - Che la gloria del Signor - La gloria del Signore.mp3" },
+    { num: "32", titolo: "Venite adoriamo", src: "canti/032 - Venite adoriamo.mp3" },
+    { num: "33", titolo: "Siam riuniti tutti qui", src: "canti/033 - Siam riuniti tutti qui.mp3" },
+    { num: "34", titolo: "Degno sei tu", src: "canti/034 - Degno sei tu.mp3" },
+    { num: "35", titolo: "Egli è qui - Gesù è qui", src: "canti/035 - Egli è qui - Gesù è qui.mp3" },
+    { num: "36", titolo: "Iddio dimora", src: "canti/036 - Iddio dimora.mp3" },
+    { num: "37", titolo: "Le sofferenze di Gesù", src: "canti/037 - Le sofferenze di Gesù.mp3" },
+    { num: "38", titolo: "Alleluia no.1", src: "canti/038 - Alleluia no.1.mp3" },
+    { num: "39", titolo: "Egli è il Salvator", src: "canti/039 - Egli è il Salvator.mp3" },
+    { num: "40", titolo: "Alleluia", src: "canti/040 - Alleluia.mp3" },
+    { num: "41", titolo: "Alleluia, Gesù è il Re - Alleluia, Gesù è il Signor", src: "canti/041 - Alleluia, Gesù è il Re - Alleluia, Gesù è il Signor.mp3" },
+    { num: "42", titolo: "Santo è il Signor", src: "canti/042 - Santo è il Signor.mp3" },
+    { num: "43", titolo: "È il Signor", src: "canti/043 - È il Signor.mp3" },
+    { num: "44", titolo: "Poiché lassù Signor", src: "canti/044 - Poiché lassù Signor.mp3" },
+    { num: "45", titolo: "Alleluia, il Signore regna", src: "canti/045 - Alleluia, il Signore regna.mp3" },
+    { num: "46", titolo: "Gloria e potenza", src: "canti/046 - Gloria e potenza.mp3" },
+    { num: "47", titolo: "Re dei re", src: "canti/047 - Re dei re.mp3" },
+    { num: "48", titolo: "Canto di vittoria - Con Dio farem prodigi", src: "canti/048 - Canto di vittoria - Con Dio farem prodigi.mp3" },
+    { num: "49", titolo: "L\'Eterno è potente - L\'Eterno Iddio", src: "canti/049 - L\'Eterno è potente - L\'Eterno Iddio.mp3" },
+    { num: "50", titolo: "Santo, santo, santo", src: "canti/050 - Santo, santo, santo.mp3" },
+    { num: "51", titolo: "Il suo nome è grande", src: "canti/051 - Il suo nome è grande.mp3" },
+    { num: "52", titolo: "Gesù, l\'unico nome", src: "canti/052 - Gesù, l\'unico nome.mp3" },
+    { num: "53", titolo: "Gesù quanto grande sei tu", src: "canti/053 - Gesù quanto grande sei tu.mp3" },
+    { num: "54", titolo: "Gesù, Gesù, Gesù - È un nome che pari non ha", src: "canti/054 - Gesù, Gesù, Gesù - È un nome che pari non ha.mp3" },
+    { num: "55", titolo: "Padre buono", src: "canti/055 - Padre buono.mp3" },
+    { num: "56", titolo: "Gloria, alleluia", src: "canti/056 - Gloria, alleluia.mp3" },
+    { num: "57", titolo: "Padre ti adoro", src: "canti/057 - Padre ti adoro.mp3" },
+    { num: "58", titolo: "Con le mani al cielo - Esaltiam Gesù", src: "canti/058 - Con le mani al cielo - Esaltiam Gesù.mp3" },
+    { num: "59", titolo: "Grazie a te io renderò - Sii esaltato", src: "canti/059 - Grazie a te io renderò - Sii esaltato.mp3" },
+    { num: "60", titolo: "T\'amerò Signor", src: "canti/060 - T\'amerò Signor.mp3" },
+    { num: "61", titolo: "Fammi veder, Signor", src: "canti/061 - Fammi veder, Signor.mp3" },
+    { num: "62", titolo: "Abba Padre", src: "canti/062 - Abba Padre.mp3" },
+    { num: "63", titolo: "Santo tu sei Signor", src: "canti/063 - Santo tu sei Signor.mp3" },
+    { num: "64", titolo: "È verso di te che guardo", src: "canti/064 - È verso di te che guardo.mp3" },
+    { num: "65", titolo: "Padre ascolta", src: "canti/065 - Padre ascolta.mp3" },
+    { num: "66", titolo: "Mi cercherete e mi troverete", src: "canti/066 - Mi cercherete e mi troverete.mp3" },
+    { num: "67", titolo: "Il vasellaio tu sei Signor", src: "canti/067 - Il vasellaio tu sei Signor.mp3" },
+    { num: "68", titolo: "Con gran tremor - Il tempio di Dio", src: "canti/068 - Con gran tremor - Il tempio di Dio.mp3" },
+    { num: "69", titolo: "O Gesù - Sento pace", src: "canti/069 - O Gesù - Sento pace.mp3" },
+    { num: "70", titolo: "Solo a te Signor", src: "canti/070 - Solo a te Signor.mp3" },
+    { num: "71", titolo: "Ruah", src: "canti/071 - Ruah.mp3" },
+    { num: "72", titolo: "Gerico cadrà - Leviamo i vessilli d\'amor", src: "canti/072 - Gerico cadrà - Leviamo i vessilli d\'amor.mp3" },
+    { num: "73", titolo: "Mia luce è il Signor", src: "canti/073 - Mia luce è il Signor.mp3" },
+    { num: "74", titolo: "Certo beni", src: "canti/074 - Certo beni.mp3" },
+    { num: "75", titolo: "Gesù ci ha dato - Un nuovo comandamento", src: "canti/075 - Gesù ci ha dato - Un nuovo comandamento.mp3" },
+    { num: "76", titolo: "Si rallegreranno", src: "canti/076 - Si rallegreranno.mp3" },
+    { num: "77", titolo: "Ho stretto un\'alleanza - Sempre canterò", src: "canti/077 - Ho stretto un\'alleanza - Sempre canterò.mp3" },
+    { num: "78", titolo: "Padre ti preghiam", src: "canti/078 - Padre ti preghiam.mp3" },
+    { num: "79", titolo: "Salmo 47 - Le vostre mani battete a Dio", src: "canti/079 - Salmo 47 - Le vostre mani battete a Dio.mp3" },
+    { num: "80", titolo: "Tutti insiem", src: "canti/080 - Tutti insiem.mp3" },
+    { num: "81", titolo: "Batti le mani", src: "canti/081 - Batti le mani.mp3" },
+    { num: "82", titolo: "Grande Signor", src: "canti/082 - Grande Signor.mp3" },
+    { num: "83", titolo: "Canterò al Signore", src: "canti/083 - Canterò al Signore.mp3" },
+    { num: "84", titolo: "Amo il Signor", src: "canti/084 - Amo il Signor.mp3" },
+    { num: "85", titolo: "Canto di lode - Tutti uniti", src: "canti/085 - Canto di lode - Tutti uniti.mp3" },
+    { num: "86", titolo: "Dio è Re", src: "canti/086 - Dio è Re.mp3" },
+    { num: "87", titolo: "Di gioia salterem", src: "canti/087 - Di gioia salterem.mp3" },
+    { num: "88", titolo: "Grande in potenza", src: "canti/088 - Grande in potenza.mp3" },
+    { num: "89", titolo: "Diamo gloria a Dio", src: "canti/089 - Diamo gloria a Dio.mp3" },
+    { num: "90", titolo: "Grazie Gesù", src: "canti/090 - Grazie Gesù.mp3" },
+    { num: "91", titolo: "Sia lode e gloria", src: "canti/091 - Sia lode e gloria.mp3" },
+    { num: "92", titolo: "Davanti al Re", src: "canti/092 - Davanti al Re.mp3" },
+    { num: "93", titolo: "Tu regni nella gloria", src: "canti/093 - Tu regni nella gloria.mp3" },
+    { num: "94", titolo: "Maestà", src: "canti/094 - Maestà.mp3" },
+    { num: "95", titolo: "Grande è il Signor", src: "canti/095 - Grande è il Signor.mp3" },
+    { num: "96", titolo: "Su nei cieli", src: "canti/096 - Su nei cieli.mp3" },
+    { num: "97", titolo: "Con potenza risuscitò - Risuscitò", src: "canti/097 - Con potenza risuscitò - Risuscitò.mp3" },
+    { num: "98", titolo: "Benedite Dio", src: "canti/098 - Benedite Dio.mp3" },
+    { num: "99", titolo: "Canterò un canto nuovo", src: "canti/099 - Canterò un canto nuovo.mp3" },
+    { num: "100", titolo: "Chi lassù nel ciel", src: "canti/100 - Chi lassù nel ciel.mp3" },
+    { num: "101", titolo: "Tu sei il creator", src: "canti/101 - Tu sei il creator.mp3" },
+    { num: "102", titolo: "Sì, magnifico è il Signor", src: "canti/102 - Sì, magnifico è il Signor.mp3" },
+    { num: "103", titolo: "Adoriam", src: "canti/103 - Adoriam.mp3" },
+    { num: "104", titolo: "Adoriamo il Signor", src: "canti/104 - Adoriamo il Signor.mp3" },
+    { num: "105", titolo: "Noi t\'adoriam", src: "canti/105 - Noi t\'adoriam.mp3" },
+    { num: "106", titolo: "Gloria a te", src: "canti/106 - Gloria a te.mp3" },
+    { num: "107", titolo: "Padre t\'amiamo", src: "canti/107 - Padre t\'amiamo.mp3" },
+    { num: "108", titolo: "Signor Gesù", src: "canti/108 - Signor Gesù.mp3" },
+    { num: "109", titolo: "Signor Gesù io amo te", src: "canti/109 - Signor Gesù io amo te.mp3" },
+    { num: "110", titolo: "Gesù dolce musica", src: "canti/110 - Gesù dolce musica.mp3" },
+    { num: "111", titolo: "Gesù sei meraviglioso - Gesù, sei per me", src: "canti/111 - Gesù sei meraviglioso - Gesù, sei per me.mp3" },
+    { num: "112", titolo: "Lodato sia il Signor", src: "canti/112 - Lodato sia il Signor.mp3" },
+    { num: "113", titolo: "Degno è l\'Agnel", src: "canti/113 - Degno è l\'Agnel.mp3" },
+    { num: "114", titolo: "Gesù t\'innalziamo", src: "canti/114 - Gesù t\'innalziamo.mp3" },
+    { num: "115", titolo: "Per me Signor", src: "canti/115 - Per me Signor.mp3" },
+    { num: "116", titolo: "Dammi le ali della lode", src: "canti/116 - Dammi le ali della lode.mp3" },
+    { num: "117", titolo: "Fammi restar con te - Gesù, quando temo", src: "canti/117 - Fammi restar con te - Gesù, quando temo.mp3" },
+    { num: "118", titolo: "Il Signore è la mia roccia", src: "canti/118 - Il Signore è la mia roccia.mp3" },
+    { num: "119", titolo: "Io posso ogni cosa", src: "canti/119 - Io posso ogni cosa.mp3" },
+    { num: "120", titolo: "Quando su di me", src: "canti/120 - Quando su di me.mp3" },
+    { num: "121", titolo: "Grazie (R. Romeo)", src: "canti/121 - Grazie (R. Romeo).mp3" },
+    { num: "122", titolo: "Redentor del mondo", src: "canti/122 - Redentor del mondo.mp3" },
+    { num: "123", titolo: "Per quel sangue", src: "canti/123 - Per quel sangue.mp3" },
+    { num: "124", titolo: "Lasciati andare", src: "canti/124 - Lasciati andare.mp3" },
+    { num: "125", titolo: "Una nuova vita", src: "canti/125 - Una nuova vita.mp3" },
+    { num: "126", titolo: "Non c\'è niente di più bello", src: "canti/126 - Non c\'è niente di più bello.mp3" },
+    { num: "127", titolo: "Il regno dentro me - Tutta la gioia", src: "canti/127 - Il regno dentro me - Tutta la gioia.mp3" },
+    { num: "128", titolo: "La famiglia di Dio è qua", src: "canti/128 - La famiglia di Dio è qua.mp3" },
+    { num: "129", titolo: "Io alzo i miei occhi - Maranata", src: "canti/129 - Io alzo i miei occhi - Maranata.mp3" },
+    { num: "130", titolo: "Hai portato gioia", src: "canti/130 - Hai portato gioia.mp3" }
   ];
 
   let cantoCorrente = null;
@@ -855,7 +953,7 @@
 
     // Carica e avvia nel player
     if (window._player) {
-      window._player.playUrl(canto.src, `${canto.num}. ${canto.titolo}`, 'Canzoniere', '');
+      window._player.playUrl(canto.src, `${canto.num}. ${canto.titolo}`, 'Canzoniere', 'cover_canti.png');
     }
   }
 
