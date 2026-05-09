@@ -1503,8 +1503,13 @@ function initPlayer() {
       audio.src = src;
       titleEl.textContent  = title  || src;
       artistEl.textContent = artist || '';
-      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
-      else cover.style.display = 'none';
+      const coverEl = document.getElementById('cplCover');
+      if (coverSrc && coverEl) {
+        coverEl.src = coverSrc;
+        coverEl.style.display = 'block';
+      } else if (coverEl) {
+        coverEl.style.display = 'none';
+      }
       bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
       player.classList.add('visible');
       reopen.classList.remove('visible');
