@@ -443,10 +443,20 @@
     <input type="hidden" id="predEditIdx" value="-1">
     <div class="field-row">
       <div class="field"><label>Data</label><input type="date" id="predData"></div>
-      <div class="field"><label>Predicatore</label><input type="text" id="predPredicatore" placeholder="es. Enrico Torlai"></div>
+      <div class="field"><label>Referente</label><input type="text" id="predReferente" placeholder="es. Enrico Torlai"></div>
     </div>
     <div class="field"><label>Riassunto</label><textarea id="predRiassunto" rows="4" placeholder="Breve sintesi della predicazione…"></textarea></div>
-    <div class="field"><label>Nome file PDF (opzionale)</label><input type="text" id="predPdf" placeholder="es. pred_20260511.pdf"></div>
+    <div class="field">
+      <label>File PDF (opzionale)</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="predPdf" placeholder="es. pred_20260511.pdf" style="flex:1;">
+        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
+          📎 Sfoglia
+          <input type="file" accept=".pdf" id="predPdfFile" style="display:none;" onchange="caricaPdf(this)">
+        </label>
+      </div>
+      <div id="predPdfStatus" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ PDF pronto per il salvataggio</div>
+    </div>
     <div class="btn-row-end">
       <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
       <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
@@ -661,7 +671,7 @@
     c.innerHTML = [...dati.predicazioni].sort((a,b) => b.data.localeCompare(a.data)).map((p, i) => `
       <div class="list-item">
         <div class="list-item-info">
-          <div class="list-item-title">${p.predicatore || '<em style="color:var(--muted)">Predicatore non specificato</em>'}</div>
+          <div class="list-item-title">${p.referente || p.predicatore || '<em style="color:var(--muted)">Referente non specificato</em>'}</div>
           <div class="list-item-sub">${formatData(p.data)}${p.riassunto ? ' · ' + p.riassunto.substring(0,70) + '…' : ''}${p.pdf ? ' 📄' : ''}</div>
         </div>
         <div class="list-item-actions">
@@ -676,27 +686,60 @@
     if (idx >= 0) {
       const p = dati.predicazioni[idx];
       document.getElementById('predData').value         = p.data;
-      document.getElementById('predPredicatore').value  = p.predicatore || '';
+      document.getElementById('predReferente').value  = p.referente || p.predicatore || '';
       document.getElementById('predRiassunto').value    = p.riassunto || '';
       document.getElementById('predPdf').value          = p.pdf || '';
       document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
     } else {
       document.getElementById('predData').value         = today();
-      document.getElementById('predPredicatore').value  = '';
+      document.getElementById('predReferente').value  = '';
       document.getElementById('predRiassunto').value    = '';
       document.getElementById('predPdf').value          = '';
+      document.getElementById('predPdfStatus').style.display = 'none';
+      _pdfPendingName = null; _pdfPendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Nuova predicazione';
     }
     document.getElementById('modal-predicazione').classList.add('open');
   }
   function editPred(i) { openPredModal(i); }
 
-  function salvaPred() {
+  // ── CARICA PDF ──────────────────────────────────────────────
+  let _pdfPendingName = null;
+  let _pdfPendingData = null;
+
+  function caricaPdf(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.pdf')) { toast('⚠ Seleziona un file PDF'); return; }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      _pdfPendingName = file.name;
+      _pdfPendingData = e.target.result.split(',')[1]; // base64
+      document.getElementById('predPdf').value = file.name;
+      document.getElementById('predPdfStatus').style.display = 'block';
+      toast('📎 PDF selezionato: ' + file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function salvaPred() {
     const data = document.getElementById('predData').value;
     if (!data) { toast('⚠ Inserisci la data'); return; }
+
+    // Se c'è un PDF pendente, salvalo tramite bridge
+    if (_pdfPendingName && _pdfPendingData) {
+      if (typeof window.pywebview !== 'undefined') {
+        const result = await window.pywebview.api.salva_pdf(_pdfPendingName, _pdfPendingData);
+        if (result !== 'ok') { toast('❌ Errore salvataggio PDF: ' + result); return; }
+      }
+      _pdfPendingName = null;
+      _pdfPendingData = null;
+    }
+
     const obj = {
       data,
-      predicatore: document.getElementById('predPredicatore').value.trim(),
+      referente: document.getElementById('predReferente').value.trim(),
       riassunto:   document.getElementById('predRiassunto').value.trim(),
       pdf:         document.getElementById('predPdf').value.trim()
     };

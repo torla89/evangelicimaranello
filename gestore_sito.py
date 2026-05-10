@@ -35,6 +35,20 @@ class PythonBridge:
         self._log_q   = queue.Queue()
         self._running = False
 
+    def salva_pdf(self, filename: str, base64_data: str) -> str:
+        """
+        Riceve un PDF come base64 da JavaScript e lo salva nella cartella del sito.
+        """
+        try:
+            import base64
+            data = base64.b64decode(base64_data)
+            dest = os.path.join(SITE_DIR, filename)
+            with open(dest, 'wb') as f:
+                f.write(data)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
     def carica_auto(self) -> str:
         """
         Tenta di caricare dati.json dal percorso configurato.

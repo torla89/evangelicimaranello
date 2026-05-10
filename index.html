@@ -261,6 +261,22 @@
       margin-top: auto;
     }
 
+    /* ── MOBILE LANDSCAPE ── */
+    @media (max-width: 900px) and (orientation: landscape) {
+      html, body { overflow: auto !important; background: #1a0e04; }
+      .bg { position: fixed; background-attachment: scroll; }
+      .page { height: auto; min-height: 100vh; }
+      nav { display: none; }
+      .hamburger { display: flex; }
+      .hero {
+        min-height: auto;
+        padding: 16px 20px 20px;
+      }
+      .sections {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+    }
+
     /* ==============================
        MOBILE — ottimizzato
     ============================== */
@@ -801,8 +817,13 @@ function initPlayer() {
       audio.src = src;
       titleEl.textContent  = title  || src;
       artistEl.textContent = artist || '';
-      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
-      else cover.style.display = 'none';
+      const coverEl = document.getElementById('cplCover');
+      if (coverSrc && coverEl) {
+        coverEl.src = coverSrc;
+        coverEl.style.display = 'block';
+      } else if (coverEl) {
+        coverEl.style.display = 'none';
+      }
       bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
       player.classList.add('visible');
       reopen.classList.remove('visible');
