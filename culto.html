@@ -325,8 +325,8 @@
         <div class="azione-icon">📅</div>
         <div>
           <div class="azione-label">Programma</div>
-          <div class="azione-titolo">Calendario delle predicazioni</div>
-          <div class="azione-desc">Data, predicatore e riassunto</div>
+          <div class="azione-titolo">Calendario dei messaggi</div>
+          <div class="azione-desc">Data, referente e riassunto</div>
         </div>
       </div>
     </div>
@@ -386,7 +386,7 @@
 <div class="overlay" id="overlay-pred">
   <div class="overlay-inner">
     <div class="overlay-header">
-      <h2>📅 Calendario delle predicazioni</h2>
+      <h2>📅 Calendario dei messaggi</h2>
       <button class="overlay-close" onclick="chiudiPredicazioni()">✕ Chiudi</button>
     </div>
     <div id="pred-container">
@@ -404,16 +404,16 @@
       <div style="font-size:0.70rem;letter-spacing:0.25em;text-transform:uppercase;
                   color:rgba(255,255,255,0.38);margin-bottom:8px;">📦 Archivio storico</div>
       <p style="font-size:0.96rem;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.3;">
-        Le predicazioni del passato — presto disponibili
+        I messaggi del passato — presto disponibili
       </p>
       <p style="font-size:0.90rem;color:rgba(255,255,255,0.72);line-height:1.75;">
         Nel corso degli anni, molti fratelli e sorelle si sono impegnati con fedeltà a portare
-        avanti la Parola di Dio nella nostra comunità. Le loro predicazioni rappresentano
+        avanti la Parola di Dio nella nostra comunità. I loro messaggi rappresentano
         un patrimonio prezioso di fede, insegnamento e testimonianza che non vogliamo andasse perso.
       </p>
       <p style="font-size:0.90rem;color:rgba(255,255,255,0.72);line-height:1.75;margin-top:8px;">
-        Stiamo lavorando per raccogliere e rendere disponibile l'intero archivio delle
-        predicazioni degli anni precedenti — perché ogni parola pronunciata per edificare
+        Stiamo lavorando per raccogliere e rendere disponibile l'intero archivio dei
+        messaggi degli anni precedenti — perché ogni parola pronunciata per edificare
         la chiesa merita di essere custodita e condivisa.
       </p>
       <p style="font-size:0.82rem;color:rgba(200,150,60,0.80);margin-top:12px;font-style:italic;">
@@ -459,7 +459,7 @@
           <thead>
             <tr>
               <th>Data</th>
-              <th>Predicatore</th>
+              <th>Referente</th>
               <th>Riassunto</th>
               <th>PDF</th>
             </tr>
@@ -817,8 +817,13 @@ function initPlayer() {
       audio.src = src;
       titleEl.textContent  = title  || src;
       artistEl.textContent = artist || '';
-      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
-      else cover.style.display = 'none';
+      const coverEl = document.getElementById('cplCover');
+      if (coverSrc && coverEl) {
+        coverEl.src = coverSrc;
+        coverEl.style.display = 'block';
+      } else if (coverEl) {
+        coverEl.style.display = 'none';
+      }
       bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
       player.classList.add('visible');
       reopen.classList.remove('visible');
