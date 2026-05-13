@@ -737,9 +737,11 @@
       _pdfPendingData = null;
     }
 
+    const val_referente = document.getElementById('predReferente').value.trim();
     const obj = {
       data,
-      referente: document.getElementById('predReferente').value.trim(),
+      predicatore: val_referente,
+      referente:   val_referente,
       riassunto:   document.getElementById('predRiassunto').value.trim(),
       pdf:         document.getElementById('predPdf').value.trim()
     };
