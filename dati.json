@@ -1,10 +1,14 @@
 {
-  "saldo": 0,
-  "aggiornato_il": "2026-04-21",
+  "saldo": 200,
+  "aggiornato_il": "2026-05-18",
   "storico_saldo": [
     {
       "data": "2026-04-21",
       "saldo": 0
+    },
+    {
+      "data": "2026-05-18",
+      "saldo": 200
     }
   ],
   "spese_fisse": [
@@ -70,8 +74,8 @@
       "data": "2026-05-17",
       "predicatore": "Daniele",
       "referente": "Daniele",
-      "riassunto": "LA CHIESA E LA SUA FUNZIONE NEL MONDO",
-      "pdf": ""
+      "riassunto": "LA CHIESA E LA SUA FUNZIONE NEL MONDO Il testo propone una riflessione sulla Chiesa analizzandone tre aspetti fondamentali: chi è veramente la Chiesa (non un luogo, ma una comunità di credenti), quale sia la sua funzione nel mondo (essere luce e testimonianza) e quale sia il ruolo di ciascun membro (contribuire attivamente con i propri doni).",
+      "pdf": "17-05-26 La chiesa e la sua funzione nel mondo_Daniele.pdf"
     },
     {
       "data": "2026-05-10",
