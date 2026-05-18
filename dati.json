@@ -53,6 +53,13 @@
       "tipo_rinnovo": "automatico",
       "scadenza": "2027-04-21",
       "note": ""
+    },
+    {
+      "nome": "Gestione conto tot.",
+      "importo": 7,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "15 ogni mese",
+      "note": ""
     }
   ],
   "riunioni": [
