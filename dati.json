@@ -1,6 +1,6 @@
 {
-  "saldo": 200,
-  "aggiornato_il": "2026-05-18",
+  "saldo": 526.07,
+  "aggiornato_il": "2026-05-20",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -9,6 +9,10 @@
     {
       "data": "2026-05-18",
       "saldo": 200
+    },
+    {
+      "data": "2026-05-20",
+      "saldo": 526.07
     }
   ],
   "spese_fisse": [
@@ -46,13 +50,6 @@
       "tipo_rinnovo": "automatico",
       "scadenza": "2027-04-11",
       "note": "comprensivo di dominio, email, PEC"
-    },
-    {
-      "nome": "PEC @pec.evangelicimaranello.it",
-      "importo": 11,
-      "tipo_rinnovo": "automatico",
-      "scadenza": "2027-04-21",
-      "note": ""
     },
     {
       "nome": "Gestione conto tot.",
