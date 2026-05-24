@@ -687,7 +687,8 @@
   // ── CREDENZIALI ──────────────────────────────────────────────
   // Le password sono cifrate con SHA-256 — non modificare il formato
   const UTENTI = [
-    { username: "socio", passwordHash: "28d898220a66fb9ee698eaaf8128f848783115008ba1c857eb291c4389f326b2" }
+    { username: "socio",         passwordHash: "28d898220a66fb9ee698eaaf8128f848783115008ba1c857eb291c4389f326b2", ruolo: "socio" },
+    { username: "simpatizzante", passwordHash: "b622da6e50e9408ffebd85f95ad1931e7d0615e988247c369eea0f79b16e26e8", ruolo: "simpatizzante" }
   ];
   // ─────────────────────────────────────────────────────────────
 
@@ -707,6 +708,7 @@
 
     if (trovato) {
       sessionStorage.setItem("loggedIn", "true");
+      sessionStorage.setItem("ruolo", trovato.ruolo);
       errore.textContent = "";
       mostraContenuto();
     } else {
@@ -1191,11 +1193,44 @@
   function mostraContenuto() {
     document.getElementById("schermata-login").style.display    = "none";
     document.getElementById("schermata-contenuto").style.display = "flex";
-    caricaDati();
+
+    const ruolo = sessionStorage.getItem("ruolo") || "socio";
+
+    // Simpatizzante: mostra solo guida ai canti, nasconde tutto il resto
+    if (ruolo === "simpatizzante") {
+      // Aggiorna titolo e sottotitolo
+      const lbl = document.querySelector(".page-header .label");
+      const sub = document.querySelector(".page-header .sottotitolo");
+      if (lbl) lbl.textContent = "🎵 Guida ai Canti";
+      if (sub) sub.textContent = "Ascolta i canti del canzoniere della nostra comunità.";
+
+      // Nascondi tutti i macrogruppi tranne quello dei canti
+      document.querySelectorAll(".macrogruppo").forEach(m => {
+        const titolo = m.querySelector("h2");
+        if (titolo && titolo.textContent.includes("Canti")) {
+          m.style.display = "block";
+          // Apri automaticamente la sezione
+          const body = m.querySelector(".macrogruppo-body");
+          if (body) body.style.display = "block";
+        } else {
+          m.style.display = "none";
+        }
+      });
+
+      // Nascondi il bottone logout e back-link
+      const btnLogout = document.querySelector(".btn-logout");
+      if (btnLogout) btnLogout.style.display = "none";
+
+      // Non caricare dati JSON (non necessario)
+      renderCanti();
+    } else {
+      caricaDati();
+    }
   }
 
   function logout() {
     sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("ruolo");
     document.getElementById("schermata-login").style.display    = "flex";
     document.getElementById("schermata-contenuto").style.display = "none";
     document.getElementById("username").value = "";
