@@ -532,7 +532,7 @@
     const titolo = (p.referente || p.predicatore || 'Messaggio') + ' — ' + formatData(p.data);
 
     if (window._player) {
-      window._player.playUrl(p.mp3, titolo, 'Chiesa Evangelica Maranello', '');
+      window._player.playUrl(p.mp3, titolo, 'Chiesa Evangelica Maranello', '', true);
     }
 
     // Quando finisce → mette in pausa e resetta il bottone
@@ -869,7 +869,7 @@ function initPlayer() {
       saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
     },
     // Carica e suona un brano esterno alla playlist (es. canti del culto)
-    playUrl(src, title, artist, coverSrc) {
+    playUrl(src, title, artist, coverSrc, singleMode) {
       audio.src = src;
       titleEl.textContent  = title  || src;
       artistEl.textContent = artist || '';
@@ -884,6 +884,7 @@ function initPlayer() {
       player.classList.add('visible');
       reopen.classList.remove('visible');
       isClosed = false;
+      window._playerSingleMode = singleMode === true;
       play();
     }
   };
@@ -901,7 +902,14 @@ function initPlayer() {
   });
 
   audio.addEventListener('ended', () => {
-    window._player.next();
+    // Se siamo in modalità playlist normale, vai al prossimo
+    if (!window._playerSingleMode) {
+      window._player.next();
+    } else {
+      // Modalità singolo brano (es. messaggio) → pausa
+      pause();
+      window._playerSingleMode = false;
+    }
   });
 
   // Salva posizione ogni 5 secondi
