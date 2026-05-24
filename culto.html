@@ -461,21 +461,31 @@
               <th>Data</th>
               <th>Referente</th>
               <th>Riassunto</th>
+              <th>Ascolta</th>
               <th>PDF</th>
             </tr>
           </thead>
           <tbody>`;
 
-      pred.forEach(p => {
+      pred.forEach((p, i) => {
+        const referente = p.referente || p.predicatore || '';
         html += `<tr>
           <td><div class="pred-data">${formatData(p.data)}</div></td>
-          <td>${p.predicatore
-            ? `<div class="pred-predicatore">${p.predicatore}</div>`
+          <td>${referente
+            ? `<div class="pred-predicatore">${referente}</div>`
             : `<div class="pred-vuoto">—</div>`}
           </td>
           <td>${p.riassunto
             ? `<div class="pred-riassunto">${p.riassunto}</div>`
             : `<div class="pred-vuoto">Non ancora disponibile</div>`}
+          </td>
+          <td>${p.mp3
+            ? `<button class="btn-pdf" id="pred-play-${i}" onclick="suonaMessaggio(${i}, this)"
+                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.20);
+                border-radius:20px;padding:5px 12px;cursor:pointer;color:#fff;font-size:0.82rem;">
+                ▶ Ascolta
+               </button>`
+            : `<span class="pred-vuoto">—</span>`}
           </td>
           <td>${p.pdf
             ? `<a href="${p.pdf}" target="_blank" class="btn-pdf">📄 Apri</a>`
@@ -487,8 +497,54 @@
       html += '</tbody></table>';
       c.innerHTML = html;
 
+      // Salva i dati per la funzione suonaMessaggio
+      window._predDati = pred;
+
     } catch(e) {
       c.innerHTML = '<p style="color:rgba(255,120,120,0.8);font-size:0.88rem;">Impossibile caricare dati.json</p>';
+    }
+  }
+
+  let _predPlayingBtn = null;
+
+  function suonaMessaggio(i, btn) {
+    const p = window._predDati[i];
+    if (!p || !p.mp3) return;
+
+    // Se stesso bottone → toggle
+    if (_predPlayingBtn === btn) {
+      if (window._player) window._player.toggle();
+      const isPaused = btn.textContent.includes('▶');
+      btn.textContent = isPaused ? '⏸ In ascolto' : '▶ Ascolta';
+      return;
+    }
+
+    // Reset bottone precedente
+    if (_predPlayingBtn) {
+      _predPlayingBtn.textContent = '▶ Ascolta';
+      _predPlayingBtn.style.borderColor = 'rgba(255,255,255,0.20)';
+    }
+
+    _predPlayingBtn = btn;
+    btn.textContent = '⏸ In ascolto';
+    btn.style.borderColor = 'rgba(200,150,60,0.60)';
+
+    const titolo = (p.referente || p.predicatore || 'Messaggio') + ' — ' + formatData(p.data);
+
+    if (window._player) {
+      window._player.playUrl(p.mp3, titolo, 'Chiesa Evangelica Maranello', '');
+    }
+
+    // Quando finisce → mette in pausa e resetta il bottone
+    const audio = document.getElementById('cemAudio');
+    if (audio) {
+      const onEnded = () => {
+        btn.textContent = '▶ Ascolta';
+        btn.style.borderColor = 'rgba(255,255,255,0.20)';
+        _predPlayingBtn = null;
+        audio.removeEventListener('ended', onEnded);
+      };
+      audio.addEventListener('ended', onEnded);
     }
   }
 

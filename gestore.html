@@ -457,6 +457,18 @@
       </div>
       <div id="predPdfStatus" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ PDF pronto per il salvataggio</div>
     </div>
+
+    <div class="field">
+      <label>File MP3 (opzionale)</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="predMp3" placeholder="es. pred_20260511.mp3" style="flex:1;">
+        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
+          🎵 Sfoglia
+          <input type="file" accept=".mp3,audio/*" id="predMp3File" style="display:none;" onchange="caricaMp3(this)">
+        </label>
+      </div>
+      <div id="predMp3Status" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ MP3 pronto per il salvataggio</div>
+    </div>
     <div class="btn-row-end">
       <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
       <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
@@ -689,36 +701,57 @@
       document.getElementById('predReferente').value  = p.referente || p.predicatore || '';
       document.getElementById('predRiassunto').value    = p.riassunto || '';
       document.getElementById('predPdf').value          = p.pdf || '';
+      document.getElementById('predMp3').value          = p.mp3 || '';
+      document.getElementById('predPdfStatus').style.display = 'none';
+      document.getElementById('predMp3Status').style.display = 'none';
+      _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
     } else {
       document.getElementById('predData').value         = today();
       document.getElementById('predReferente').value  = '';
       document.getElementById('predRiassunto').value    = '';
       document.getElementById('predPdf').value          = '';
+      document.getElementById('predMp3').value          = '';
       document.getElementById('predPdfStatus').style.display = 'none';
+      document.getElementById('predMp3Status').style.display = 'none';
       _pdfPendingName = null; _pdfPendingData = null;
+      _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Nuova predicazione';
     }
     document.getElementById('modal-predicazione').classList.add('open');
   }
   function editPred(i) { openPredModal(i); }
 
-  // ── CARICA PDF ──────────────────────────────────────────────
   let _pdfPendingName = null;
   let _pdfPendingData = null;
+  let _mp3PendingName = null;
+  let _mp3PendingData = null;
 
   function caricaPdf(input) {
     const file = input.files[0];
     if (!file) return;
     if (!file.name.endsWith('.pdf')) { toast('⚠ Seleziona un file PDF'); return; }
-
     const reader = new FileReader();
     reader.onload = e => {
       _pdfPendingName = file.name;
-      _pdfPendingData = e.target.result.split(',')[1]; // base64
+      _pdfPendingData = e.target.result.split(',')[1];
       document.getElementById('predPdf').value = file.name;
       document.getElementById('predPdfStatus').style.display = 'block';
       toast('📎 PDF selezionato: ' + file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function caricaMp3(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      _mp3PendingName = file.name;
+      _mp3PendingData = e.target.result.split(',')[1];
+      document.getElementById('predMp3').value = file.name;
+      document.getElementById('predMp3Status').style.display = 'block';
+      toast('🎵 MP3 selezionato: ' + file.name);
     };
     reader.readAsDataURL(file);
   }
@@ -727,14 +760,22 @@
     const data = document.getElementById('predData').value;
     if (!data) { toast('⚠ Inserisci la data'); return; }
 
-    // Se c'è un PDF pendente, salvalo tramite bridge
+    // Salva PDF se presente
     if (_pdfPendingName && _pdfPendingData) {
       if (typeof window.pywebview !== 'undefined') {
         const result = await window.pywebview.api.salva_pdf(_pdfPendingName, _pdfPendingData);
         if (result !== 'ok') { toast('❌ Errore salvataggio PDF: ' + result); return; }
       }
-      _pdfPendingName = null;
-      _pdfPendingData = null;
+      _pdfPendingName = null; _pdfPendingData = null;
+    }
+
+    // Salva MP3 se presente
+    if (_mp3PendingName && _mp3PendingData) {
+      if (typeof window.pywebview !== 'undefined') {
+        const result = await window.pywebview.api.salva_pdf(_mp3PendingName, _mp3PendingData);
+        if (result !== 'ok') { toast('❌ Errore salvataggio MP3: ' + result); return; }
+      }
+      _mp3PendingName = null; _mp3PendingData = null;
     }
 
     const val_referente = document.getElementById('predReferente').value.trim();
@@ -743,7 +784,8 @@
       predicatore: val_referente,
       referente:   val_referente,
       riassunto:   document.getElementById('predRiassunto').value.trim(),
-      pdf:         document.getElementById('predPdf').value.trim()
+      pdf:         document.getElementById('predPdf').value.trim(),
+      mp3:         document.getElementById('predMp3').value.trim()
     };
     const idx = parseInt(document.getElementById('predEditIdx').value);
     if (idx >= 0) dati.predicazioni[idx] = obj;
