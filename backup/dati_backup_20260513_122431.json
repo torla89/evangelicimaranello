@@ -1,0 +1,133 @@
+{
+  "saldo": 0,
+  "aggiornato_il": "2026-04-21",
+  "storico_saldo": [
+    {
+      "data": "2026-04-21",
+      "saldo": 0
+    }
+  ],
+  "spese_fisse": [
+    {
+      "nome": "Truecode",
+      "importo": 217,
+      "tipo_rinnovo": "disattivato",
+      "scadenza": "2027-04-04",
+      "note": "le funzionalità pro saranno disattivate dal 04/27"
+    },
+    {
+      "nome": "Apple Developer",
+      "importo": 99,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2027-02-01",
+      "note": ""
+    },
+    {
+      "nome": "Claude.ai",
+      "importo": 21,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "mensile-22",
+      "note": "Ogni 22 del mese"
+    },
+    {
+      "nome": "Dominio OgniTipoDiInsegnamento.it",
+      "importo": 12,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2028-03-09",
+      "note": ""
+    },
+    {
+      "nome": "Dominio evangelicimaranello.it",
+      "importo": 32.2,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2027-04-11",
+      "note": "comprensivo di dominio, email, PEC"
+    },
+    {
+      "nome": "PEC @pec.evangelicimaranello.it",
+      "importo": 11,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2027-04-21",
+      "note": ""
+    }
+  ],
+  "riunioni": [
+    {
+      "data": "2026-04-19",
+      "titolo": "Riunione di chiesa del 19 aprile 2026",
+      "testo": "1. FONDAZIONE DELL'ASSOCIAZIONE EVANGELICA MARANELLESE\nL'assemblea ha deliberato all'unanimità la costituzione dell'Associazione Evangelica Maranellese, associazione non riconosciuta e senza fini di lucro. La scelta di dotarsi di una forma associativa nasce dalla necessità di ottenere un codice fiscale che permetta di dare seguito concreto alle iniziative promosse dalla chiesa. Sono stati nominati i seguenti organi sociali:\n- Presidente: Enrico Torlai\n- Vicepresidente e Tesoriere: Daniele Torlai\n- Consigliere: Marco Torlai\n- Consigliere: Susanna Casari\n- Consigliere Onorario: Riccardo Torlai, riconosciuto come guida morale e riferimento spirituale per i membri fondatori dell'associazione.\n\n2. INIZIATIVE PROMOSSE DALLA CHIESA\nSono state formalizzate le attività in corso e pianificate promosse dall'associazione. È stata predisposta un'apposita sezione nell'area privata del sito dove è possibile consultare nel dettaglio ogni attività, la relativa descrizione e il responsabile incaricato.\n\n3. AFFITTO DI UNA SALETTA PER LE RIUNIONI\nÈ stato sollevato il tema della possibilità di affittare uno spazio dedicato per le riunioni domenicali. Non essendosi raggiunta l'unanimità nella discussione, si è convenuto di rimandare la decisione a un momento successivo, qualora si presentassero opportunità concrete e condizioni favorevoli."
+    }
+  ],
+  "predicazioni": [
+    {
+      "data": "2026-05-17",
+      "predicatore": "Daniel",
+      "referente": "Daniel",
+      "riassunto": "LA CHIESA E LA SUA FUNZIONE NEL MONDO",
+      "pdf": ""
+    },
+    {
+      "data": "2026-05-10",
+      "predicatore": "Marc",
+      "referente": "Marc",
+      "riassunto": "RIFLESSIONI SULLA PREGHIERA: La preghiera non è un rituale da compiere, ma un incontro reale con Dio: nasce da un cuore sincero, si fonda sulla Sua Parola e cerca prima di tutto la Sua volontà. Pregare “in modo corretto” significa allinearci a ciò che Dio desidera, non tentare di convincerlo dei nostri piani. E quando Dio risponde — che sia con un sì, un no o un’attesa — lo fa sempre secondo la Sua sapienza e la Sua grazia, non come conseguenza della nostra bravura nel pregare. La preghiera è fiducia, non tecnica.",
+      "pdf": ""
+    }
+  ],
+  "attivita": [
+    {
+      "nome": "Sito web OgniTipoDiInsegnamento.it",
+      "descrizione": "Creazione sito web dedicato al materiale di Ellero Balzani.",
+      "responsabile": "Daniele",
+      "stato": "completata"
+    },
+    {
+      "nome": "App OgniTipoDiInsegnamento",
+      "descrizione": "Creazione dell'app per tutti i maggiori sistemi operativi dedicata al materiale di Ellero Balzani.",
+      "responsabile": "Daniele",
+      "stato": "completata"
+    },
+    {
+      "nome": "Calendario 2027",
+      "descrizione": "Creazione di un calendario evangelico di chiesa da distribuire gratuitamente a novembre.",
+      "responsabile": "Marica",
+      "stato": "in_corso"
+    },
+    {
+      "nome": "Podcast Ellero",
+      "descrizione": "Miglioramento della qualità dei podcast di Ellero Balzani, divisione in segmenti da 15 minuti e pubblicazione su Spotify e sull'app/sito.",
+      "responsabile": "Enrico",
+      "stato": "completata"
+    },
+    {
+      "nome": "Pagina social OgniTipoDiInsegnamento",
+      "descrizione": "Creazione di una pagina Facebook per promuovere il materiale di Ellero Balzani.",
+      "responsabile": "Marica",
+      "stato": "completata"
+    },
+    {
+      "nome": "Pagina social Evangelici Maranello",
+      "descrizione": "Creazione di una pagina Facebook per promuovere le attività della chiesa di Maranello.",
+      "responsabile": "Marica",
+      "stato": "completata"
+    },
+    {
+      "nome": "Sito web evangelicimaranello.it",
+      "descrizione": "Creazione del sito web ufficiale della chiesa evangelica di Maranello.",
+      "responsabile": "Daniele",
+      "stato": "completata"
+    },
+    {
+      "nome": "Creazione musica cristiana",
+      "descrizione": "Creazione di playlist con musica cristiana a ritmo giovanile per avvicinare i ragazzi, con pubblicazione su sito e Spotify.",
+      "responsabile": "Enrico",
+      "stato": "in_corso"
+    },
+    {
+      "nome": "Musica per il culto domenicale",
+      "descrizione": "Creazione di basi musicali per i canti del culto domenicale.",
+      "responsabile": "Enrico",
+      "stato": "in_corso"
+    }
+  ]
+}

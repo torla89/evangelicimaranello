@@ -921,6 +921,23 @@
   ];
 
   let cantoCorrente = null;
+  let _cantiAutoplay = false; // flag: stiamo riproducendo dalla guida ai canti
+
+  // Intercetta la fine del brano per autoplay canto successivo
+  function _setupCantiAutoplay() {
+    const audio = document.getElementById('cemAudio');
+    if (!audio) { setTimeout(_setupCantiAutoplay, 500); return; }
+    audio.addEventListener('ended', () => {
+      if (!_cantiAutoplay || cantoCorrente === null) return;
+      // Trova il prossimo canto con src disponibile
+      const cantiFiltrati = CANTI.map((c, i) => ({ c, i })).filter(x => x.c.src);
+      const posAttuale = cantiFiltrati.findIndex(x => x.i === cantoCorrente);
+      if (posAttuale === -1) return;
+      const prossimo = cantiFiltrati[(posAttuale + 1) % cantiFiltrati.length];
+      suonaCanto(prossimo.i);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', _setupCantiAutoplay);
 
   function renderCanti() {
     const c = document.getElementById('canti-container');
@@ -944,7 +961,7 @@
     // Aggiorna icone
     if (cantoCorrente !== null) {
       const prevBtn = document.getElementById(`canto-btn-${cantoCorrente}`);
-      if (prevBtn) prevBtn.textContent = '▶', prevBtn.classList.remove('playing');
+      if (prevBtn) { prevBtn.textContent = '▶'; prevBtn.classList.remove('playing'); }
     }
 
     const btn = document.getElementById(`canto-btn-${i}`);
@@ -952,12 +969,15 @@
     // Se stesso canto → toggle play/pausa
     if (cantoCorrente === i && window._player) {
       window._player.toggle();
-      btn.textContent = btn.classList.contains('playing') ? '▶' : '⏸';
-      btn.classList.toggle('playing');
+      if (btn) {
+        btn.textContent = btn.classList.contains('playing') ? '▶' : '⏸';
+        btn.classList.toggle('playing');
+      }
       return;
     }
 
     cantoCorrente = i;
+    _cantiAutoplay = true; // attiva autoplay
     if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
 
     // Carica e avvia nel player

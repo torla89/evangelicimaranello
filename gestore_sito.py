@@ -121,8 +121,8 @@ class PythonBridge:
         try:
             log(f"📁 {SITE_DIR}")
             log("")
-            log("📡 git add dati.json...")
-            if run("git add dati.json") != 0:
+            log("📡 git add dati.json e PDF...")
+            if run("git add dati.json *.pdf") != 0:
                 log("❌ git add fallito"); log("__ERROR__"); return
 
             msg = f"aggiorna dati.json - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
