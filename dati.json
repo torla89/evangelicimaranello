@@ -1,6 +1,6 @@
 {
-  "saldo": 826.07,
-  "aggiornato_il": "2026-05-23",
+  "saldo": 836.07,
+  "aggiornato_il": "2026-05-24",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -21,6 +21,10 @@
     {
       "data": "2026-05-23",
       "saldo": 826.07
+    },
+    {
+      "data": "2026-05-24",
+      "saldo": 836.07
     }
   ],
   "spese_fisse": [
@@ -77,10 +81,10 @@
   "predicazioni": [
     {
       "data": "2026-05-24",
-      "predicatore": "Confronto con i ragazzi",
-      "referente": "Confronto con i ragazzi",
-      "riassunto": "SI DARANNO RISPOSTA ALLE DOMANDE DEI RAGAZZI",
-      "pdf": ""
+      "predicatore": "Daniele",
+      "referente": "Daniele",
+      "riassunto": "CHIAMATI AD EDIFICARE, NON SOLO A PARTECIPARE: Siamo chiamati a incoraggiarci ed edificarci a vicenda, dando il meglio di noi stessi.\nL’atteggiamento di ognuno influisce sugli altri: quando tutti collaborano, la crescita è più facile e armoniosa.\nPer questo è importante impegnarsi davvero e mettere Dio al primo posto nella vita di ogni giorno.",
+      "pdf": "24-05-26 Chiamati a edificare, non solo a partecipare.pdf"
     },
     {
       "data": "2026-05-17",
