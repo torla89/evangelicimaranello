@@ -35,14 +35,55 @@ class PythonBridge:
         self._log_q   = queue.Queue()
         self._running = False
 
+    def salva_musica(self, filename: str, base64_data: str) -> str:
+        """Salva un MP3 nella cartella musica-player/."""
+        try:
+            import base64 as b64mod
+            data = b64mod.b64decode(base64_data)
+            dest_dir = os.path.join(SITE_DIR, "musica-player")
+            os.makedirs(dest_dir, exist_ok=True)
+            with open(os.path.join(dest_dir, filename), 'wb') as f:
+                f.write(data)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def lista_musica(self) -> str:
+        """Restituisce la lista dei file MP3 in musica-player/ come JSON."""
+        try:
+            import json
+            dest_dir = os.path.join(SITE_DIR, "musica-player")
+            os.makedirs(dest_dir, exist_ok=True)
+            files = sorted([f for f in os.listdir(dest_dir)
+                           if f.lower().endswith('.mp3')])
+            return json.dumps(files)
+        except Exception as e:
+            return "[]"
+
+    def elimina_musica(self, filename: str) -> str:
+        """Elimina un MP3 dalla cartella musica-player/."""
+        try:
+            path = os.path.join(SITE_DIR, "musica-player", filename)
+            if os.path.exists(path):
+                os.remove(path)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
     def salva_pdf(self, filename: str, base64_data: str) -> str:
         """
-        Riceve un PDF come base64 da JavaScript e lo salva nella cartella del sito.
+        Riceve un file (PDF o MP3) come base64 e lo salva nella sottocartella corretta:
+        - PDF → predicazioni/
+        - MP3 → predicazioni/ (audio messaggi)
         """
         try:
-            import base64
-            data = base64.b64decode(base64_data)
-            dest = os.path.join(SITE_DIR, filename)
+            import base64 as b64mod
+            data = b64mod.b64decode(base64_data)
+            ext = os.path.splitext(filename)[1].lower()
+            subdir = "predicazioni"
+            dest_dir = os.path.join(SITE_DIR, subdir)
+            os.makedirs(dest_dir, exist_ok=True)
+            dest = os.path.join(dest_dir, filename)
             with open(dest, 'wb') as f:
                 f.write(data)
             return "ok"
@@ -121,8 +162,8 @@ class PythonBridge:
         try:
             log(f"📁 {SITE_DIR}")
             log("")
-            log("📡 git add dati.json, PDF e MP3...")
-            if run("git add dati.json *.pdf *.mp3") != 0:
+            log("📡 git add...")
+            if run("git add dati.json predicazioni/ musica-player/ *.html") != 0:
                 log("❌ git add fallito"); log("__ERROR__"); return
 
             msg = f"aggiorna dati.json - {datetime.now().strftime('%d/%m/%Y %H:%M')}"

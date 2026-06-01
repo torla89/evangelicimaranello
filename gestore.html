@@ -273,6 +273,7 @@
       <button class="tab" onclick="switchTab('riunioni',this)">🏛️ Riunioni</button>
       <button class="tab" onclick="switchTab('predicazioni',this)">📅 Predicazioni</button>
       <button class="tab" onclick="switchTab('attivita',this)">🎯 Attività</button>
+      <button class="tab" onclick="switchTab('musica',this)">🎵 Musica Player</button>
     </div>
 
     <!-- ══ SALDO ══ -->
@@ -336,6 +337,27 @@
       <div class="btn-row-start" style="margin-top:4px;">
         <button class="btn btn-ghost" onclick="openAttModal()">＋ Aggiungi attività</button>
       </div>
+    </div>
+
+    <!-- ══ MUSICA PLAYER ══ -->
+    <div class="panel" id="panel-musica">
+      <div class="section-label">🎵 Brani riprodotti in maniera casuale nel player</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+        I file MP3 vengono salvati nella cartella <strong style="color:var(--white)">musica-player/</strong>
+        e riprodotti in ordine casuale nel player in fondo al sito.
+      </p>
+
+      <div id="musicaList"></div>
+
+      <div class="btn-row-start" style="margin-top:12px;">
+        <label class="btn btn-ghost" style="cursor:pointer;">
+          🎵 Aggiungi MP3
+          <input type="file" accept=".mp3,audio/*" multiple id="musicaUploadInput"
+            style="display:none;" onchange="caricaMusica(this)">
+        </label>
+      </div>
+
+      <div id="musicaUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
     </div>
 
   </div><!-- /#mainApp -->
@@ -766,6 +788,7 @@
         const result = await window.pywebview.api.salva_pdf(_pdfPendingName, _pdfPendingData);
         if (result !== 'ok') { toast('❌ Errore salvataggio PDF: ' + result); return; }
       }
+      document.getElementById('predPdf').value = 'predicazioni/' + _pdfPendingName;
       _pdfPendingName = null; _pdfPendingData = null;
     }
 
@@ -775,6 +798,7 @@
         const result = await window.pywebview.api.salva_pdf(_mp3PendingName, _mp3PendingData);
         if (result !== 'ok') { toast('❌ Errore salvataggio MP3: ' + result); return; }
       }
+      document.getElementById('predMp3').value = 'predicazioni/' + _mp3PendingName;
       _mp3PendingName = null; _mp3PendingData = null;
     }
 
@@ -855,6 +879,68 @@
     renderAll(); markDirty(); toast('🗑 Eliminato');
   }
 
+  // ── MUSICA PLAYER ──────────────────────────────────────────
+  async function caricaMusica(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const log = document.getElementById('musicaUploadLog');
+    log.style.display = 'block';
+    log.textContent = '⏳ Caricamento in corso...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result.split(',')[1]);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+        if (typeof window.pywebview !== 'undefined') {
+          const result = await window.pywebview.api.salva_musica(file.name, b64);
+          if (result === 'ok') ok++; else { fail++; }
+        } else { ok++; }
+      } catch(e) { fail++; }
+    }
+    log.textContent = ok > 0
+      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} in musica-player/${fail > 0 ? ` — ${fail} errori` : ''}`
+      : `❌ Errore nel caricamento`;
+    input.value = '';
+    renderMusica();
+  }
+
+  async function renderMusica() {
+    const c = document.getElementById('musicaList');
+    if (!c) return;
+    if (typeof window.pywebview !== 'undefined') {
+      try {
+        const result = await window.pywebview.api.lista_musica();
+        const files = JSON.parse(result);
+        if (files.length === 0) { c.innerHTML = emptyState('Nessun brano nella cartella musica-player/'); return; }
+        c.innerHTML = files.map(f => `
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="list-item-title">🎵 ${f}</div>
+              <div class="list-item-sub">musica-player/${f}</div>
+            </div>
+            <div class="list-item-actions">
+              <button class="btn btn-danger btn-sm" onclick="eliminaMusica('${f.replace(/'/g,"\\'")}')">🗑</button>
+            </div>
+          </div>`).join('');
+      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la cartella musica-player/'); }
+    } else {
+      c.innerHTML = emptyState('Lista disponibile solo nell\'app desktop');
+    }
+  }
+
+  async function eliminaMusica(filename) {
+    if (!confirm(`Eliminare "${filename}"?`)) return;
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.elimina_musica(filename);
+      if (result === 'ok') { toast('🗑 Eliminato'); renderMusica(); }
+      else toast('❌ ' + result);
+    }
+  }
+
   /* ── MODAL HELPERS ── */
   function openModal(name) {
     document.getElementById('modal-' + name).classList.add('open');
@@ -876,6 +962,7 @@
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('panel-' + name).classList.add('active');
+    if (name === 'musica') renderMusica();
   }
 
   /* ── SALVA/PUBBLICA tramite bridge Python ── */
