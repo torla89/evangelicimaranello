@@ -562,6 +562,7 @@
   }
 </script>
 
+
 <!-- MUSIC PLAYER -->
 <script>
 /**
@@ -779,10 +780,32 @@ function initPlayer() {
     saveState({ trackIndex: idx, time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: isPlaying });
   }
 
+  // ── WAKE LOCK — impedisce risparmio energetico durante la riproduzione ──
+  let _wakeLock = null;
+
+  async function acquireWakeLock() {
+    if (!('wakeLock' in navigator)) return; // non supportato
+    try {
+      if (_wakeLock) return; // già attivo
+      _wakeLock = await navigator.wakeLock.request('screen');
+      _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+    } catch(e) {} // silenzioso se negato (es. pagina non visibile)
+  }
+
+  function releaseWakeLock() {
+    if (_wakeLock) { _wakeLock.release(); _wakeLock = null; }
+  }
+
+  // Riattiva il wake lock se la pagina torna visibile mentre la musica suona
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isPlaying) acquireWakeLock();
+  });
+
   function play() {
     audio.play().then(() => {
       isPlaying = true;
       playBtn.textContent = '⏸';
+      acquireWakeLock();
       saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: true });
     }).catch(() => {});
   }
@@ -791,6 +814,7 @@ function initPlayer() {
     audio.pause();
     isPlaying = false;
     playBtn.textContent = '▶';
+    releaseWakeLock();
     saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: isClosed, playing: false });
   }
 
