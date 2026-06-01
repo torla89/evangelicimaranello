@@ -469,6 +469,9 @@
 
       pred.forEach((p, i) => {
         const referente = p.referente || p.predicatore || '';
+        // Normalizza path: se non ha cartella, aggiunge predicazioni/
+        const pdfPath = p.pdf ? (p.pdf.includes('/') ? p.pdf : 'predicazioni/' + p.pdf) : null;
+        const mp3Path = p.mp3 ? (p.mp3.includes('/') ? p.mp3 : 'predicazioni/' + p.mp3) : null;
         html += `<tr>
           <td><div class="pred-data">${formatData(p.data)}</div></td>
           <td>${referente
@@ -479,7 +482,7 @@
             ? `<div class="pred-riassunto">${p.riassunto}</div>`
             : `<div class="pred-vuoto">Non ancora disponibile</div>`}
           </td>
-          <td>${p.mp3
+          <td>${mp3Path
             ? `<button class="btn-pdf" id="pred-play-${i}" onclick="suonaMessaggio(${i}, this)"
                 style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.20);
                 border-radius:20px;padding:5px 12px;cursor:pointer;color:#fff;font-size:0.82rem;">
@@ -487,8 +490,8 @@
                </button>`
             : `<span class="pred-vuoto">—</span>`}
           </td>
-          <td>${p.pdf
-            ? `<a href="${p.pdf}" target="_blank" class="btn-pdf">📄 Apri</a>`
+          <td>${pdfPath
+            ? `<a href="${pdfPath}" target="_blank" class="btn-pdf">📄 Apri</a>`
             : `<span class="pred-vuoto">—</span>`}
           </td>
         </tr>`;
@@ -509,7 +512,9 @@
 
   function suonaMessaggio(i, btn) {
     const p = window._predDati[i];
-    if (!p || !p.mp3) return;
+    if (!p) return;
+    const mp3Path = p.mp3 ? (p.mp3.includes('/') ? p.mp3 : 'predicazioni/' + p.mp3) : null;
+    if (!mp3Path) return;
 
     // Se stesso bottone → toggle
     if (_predPlayingBtn === btn) {
@@ -532,7 +537,7 @@
     const titolo = (p.referente || p.predicatore || 'Messaggio') + ' — ' + formatData(p.data);
 
     if (window._player) {
-      window._player.playUrl(p.mp3, titolo, 'Chiesa Evangelica Maranello', '', true);
+      window._player.playUrl(mp3Path, titolo, 'Chiesa Evangelica Maranello', '', true);
     }
 
     // Quando finisce → mette in pausa e resetta il bottone
@@ -571,13 +576,13 @@
 
 const PLAYLIST = [
   {
-    src:    "gioia_nel_tuo_nome.mp3",
+    src:    "musica-player/gioia_nel_tuo_nome.mp3",
     title:  "Gioia nel Tuo Nome",
     artist: "Chiesa Evangelica Maranello",
     cover:  "cover_gioia.jpg"
   }
   // Aggiungi altri brani qui sotto:
-  // { src: "brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
+  // { src: "musica-player/brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
 ];
 
 /* ── SHUFFLE Fisher-Yates ── */
