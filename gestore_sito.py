@@ -38,14 +38,21 @@ class PythonBridge:
     def _aggiorna_playlist_json(self):
         """Rigenera musica-player/playlist.json con i file MP3 presenti."""
         import json
+        from urllib.parse import quote
         dest_dir = os.path.join(SITE_DIR, "musica-player")
         os.makedirs(dest_dir, exist_ok=True)
         files = sorted([f for f in os.listdir(dest_dir)
                        if f.lower().endswith('.mp3')])
-        playlist = [{"src": f"musica-player/{f}",
-                     "title": os.path.splitext(f)[0],
-                     "artist": "Chiesa Evangelica Maranello",
-                     "cover": "cover_gioia.jpg"} for f in files]
+        playlist = []
+        for f in files:
+            # Codifica il nome file per URL (spazi → %20 ecc.)
+            encoded = quote(f, safe='')
+            playlist.append({
+                "src":    f"musica-player/{encoded}",
+                "title":  os.path.splitext(f)[0],
+                "artist": "Chiesa Evangelica Maranello",
+                "cover":  "cover_gioia.jpg"
+            })
         with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
             json.dump(playlist, fp, ensure_ascii=False, indent=2)
 
