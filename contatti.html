@@ -421,13 +421,13 @@
 
 const PLAYLIST = [
   {
-    src:    "gioia_nel_tuo_nome.mp3",
+    src:    "musica-player/gioia_nel_tuo_nome.mp3",
     title:  "Gioia nel Tuo Nome",
     artist: "Chiesa Evangelica Maranello",
     cover:  "cover_gioia.jpg"
   }
   // Aggiungi altri brani qui sotto:
-  // { src: "brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
+  // { src: "musica-player/brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
 ];
 
 /* ── SHUFFLE Fisher-Yates ── */
@@ -719,16 +719,22 @@ function initPlayer() {
       saveState({ trackIndex: order[posInOrder], time: audio.currentTime, volume: parseInt(volEl.value), closed: false });
     },
     // Carica e suona un brano esterno alla playlist (es. canti del culto)
-    playUrl(src, title, artist, coverSrc) {
+    playUrl(src, title, artist, coverSrc, singleMode) {
       audio.src = src;
       titleEl.textContent  = title  || src;
       artistEl.textContent = artist || '';
-      if (coverSrc) { cover.src = coverSrc; cover.style.display = 'block'; }
-      else cover.style.display = 'none';
+      const coverEl = document.getElementById('cplCover');
+      if (coverSrc && coverEl) {
+        coverEl.src = coverSrc;
+        coverEl.style.display = 'block';
+      } else if (coverEl) {
+        coverEl.style.display = 'none';
+      }
       bar.value = 0; cur.textContent = '0:00'; dur.textContent = '0:00';
       player.classList.add('visible');
       reopen.classList.remove('visible');
       isClosed = false;
+      window._playerSingleMode = singleMode === true;
       play();
     }
   };
@@ -746,7 +752,14 @@ function initPlayer() {
   });
 
   audio.addEventListener('ended', () => {
-    window._player.next();
+    // Se siamo in modalità playlist normale, vai al prossimo
+    if (!window._playerSingleMode) {
+      window._player.next();
+    } else {
+      // Modalità singolo brano (es. messaggio) → pausa
+      pause();
+      window._playerSingleMode = false;
+    }
   });
 
   // Salva posizione ogni 5 secondi
