@@ -35,8 +35,22 @@ class PythonBridge:
         self._log_q   = queue.Queue()
         self._running = False
 
+    def _aggiorna_playlist_json(self):
+        """Rigenera musica-player/playlist.json con i file MP3 presenti."""
+        import json
+        dest_dir = os.path.join(SITE_DIR, "musica-player")
+        os.makedirs(dest_dir, exist_ok=True)
+        files = sorted([f for f in os.listdir(dest_dir)
+                       if f.lower().endswith('.mp3')])
+        playlist = [{"src": f"musica-player/{f}",
+                     "title": os.path.splitext(f)[0],
+                     "artist": "Chiesa Evangelica Maranello",
+                     "cover": "cover_gioia.jpg"} for f in files]
+        with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
+            json.dump(playlist, fp, ensure_ascii=False, indent=2)
+
     def salva_musica(self, filename: str, base64_data: str) -> str:
-        """Salva un MP3 nella cartella musica-player/."""
+        """Salva un MP3 nella cartella musica-player/ e aggiorna playlist.json."""
         try:
             import base64 as b64mod
             data = b64mod.b64decode(base64_data)
@@ -44,6 +58,7 @@ class PythonBridge:
             os.makedirs(dest_dir, exist_ok=True)
             with open(os.path.join(dest_dir, filename), 'wb') as f:
                 f.write(data)
+            self._aggiorna_playlist_json()
             return "ok"
         except Exception as e:
             return str(e)
@@ -61,11 +76,12 @@ class PythonBridge:
             return "[]"
 
     def elimina_musica(self, filename: str) -> str:
-        """Elimina un MP3 dalla cartella musica-player/."""
+        """Elimina un MP3 dalla cartella musica-player/ e aggiorna playlist.json."""
         try:
             path = os.path.join(SITE_DIR, "musica-player", filename)
             if os.path.exists(path):
                 os.remove(path)
+            self._aggiorna_playlist_json()
             return "ok"
         except Exception as e:
             return str(e)

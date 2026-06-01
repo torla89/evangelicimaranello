@@ -406,29 +406,25 @@
   <a href="area-privata.html"  onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
 </div>
 
+
 <!-- MUSIC PLAYER -->
 <script>
 /**
  * player.js — Music player condiviso tra tutte le pagine
- * Persistenza tramite localStorage: posizione e stato sopravvivono alla navigazione
- *
- * ── COME AGGIUNGERE BRANI ────────────────────────────────────────
- * Aggiungi un oggetto nell'array PLAYLIST qui sotto:
- *   { src: "nomefile.mp3", title: "Titolo", artist: "Artista", cover: "copertina.jpg" }
- * Metti l'mp3 (e la copertina se ce l'ha) nella stessa cartella del sito.
- * ────────────────────────────────────────────────────────────────
+ * Carica la playlist dinamicamente da musica-player/playlist.json
+ * Persistenza tramite sessionStorage.
  */
 
-const PLAYLIST = [
+const PLAYLIST_FALLBACK = [
   {
     src:    "musica-player/gioia_nel_tuo_nome.mp3",
     title:  "Gioia nel Tuo Nome",
     artist: "Chiesa Evangelica Maranello",
     cover:  "cover_gioia.jpg"
   }
-  // Aggiungi altri brani qui sotto:
-  // { src: "musica-player/brano2.mp3", title: "Titolo 2", artist: "Artista", cover: "cover2.jpg" }
 ];
+
+let PLAYLIST = [];
 
 /* ── SHUFFLE Fisher-Yates ── */
 function shuffle(arr) {
@@ -772,12 +768,30 @@ function initPlayer() {
 
 // Avvia quando il DOM è pronto
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPlayer);
+  document.addEventListener('DOMContentLoaded', caricaPlaylistEAvvia);
 } else {
+  caricaPlaylistEAvvia();
+}
+
+async function caricaPlaylistEAvvia() {
+  try {
+    const res = await fetch('musica-player/playlist.json?t=' + Date.now());
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        PLAYLIST = data;
+      } else {
+        PLAYLIST = PLAYLIST_FALLBACK;
+      }
+    } else {
+      PLAYLIST = PLAYLIST_FALLBACK;
+    }
+  } catch(e) {
+    PLAYLIST = PLAYLIST_FALLBACK;
+  }
   initPlayer();
 }
 
 </script>
-
 </body>
 </html>
