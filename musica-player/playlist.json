@@ -1,17 +1,5 @@
 [
   {
-    "src": "musica-player/Croce%20Bussola.mp3",
-    "title": "Croce Bussola",
-    "artist": "Chiesa Evangelica Maranello",
-    "cover": "cover_gioia.jpg"
-  },
-  {
-    "src": "musica-player/E%20torno%20a%20Te.mp3",
-    "title": "E torno a Te",
-    "artist": "Chiesa Evangelica Maranello",
-    "cover": "cover_gioia.jpg"
-  },
-  {
     "src": "musica-player/gioia_nel_tuo_nome.mp3",
     "title": "gioia_nel_tuo_nome",
     "artist": "Chiesa Evangelica Maranello",
