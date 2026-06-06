@@ -47,13 +47,6 @@
       "note": ""
     },
     {
-      "nome": "Claude.ai",
-      "importo": 21,
-      "tipo_rinnovo": "automatico",
-      "scadenza": "mensile-22",
-      "note": "Ogni 22 del mese"
-    },
-    {
       "nome": "Dominio OgniTipoDiInsegnamento.it",
       "importo": 12,
       "tipo_rinnovo": "automatico",
