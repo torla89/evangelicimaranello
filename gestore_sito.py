@@ -35,6 +35,24 @@ class PythonBridge:
         self._log_q   = queue.Queue()
         self._running = False
 
+    def _estrai_copertina(self, mp3_path: str, filename: str) -> str:
+        """Estrae la copertina dall'MP3 e la salva come immagine. Ritorna il path cover."""
+        try:
+            from mutagen.id3 import ID3
+            tags = ID3(mp3_path)
+            for tag in tags.values():
+                if tag.__class__.__name__ == 'APIC':
+                    ext = 'jpg' if 'jpeg' in tag.mime else 'png'
+                    cover_name = os.path.splitext(filename)[0] + '_cover.' + ext
+                    cover_path = os.path.join(SITE_DIR, "musica-player", cover_name)
+                    with open(cover_path, 'wb') as f:
+                        f.write(tag.data)
+                    from urllib.parse import quote
+                    return f"musica-player/{quote(cover_name, safe='')}"
+        except Exception:
+            pass
+        return "cover_gioia.jpg"
+
     def _aggiorna_playlist_json(self):
         """Rigenera musica-player/playlist.json con i file MP3 presenti."""
         import json
@@ -45,26 +63,35 @@ class PythonBridge:
                        if f.lower().endswith('.mp3')])
         playlist = []
         for f in files:
-            # Codifica il nome file per URL (spazi → %20 ecc.)
             encoded = quote(f, safe='')
+            # Cerca copertina estratta associata
+            base = os.path.splitext(f)[0]
+            cover = "cover_gioia.jpg"
+            for ext in ['jpg', 'jpeg', 'png']:
+                cover_file = f"{base}_cover.{ext}"
+                if os.path.exists(os.path.join(dest_dir, cover_file)):
+                    cover = f"musica-player/{quote(cover_file, safe='')}"
+                    break
             playlist.append({
                 "src":    f"musica-player/{encoded}",
                 "title":  os.path.splitext(f)[0],
                 "artist": "Chiesa Evangelica Maranello",
-                "cover":  "cover_gioia.jpg"
+                "cover":  cover
             })
         with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
             json.dump(playlist, fp, ensure_ascii=False, indent=2)
 
     def salva_musica(self, filename: str, base64_data: str) -> str:
-        """Salva un MP3 nella cartella musica-player/ e aggiorna playlist.json."""
+        """Salva un MP3, estrae la copertina dai tag ID3 e aggiorna playlist.json."""
         try:
             import base64 as b64mod
             data = b64mod.b64decode(base64_data)
             dest_dir = os.path.join(SITE_DIR, "musica-player")
             os.makedirs(dest_dir, exist_ok=True)
-            with open(os.path.join(dest_dir, filename), 'wb') as f:
+            mp3_path = os.path.join(dest_dir, filename)
+            with open(mp3_path, 'wb') as f:
                 f.write(data)
+            self._estrai_copertina(mp3_path, filename)
             self._aggiorna_playlist_json()
             return "ok"
         except Exception as e:
@@ -83,11 +110,17 @@ class PythonBridge:
             return "[]"
 
     def elimina_musica(self, filename: str) -> str:
-        """Elimina un MP3 dalla cartella musica-player/ e aggiorna playlist.json."""
+        """Elimina un MP3 e la sua copertina dalla cartella musica-player/."""
         try:
-            path = os.path.join(SITE_DIR, "musica-player", filename)
-            if os.path.exists(path):
-                os.remove(path)
+            mp3_path = os.path.join(SITE_DIR, "musica-player", filename)
+            if os.path.exists(mp3_path):
+                os.remove(mp3_path)
+            # Elimina anche la copertina associata
+            base = os.path.splitext(filename)[0]
+            for ext in ['jpg', 'jpeg', 'png']:
+                cover_path = os.path.join(SITE_DIR, "musica-player", f"{base}_cover.{ext}")
+                if os.path.exists(cover_path):
+                    os.remove(cover_path)
             self._aggiorna_playlist_json()
             return "ok"
         except Exception as e:
