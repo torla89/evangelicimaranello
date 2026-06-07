@@ -62,10 +62,10 @@
     },
     {
       "nome": "Gestione conto tot.",
-      "importo": 7,
+      "importo": 86,
       "tipo_rinnovo": "automatico",
-      "scadenza": "15 ogni mese",
-      "note": ""
+      "scadenza": "14/06",
+      "note": "Addebito annuale"
     }
   ],
   "riunioni": [
