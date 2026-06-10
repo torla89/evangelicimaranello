@@ -1,6 +1,6 @@
 {
-  "saldo": 1036.07,
-  "aggiornato_il": "2026-06-02",
+  "saldo": 1076.07,
+  "aggiornato_il": "2026-06-10",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -29,6 +29,10 @@
     {
       "data": "2026-06-02",
       "saldo": 1036.07
+    },
+    {
+      "data": "2026-06-10",
+      "saldo": 1076.07
     }
   ],
   "spese_fisse": [
@@ -76,6 +80,14 @@
     }
   ],
   "predicazioni": [
+    {
+      "data": "2026-06-07",
+      "predicatore": "Ragazzi",
+      "referente": "Ragazzi",
+      "riassunto": "I RAGAZZI LEGGONO UN BRANO A SCELTA E RIFLETTONO INSIEME: \nI ragazzi hanno letto il brano di Davide e Golia e, successivamente, abbiamo avuto un momento di confronto sugli insegnamenti che possiamo trarre da questo testo.",
+      "pdf": "",
+      "mp3": ""
+    },
     {
       "data": "2026-05-31",
       "predicatore": "Daniele",
