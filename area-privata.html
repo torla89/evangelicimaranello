@@ -815,6 +815,7 @@
       const res = await fetch('basi-inni/playlist.json?t=' + Date.now());
       if (!res.ok) throw new Error('File non trovato');
       const basi = await res.json();
+      basi.sort((a, b) => a.title.localeCompare(b.title, 'it'));
       if (!basi.length) {
         c.innerHTML = '<div class="empty"><div class="emoji">🎹</div>Nessuna base disponibile.</div>';
         return;
@@ -850,21 +851,22 @@
     }
 
     baseCorrente = i;
-    _basiAutoplay = true;
+    _basiAutoplay = false; // nessun autoplay — si ferma alla fine
     if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
     if (window._player) {
-      window._player.playUrl(b.src, b.title, 'Base Musicale', b.cover || '');
+      window._player.playUrl(b.src, b.title, 'Base Musicale', b.cover || '', true);
     }
   }
 
-  // Autoplay basi: quando finisce una parte automaticamente alla successiva
+  // Quando la base finisce: resetta il bottone
   function _setupBasiAutoplay() {
     const audio = document.getElementById('cemAudio');
     if (!audio) { setTimeout(_setupBasiAutoplay, 500); return; }
     audio.addEventListener('ended', () => {
-      if (!_basiAutoplay || baseCorrente === null || !window._basiDati) return;
-      const next = (baseCorrente + 1) % window._basiDati.length;
-      suonaBase(next);
+      if (baseCorrente === null) return;
+      const btn = document.getElementById(`base-btn-${baseCorrente}`);
+      if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+      baseCorrente = null;
     });
   }
   document.addEventListener('DOMContentLoaded', _setupBasiAutoplay);
