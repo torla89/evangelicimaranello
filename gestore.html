@@ -274,6 +274,7 @@
       <button class="tab" onclick="switchTab('predicazioni',this)">📅 Predicazioni</button>
       <button class="tab" onclick="switchTab('attivita',this)">🎯 Attività</button>
       <button class="tab" onclick="switchTab('musica',this)">🎵 Musica Player</button>
+      <button class="tab" onclick="switchTab('basi',this)">🎹 Basi Inni</button>
     </div>
 
     <!-- ══ SALDO ══ -->
@@ -358,6 +359,27 @@
       </div>
 
       <div id="musicaUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
+    </div>
+
+    <!-- ══ BASI INNI ══ -->
+    <div class="panel" id="panel-basi">
+      <div class="section-label">🎹 Basi strumentali degli inni</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+        I file MP3 vengono salvati nella cartella <strong style="color:var(--white)">basi-inni/</strong>
+        e sono disponibili nell'area privata del sito per soci e simpatizzanti.
+      </p>
+
+      <div id="basiList"></div>
+
+      <div class="btn-row-start" style="margin-top:12px;">
+        <label class="btn btn-ghost" style="cursor:pointer;">
+          🎹 Aggiungi base
+          <input type="file" accept=".mp3,audio/*" multiple id="basiUploadInput"
+            style="display:none;" onchange="caricaBasi(this)">
+        </label>
+      </div>
+
+      <div id="basiUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
     </div>
 
   </div><!-- /#mainApp -->
@@ -957,12 +979,68 @@
   });
 
   /* ── TABS ── */
+  // ── BASI INNI ──────────────────────────────────────────────
+  async function caricaBasi(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const log = document.getElementById('basiUploadLog');
+    log.style.display = 'block'; log.textContent = '⏳ Caricamento...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result.split(',')[1]);
+          r.onerror = rej; r.readAsDataURL(file);
+        });
+        if (typeof window.pywebview !== 'undefined') {
+          const result = await window.pywebview.api.salva_base(file.name, b64);
+          if (result === 'ok') ok++; else fail++;
+        } else ok++;
+      } catch(e) { fail++; }
+    }
+    log.textContent = ok > 0 ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''}${fail > 0 ? ` — ${fail} errori` : ''}` : '❌ Errore';
+    input.value = ''; renderBasi();
+  }
+
+  async function renderBasi() {
+    const c = document.getElementById('basiList');
+    if (!c) return;
+    if (typeof window.pywebview !== 'undefined') {
+      try {
+        const result = await window.pywebview.api.lista_basi();
+        const files = JSON.parse(result);
+        if (!files.length) { c.innerHTML = emptyState('Nessuna base nella cartella basi-inni/'); return; }
+        c.innerHTML = files.map(f => `
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="list-item-title">🎹 ${f}</div>
+              <div class="list-item-sub">basi-inni/${f}</div>
+            </div>
+            <div class="list-item-actions">
+              <button class="btn btn-danger btn-sm" onclick="eliminaBasi('${f.replace(/'/g,"\\'")}')">🗑</button>
+            </div>
+          </div>`).join('');
+      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la cartella basi-inni/'); }
+    } else { c.innerHTML = emptyState('Disponibile solo nell\'app desktop'); }
+  }
+
+  async function eliminaBasi(filename) {
+    if (!confirm(`Eliminare "${filename}"?`)) return;
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.elimina_base(filename);
+      if (result === 'ok') { toast('🗑 Eliminata'); renderBasi(); }
+      else toast('❌ ' + result);
+    }
+  }
+
   function switchTab(name, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('panel-' + name).classList.add('active');
     if (name === 'musica') renderMusica();
+    if (name === 'basi') renderBasi();
   }
 
   /* ── SALVA/PUBBLICA tramite bridge Python ── */
