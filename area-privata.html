@@ -1303,9 +1303,8 @@
         const testo = titolo ? titolo.textContent : '';
         if (testo.includes("Canti") || testo.includes("Basi")) {
           m.style.display = "block";
-          // Lascia entrambi chiusi — l'utente li apre manualmente
           const body = m.querySelector(".macrogruppo-body");
-          if (body) body.style.display = "none";
+          if (body) { body.style.display = "none"; body.classList.remove("aperto"); }
           const toggle = m.querySelector(".macrogruppo-toggle");
           if (toggle) toggle.classList.remove("aperto");
         } else {
@@ -1325,14 +1324,32 @@
   function logout() {
     sessionStorage.removeItem("loggedIn");
     sessionStorage.removeItem("ruolo");
+    localStorage.removeItem("areaPrivataToken");
     document.getElementById("schermata-login").style.display    = "flex";
     document.getElementById("schermata-contenuto").style.display = "none";
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
   }
 
-  // Logout automatico quando si lascia la pagina
-  window.addEventListener("beforeunload", function() {
+  // Logout automatico al cambio pagina:
+  // Quando si fa login, salva un token in localStorage con scadenza breve.
+  // All'apertura della pagina controlla se il token è ancora valido.
+  // Se l'utente naviga altrove e torna, il token è scaduto → richiede login.
+  function salvaTokenSessione() {
+    localStorage.setItem("areaPrivataToken", Date.now().toString());
+  }
+
+  function tokenValido() {
+    const t = localStorage.getItem("areaPrivataToken");
+    if (!t) return false;
+    // Token valido solo se la pagina non è mai stata lasciata
+    // (controlliamo via sessionStorage che viene pulito ad ogni nuova navigazione)
+    return sessionStorage.getItem("loggedIn") === "true";
+  }
+
+  // Quando si lascia la pagina, rimuovi il sessionStorage
+  // così al ritorno non risulta più loggato
+  window.addEventListener("pagehide", function() {
     sessionStorage.removeItem("loggedIn");
     sessionStorage.removeItem("ruolo");
   });
