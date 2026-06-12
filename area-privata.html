@@ -1297,14 +1297,15 @@
       if (lbl) lbl.textContent = "🎵 Area Canti";
       if (sub) sub.textContent = "Ascolta i canti e le basi musicali della nostra comunità.";
 
-      // Mostra solo Canti e Basi — entrambi chiusi
+      // Mostra solo Canti e Basi — entrambi chiusi (usa solo classi, non display)
       document.querySelectorAll(".macrogruppo").forEach(m => {
         const titolo = m.querySelector("h2");
         const testo = titolo ? titolo.textContent : '';
         if (testo.includes("Canti") || testo.includes("Basi")) {
           m.style.display = "block";
+          // Assicura che siano chiusi rimuovendo la classe aperto
           const body = m.querySelector(".macrogruppo-body");
-          if (body) { body.style.display = "none"; body.classList.remove("aperto"); }
+          if (body) body.classList.remove("aperto");
           const toggle = m.querySelector(".macrogruppo-toggle");
           if (toggle) toggle.classList.remove("aperto");
         } else {
