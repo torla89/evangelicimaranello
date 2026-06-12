@@ -126,6 +126,64 @@ class PythonBridge:
         except Exception as e:
             return str(e)
 
+    def salva_base(self, filename: str, base64_data: str) -> str:
+        """Salva un MP3 nella cartella basi-inni/ e aggiorna playlist.json."""
+        try:
+            import base64 as b64mod
+            from urllib.parse import quote
+            data = b64mod.b64decode(base64_data)
+            dest_dir = os.path.join(SITE_DIR, "basi-inni")
+            os.makedirs(dest_dir, exist_ok=True)
+            with open(os.path.join(dest_dir, filename), 'wb') as f:
+                f.write(data)
+            self._aggiorna_basi_json()
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def lista_basi(self) -> str:
+        """Restituisce la lista dei file MP3 in basi-inni/."""
+        try:
+            import json
+            dest_dir = os.path.join(SITE_DIR, "basi-inni")
+            os.makedirs(dest_dir, exist_ok=True)
+            files = sorted([f for f in os.listdir(dest_dir) if f.lower().endswith('.mp3')])
+            return json.dumps(files)
+        except Exception:
+            return "[]"
+
+    def elimina_base(self, filename: str) -> str:
+        """Elimina un MP3 da basi-inni/ e aggiorna playlist.json."""
+        try:
+            path = os.path.join(SITE_DIR, "basi-inni", filename)
+            if os.path.exists(path):
+                os.remove(path)
+            self._aggiorna_basi_json()
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def _aggiorna_basi_json(self):
+        """Rigenera basi-inni/playlist.json."""
+        import json
+        from urllib.parse import quote
+        dest_dir = os.path.join(SITE_DIR, "basi-inni")
+        os.makedirs(dest_dir, exist_ok=True)
+        files = sorted([f for f in os.listdir(dest_dir) if f.lower().endswith('.mp3')])
+        playlist = [{"src": f"basi-inni/{quote(f, safe='')}", "title": os.path.splitext(f)[0], "cover": ""} for f in files]
+        with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
+            json.dump(playlist, fp, ensure_ascii=False, indent=2)
+
+    def git_pull(self) -> str:
+        """Fa git pull per sincronizzare il repository locale con GitHub."""
+        try:
+            r = subprocess.run("git pull", cwd=SITE_DIR,
+                               capture_output=True, text=True, shell=True)
+            out = r.stdout.strip()
+            return out if out else "Already up to date."
+        except Exception as e:
+            return f"Errore: {e}"
+
     def salva_pdf(self, filename: str, base64_data: str) -> str:
         """
         Riceve un file (PDF o MP3) come base64 e lo salva nella sottocartella corretta:
@@ -219,7 +277,7 @@ class PythonBridge:
             log(f"📁 {SITE_DIR}")
             log("")
             log("📡 git add...")
-            if run("git add dati.json predicazioni/ musica-player/ *.html") != 0:
+            if run("git add dati.json predicazioni/ musica-player/ basi-inni/ *.html") != 0:
                 log("❌ git add fallito"); log("__ERROR__"); return
 
             msg = f"aggiorna dati.json - {datetime.now().strftime('%d/%m/%Y %H:%M')}"

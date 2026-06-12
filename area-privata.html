@@ -668,6 +668,24 @@
         </div>
       </div>
 
+      <!-- MACROGRUPPO: BASE MUSICALE INNI -->
+      <div class="macrogruppo" id="macrogruppo-basi">
+        <div class="macrogruppo-header" onclick="toggleMacrogruppo(this)">
+          <span class="macrogruppo-icon">🎹</span>
+          <h2>Basi Musicali degli Inni</h2>
+          <span class="macrogruppo-toggle">▼</span>
+        </div>
+        <div class="macrogruppo-body">
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-bottom:16px;line-height:1.6;">
+            Basi strumentali degli inni — solo musica, senza voce. Clicca ▶ per riprodurre nel player in basso.
+          </p>
+          <div id="basi-container">
+            <div class="empty"><div class="emoji">🎹</div>Nessuna base musicale disponibile.<br>
+            <span style="font-size:0.78rem;">Aggiungi i file MP3 nella cartella <strong>basi-inni/</strong> del sito.</span></div>
+          </div>
+        </div>
+      </div>
+
       <button class="btn-logout" onclick="logout()">🔒 Esci dall'area privata</button>
     </main>
   </div>
@@ -786,7 +804,82 @@
     return result;
   }
 
-  // ── CANTI ────────────────────────────────────────────────────
+  // ── BASI MUSICALI INNI ────────────────────────────────────────
+  let baseCorrente = null;
+  let _basiAutoplay = false;
+
+  async function renderBasi() {
+    const c = document.getElementById('basi-container');
+    if (!c) return;
+    try {
+      const res = await fetch('basi-inni/playlist.json?t=' + Date.now());
+      if (!res.ok) throw new Error('File non trovato');
+      const basi = await res.json();
+      if (!basi.length) {
+        c.innerHTML = '<div class="empty"><div class="emoji">🎹</div>Nessuna base disponibile.</div>';
+        return;
+      }
+      c.innerHTML = basi.map((b, i) => `
+        <div class="canto-row" id="base-row-${i}">
+          <span class="canto-num">${i + 1}</span>
+          <span class="canto-titolo">${b.title}</span>
+          <button class="canto-play" id="base-btn-${i}"
+            onclick="suonaBase(${i})" title="Ascolta">▶</button>
+        </div>`).join('');
+      window._basiDati = basi;
+    } catch(e) {
+      c.innerHTML = '<div class="empty"><div class="emoji">🎹</div>Nessuna base musicale disponibile.</div>';
+    }
+  }
+
+  function suonaBase(i) {
+    const basi = window._basiDati;
+    if (!basi || !basi[i]) return;
+    const b = basi[i];
+
+    if (baseCorrente !== null) {
+      const prevBtn = document.getElementById(`base-btn-${baseCorrente}`);
+      if (prevBtn) { prevBtn.textContent = '▶'; prevBtn.classList.remove('playing'); }
+    }
+    const btn = document.getElementById(`base-btn-${i}`);
+
+    if (baseCorrente === i && window._player) {
+      window._player.toggle();
+      if (btn) { btn.textContent = btn.classList.contains('playing') ? '▶' : '⏸'; btn.classList.toggle('playing'); }
+      return;
+    }
+
+    baseCorrente = i;
+    _basiAutoplay = true;
+    if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
+    if (window._player) {
+      window._player.playUrl(b.src, b.title, 'Base Musicale', b.cover || '');
+    }
+  }
+
+  // Autoplay basi: quando finisce una parte automaticamente alla successiva
+  function _setupBasiAutoplay() {
+    const audio = document.getElementById('cemAudio');
+    if (!audio) { setTimeout(_setupBasiAutoplay, 500); return; }
+    audio.addEventListener('ended', () => {
+      if (!_basiAutoplay || baseCorrente === null || !window._basiDati) return;
+      const next = (baseCorrente + 1) % window._basiDati.length;
+      suonaBase(next);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', _setupBasiAutoplay);
+
+  // Renderizza basi quando si apre il macrogruppo
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('#macrogruppo-basi .macrogruppo-header');
+    if (header) {
+      const orig = header.onclick;
+      header.onclick = function() {
+        if (orig) orig.call(this);
+        renderBasi();
+      };
+    }
+  });
   // Per aggiungere un canto: { num: "2", titolo: "Vieni con noi", src: "canti/02.mp3" }
   // Lascia src vuoto ("") se il file non è ancora disponibile.
   const CANTI = [
@@ -1204,14 +1297,16 @@
       if (lbl) lbl.textContent = "🎵 Guida ai Canti";
       if (sub) sub.textContent = "Ascolta i canti del canzoniere della nostra comunità.";
 
-      // Nascondi tutti i macrogruppi tranne quello dei canti
+      // Nascondi tutti i macrogruppi tranne quelli accessibili
       document.querySelectorAll(".macrogruppo").forEach(m => {
         const titolo = m.querySelector("h2");
-        if (titolo && titolo.textContent.includes("Canti")) {
+        const testo = titolo ? titolo.textContent : '';
+        if (testo.includes("Canti") || testo.includes("Basi")) {
           m.style.display = "block";
-          // Apri automaticamente la sezione
-          const body = m.querySelector(".macrogruppo-body");
-          if (body) body.style.display = "block";
+          if (testo.includes("Canti")) {
+            const body = m.querySelector(".macrogruppo-body");
+            if (body) body.style.display = "block";
+          }
         } else {
           m.style.display = "none";
         }
