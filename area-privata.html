@@ -815,7 +815,12 @@
       const res = await fetch('basi-inni/playlist.json?t=' + Date.now());
       if (!res.ok) throw new Error('File non trovato');
       const basi = await res.json();
-      basi.sort((a, b) => a.title.localeCompare(b.title, 'it'));
+      basi.sort((a, b) => {
+        const numA = parseInt(a.title) || 0;
+        const numB = parseInt(b.title) || 0;
+        if (numA !== numB) return numA - numB;
+        return a.title.localeCompare(b.title, 'it');
+      });
       if (!basi.length) {
         c.innerHTML = '<div class="empty"><div class="emoji">🎹</div>Nessuna base disponibile.</div>';
         return;

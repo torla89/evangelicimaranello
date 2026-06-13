@@ -146,12 +146,18 @@ class PythonBridge:
             return str(e)
 
     def _aggiorna_basi_json(self):
-        """Rigenera basi-inni/playlist.json."""
-        import json
+        """Rigenera basi-inni/playlist.json ordinato numericamente."""
+        import json, re
         from urllib.parse import quote
         dest_dir = os.path.join(SITE_DIR, "basi-inni")
         os.makedirs(dest_dir, exist_ok=True)
-        files = sorted([f for f in os.listdir(dest_dir) if f.lower().endswith('.mp3')])
+        files = os.listdir(dest_dir)
+        files = [f for f in files if f.lower().endswith('.mp3')]
+        # Ordina numericamente estraendo il numero iniziale dal nome file
+        def sort_key(f):
+            m = re.match(r'^(\d+)', f)
+            return (int(m.group(1)) if m else 9999, f)
+        files = sorted(files, key=sort_key)
         playlist = [{"src": f"basi-inni/{quote(f, safe='')}", "title": os.path.splitext(f)[0], "cover": ""} for f in files]
         with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
             json.dump(playlist, fp, ensure_ascii=False, indent=2)
