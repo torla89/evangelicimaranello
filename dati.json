@@ -1,6 +1,6 @@
 {
-  "saldo": 1076.07,
-  "aggiornato_il": "2026-06-10",
+  "saldo": 1051.58,
+  "aggiornato_il": "2026-06-14",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -33,6 +33,10 @@
     {
       "data": "2026-06-10",
       "saldo": 1076.07
+    },
+    {
+      "data": "2026-06-14",
+      "saldo": 1051.58
     }
   ],
   "spese_fisse": [
@@ -70,6 +74,13 @@
       "tipo_rinnovo": "automatico",
       "scadenza": "14/06",
       "note": "Addebito annuale"
+    },
+    {
+      "nome": "Moises Studio",
+      "importo": 24.49,
+      "tipo_rinnovo": "mensile",
+      "scadenza": "14/06",
+      "note": "applicazione per creare la base degli inni"
     }
   ],
   "riunioni": [
