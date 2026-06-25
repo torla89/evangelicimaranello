@@ -1,6 +1,6 @@
 {
-  "saldo": 1301.58,
-  "aggiornato_il": "2026-06-15",
+  "saldo": 1519.1,
+  "aggiornato_il": "2026-06-25",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -41,6 +41,10 @@
     {
       "data": "2026-06-15",
       "saldo": 1301.58
+    },
+    {
+      "data": "2026-06-25",
+      "saldo": 1519.1
     }
   ],
   "spese_fisse": [
@@ -74,10 +78,10 @@
     },
     {
       "nome": "Gestione conto tot.",
-      "importo": 86,
+      "importo": 102.48,
       "tipo_rinnovo": "automatico",
       "scadenza": "14/06",
-      "note": "Addebito annuale"
+      "note": "Addebito annuale, comprensivo di IVA"
     },
     {
       "nome": "Moises Studio",
