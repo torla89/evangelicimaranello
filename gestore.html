@@ -344,8 +344,7 @@
     <div class="panel" id="panel-musica">
       <div class="section-label">🎵 Brani riprodotti in maniera casuale nel player</div>
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
-        I file MP3 vengono salvati nella cartella <strong style="color:var(--white)">musica-player/</strong>
-        e riprodotti in ordine casuale nel player in fondo al sito.
+        I brani vengono caricati su <strong style="color:var(--white)">Archive.org</strong> — collezione <strong style="color:var(--white)">Cem-Musica-Player</strong>.
       </p>
 
       <div id="musicaList"></div>
@@ -354,10 +353,9 @@
         <label class="btn btn-ghost" style="cursor:pointer;">
           🎵 Aggiungi MP3
           <input type="file" accept=".mp3,audio/*" multiple id="musicaUploadInput"
-            style="display:none;" onchange="caricaMusica(this)">
+            style="display:none;" onchange="caricaMusicaArchive(this)">
         </label>
       </div>
-
       <div id="musicaUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
     </div>
 
@@ -365,8 +363,7 @@
     <div class="panel" id="panel-basi">
       <div class="section-label">🎹 Basi strumentali degli inni</div>
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
-        I file MP3 vengono salvati nella cartella <strong style="color:var(--white)">basi-inni/</strong>
-        e sono disponibili nell'area privata del sito per soci e simpatizzanti.
+        Le basi vengono caricate su <strong style="color:var(--white)">Archive.org</strong> — collezione <strong style="color:var(--white)">Cem-basi-inni</strong>.
       </p>
 
       <div id="basiList"></div>
@@ -375,10 +372,9 @@
         <label class="btn btn-ghost" style="cursor:pointer;">
           🎹 Aggiungi base
           <input type="file" accept=".mp3,audio/*" multiple id="basiUploadInput"
-            style="display:none;" onchange="caricaBasi(this)">
+            style="display:none;" onchange="caricaBasiArchive(this)">
         </label>
       </div>
-
       <div id="basiUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
     </div>
 
@@ -389,6 +385,9 @@
 <div class="save-bar" id="saveBar">
   <div class="save-bar-msg" id="saveBarMsg">Carica un file <strong>dati.json</strong> per iniziare</div>
   <div style="display:flex;gap:10px;flex-shrink:0;">
+    <button class="btn btn-ghost" onclick="openModal('s3')" title="Configura chiavi S3 Archive.org">
+      🔑 Archive.org
+    </button>
     <button class="btn btn-ghost" id="btnSalva" onclick="saveFile()" disabled
       title="Salva dati.json con backup automatico">
       💾 Salva dati.json
@@ -485,34 +484,61 @@
   <div class="modal">
     <h3 id="modalPredTitle">Nuova predicazione</h3>
     <input type="hidden" id="predEditIdx" value="-1">
-    <div class="field-row">
-      <div class="field"><label>Data</label><input type="date" id="predData"></div>
-      <div class="field"><label>Referente</label><input type="text" id="predReferente" placeholder="es. Enrico Torlai"></div>
-    </div>
-    <div class="field"><label>Riassunto</label><textarea id="predRiassunto" rows="4" placeholder="Breve sintesi della predicazione…"></textarea></div>
-    <div class="field">
-      <label>File PDF (opzionale)</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="predPdf" placeholder="es. pred_20260511.pdf" style="flex:1;">
-        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
-          📎 Sfoglia
-          <input type="file" accept=".pdf" id="predPdfFile" style="display:none;" onchange="caricaPdf(this)">
-        </label>
-      </div>
-      <div id="predPdfStatus" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ PDF pronto per il salvataggio</div>
-    </div>
 
     <div class="field">
-      <label>File MP3 (opzionale)</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="predMp3" placeholder="es. pred_20260511.mp3" style="flex:1;">
-        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
-          🎵 Sfoglia
-          <input type="file" accept=".mp3,audio/*" id="predMp3File" style="display:none;" onchange="caricaMp3(this)">
-        </label>
-      </div>
-      <div id="predMp3Status" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ MP3 pronto per il salvataggio</div>
+      <label>Tipo</label>
+      <select id="predTipo" onchange="aggiornaCampiPred()" style="width:100%;">
+        <option value="nuova">📅 Messaggio nuova associazione</option>
+        <option value="vecchia">📦 Messaggio vecchia associazione (Archivio storico)</option>
+      </select>
     </div>
+
+    <!-- CAMPI NUOVA ASSOCIAZIONE -->
+    <div id="campNuova">
+      <div class="field-row">
+        <div class="field"><label>Data</label><input type="date" id="predData"></div>
+        <div class="field"><label>Referente</label><input type="text" id="predReferente" placeholder="es. Enrico Torlai"></div>
+      </div>
+      <div class="field"><label>Riassunto</label><textarea id="predRiassunto" rows="4" placeholder="Breve sintesi della predicazione…"></textarea></div>
+      <div class="field">
+        <label>File PDF (opzionale) — URL Archive.org o sfoglia</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="predPdf" placeholder="https://archive.org/download/cem-predicazioni/..." style="flex:1;">
+          <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
+            📎 Sfoglia
+            <input type="file" accept=".pdf" id="predPdfFile" style="display:none;" onchange="caricaPdf(this)">
+          </label>
+        </div>
+        <div id="predPdfStatus" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ PDF pronto per il salvataggio</div>
+      </div>
+      <div class="field">
+        <label>File MP3 (opzionale) — URL Archive.org o sfoglia</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="predMp3" placeholder="https://archive.org/download/cem-predicazioni/..." style="flex:1;">
+          <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
+            🎵 Sfoglia
+            <input type="file" accept=".mp3,audio/*" id="predMp3File" style="display:none;" onchange="caricaMp3(this)">
+          </label>
+        </div>
+        <div id="predMp3Status" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ MP3 pronto per il salvataggio</div>
+      </div>
+    </div>
+
+    <!-- CAMPI VECCHIA ASSOCIAZIONE -->
+    <div id="campVecchia" style="display:none;">
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+        Inserisci l'URL del file MP3 dalla collezione Archive.org
+        <strong style="color:var(--white)">predicazioni-vecchie</strong>.
+        Il messaggio verrà aggiunto all'archivio storico (<code>predicazioni_vecchie.json</code>).
+      </p>
+      <div class="field"><label>Predicatore</label><input type="text" id="predVecchiaPredicatore" placeholder="es. Berri, Ivaldo, Albert…"></div>
+      <div class="field"><label>Titolo messaggio</label><input type="text" id="predVecchiaTitolo" placeholder="es. La tentazione"></div>
+      <div class="field">
+        <label>URL MP3 su Archive.org</label>
+        <input type="text" id="predVecchiaMp3" placeholder="https://archive.org/download/predicazioni-vecchie/...">
+      </div>
+    </div>
+
     <div class="btn-row-end">
       <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
       <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
@@ -737,27 +763,38 @@
       </div>`).join('');
   }
 
+  function aggiornaCampiPred() {
+    const tipo = document.getElementById('predTipo').value;
+    document.getElementById('campNuova').style.display  = tipo === 'nuova'   ? '' : 'none';
+    document.getElementById('campVecchia').style.display = tipo === 'vecchia' ? '' : 'none';
+  }
+
   function openPredModal(idx = -1) {
     document.getElementById('predEditIdx').value = idx;
+    document.getElementById('predTipo').value = 'nuova';
+    aggiornaCampiPred();
     if (idx >= 0) {
       const p = dati.predicazioni[idx];
-      document.getElementById('predData').value         = p.data;
-      document.getElementById('predReferente').value  = p.referente || p.predicatore || '';
-      document.getElementById('predRiassunto').value    = p.riassunto || '';
-      document.getElementById('predPdf').value          = p.pdf || '';
-      document.getElementById('predMp3').value          = p.mp3 || '';
+      document.getElementById('predData').value        = p.data;
+      document.getElementById('predReferente').value   = p.referente || p.predicatore || '';
+      document.getElementById('predRiassunto').value   = p.riassunto || '';
+      document.getElementById('predPdf').value         = p.pdf || '';
+      document.getElementById('predMp3').value         = p.mp3 || '';
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
       _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
     } else {
-      document.getElementById('predData').value         = today();
-      document.getElementById('predReferente').value  = '';
-      document.getElementById('predRiassunto').value    = '';
-      document.getElementById('predPdf').value          = '';
-      document.getElementById('predMp3').value          = '';
+      document.getElementById('predData').value        = today();
+      document.getElementById('predReferente').value   = '';
+      document.getElementById('predRiassunto').value   = '';
+      document.getElementById('predPdf').value         = '';
+      document.getElementById('predMp3').value         = '';
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
+      document.getElementById('predVecchiaPredicatore').value = '';
+      document.getElementById('predVecchiaTitolo').value      = '';
+      document.getElementById('predVecchiaMp3').value         = '';
       _pdfPendingName = null; _pdfPendingData = null;
       _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Nuova predicazione';
@@ -801,10 +838,30 @@
   }
 
   async function salvaPred() {
+    const tipo = document.getElementById('predTipo').value;
+
+    // ── VECCHIA ASSOCIAZIONE ──────────────────────────────────
+    if (tipo === 'vecchia') {
+      const predicatore = document.getElementById('predVecchiaPredicatore').value.trim();
+      const titolo      = document.getElementById('predVecchiaTitolo').value.trim();
+      const mp3         = document.getElementById('predVecchiaMp3').value.trim();
+      if (!predicatore || !titolo) { toast('⚠ Inserisci predicatore e titolo'); return; }
+
+      // Aggiorna predicazioni_vecchie.json
+      if (typeof window.pywebview !== 'undefined') {
+        const result = await window.pywebview.api.aggiungi_predicazione_vecchia(predicatore, titolo, mp3);
+        if (result !== 'ok') { toast('❌ ' + result); return; }
+      }
+      closeModal('predicazione'); markDirty();
+      toast('✅ Aggiunto all\'archivio storico');
+      return;
+    }
+
+    // ── NUOVA ASSOCIAZIONE ────────────────────────────────────
     const data = document.getElementById('predData').value;
     if (!data) { toast('⚠ Inserisci la data'); return; }
 
-    // Salva PDF se presente
+    // Salva PDF se file locale selezionato
     if (_pdfPendingName && _pdfPendingData) {
       if (typeof window.pywebview !== 'undefined') {
         const result = await window.pywebview.api.salva_pdf(_pdfPendingName, _pdfPendingData);
@@ -814,7 +871,7 @@
       _pdfPendingName = null; _pdfPendingData = null;
     }
 
-    // Salva MP3 se presente
+    // Salva MP3 se file locale selezionato
     if (_mp3PendingName && _mp3PendingData) {
       if (typeof window.pywebview !== 'undefined') {
         const result = await window.pywebview.api.salva_pdf(_mp3PendingName, _mp3PendingData);
@@ -901,68 +958,6 @@
     renderAll(); markDirty(); toast('🗑 Eliminato');
   }
 
-  // ── MUSICA PLAYER ──────────────────────────────────────────
-  async function caricaMusica(input) {
-    const files = Array.from(input.files);
-    if (!files.length) return;
-    const log = document.getElementById('musicaUploadLog');
-    log.style.display = 'block';
-    log.textContent = '⏳ Caricamento in corso...';
-    let ok = 0, fail = 0;
-    for (const file of files) {
-      try {
-        const b64 = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result.split(',')[1]);
-          r.onerror = rej;
-          r.readAsDataURL(file);
-        });
-        if (typeof window.pywebview !== 'undefined') {
-          const result = await window.pywebview.api.salva_musica(file.name, b64);
-          if (result === 'ok') ok++; else { fail++; }
-        } else { ok++; }
-      } catch(e) { fail++; }
-    }
-    log.textContent = ok > 0
-      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} in musica-player/${fail > 0 ? ` — ${fail} errori` : ''}`
-      : `❌ Errore nel caricamento`;
-    input.value = '';
-    renderMusica();
-  }
-
-  async function renderMusica() {
-    const c = document.getElementById('musicaList');
-    if (!c) return;
-    if (typeof window.pywebview !== 'undefined') {
-      try {
-        const result = await window.pywebview.api.lista_musica();
-        const files = JSON.parse(result);
-        if (files.length === 0) { c.innerHTML = emptyState('Nessun brano nella cartella musica-player/'); return; }
-        c.innerHTML = files.map(f => `
-          <div class="list-item">
-            <div class="list-item-info">
-              <div class="list-item-title">🎵 ${f}</div>
-              <div class="list-item-sub">musica-player/${f}</div>
-            </div>
-            <div class="list-item-actions">
-              <button class="btn btn-danger btn-sm" onclick="eliminaMusica('${f.replace(/'/g,"\\'")}')">🗑</button>
-            </div>
-          </div>`).join('');
-      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la cartella musica-player/'); }
-    } else {
-      c.innerHTML = emptyState('Lista disponibile solo nell\'app desktop');
-    }
-  }
-
-  async function eliminaMusica(filename) {
-    if (!confirm(`Eliminare "${filename}"?`)) return;
-    if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_musica(filename);
-      if (result === 'ok') { toast('🗑 Eliminato'); renderMusica(); }
-      else toast('❌ ' + result);
-    }
-  }
-
   /* ── MODAL HELPERS ── */
   function openModal(name) {
     document.getElementById('modal-' + name).classList.add('open');
@@ -979,28 +974,66 @@
   });
 
   /* ── TABS ── */
-  // ── BASI INNI ──────────────────────────────────────────────
-  async function caricaBasi(input) {
-    const files = Array.from(input.files);
-    if (!files.length) return;
-    const log = document.getElementById('basiUploadLog');
-    log.style.display = 'block'; log.textContent = '⏳ Caricamento...';
-    let ok = 0, fail = 0;
-    for (const file of files) {
-      try {
-        const b64 = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result.split(',')[1]);
-          r.onerror = rej; r.readAsDataURL(file);
-        });
-        if (typeof window.pywebview !== 'undefined') {
-          const result = await window.pywebview.api.salva_base(file.name, b64);
-          if (result === 'ok') ok++; else fail++;
-        } else ok++;
-      } catch(e) { fail++; }
+  async function aggiungiMusica() {
+    const url    = document.getElementById('musicaUrlInput').value.trim();
+    const titolo = document.getElementById('musicaTitoloInput').value.trim();
+    const cover  = document.getElementById('musicaCoverInput').value.trim();
+    if (!url || !titolo) { toast('⚠ Inserisci URL e titolo'); return; }
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.aggiungi_musica_url(url, titolo, cover);
+      if (result === 'ok') {
+        document.getElementById('musicaUrlInput').value = '';
+        document.getElementById('musicaTitoloInput').value = '';
+        document.getElementById('musicaCoverInput').value = '';
+        toast('✅ Brano aggiunto'); renderMusica();
+      } else toast('❌ ' + result);
     }
-    log.textContent = ok > 0 ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''}${fail > 0 ? ` — ${fail} errori` : ''}` : '❌ Errore';
-    input.value = ''; renderBasi();
+  }
+
+  async function renderMusica() {
+    const c = document.getElementById('musicaList');
+    if (!c) return;
+    if (typeof window.pywebview !== 'undefined') {
+      try {
+        const result = await window.pywebview.api.lista_musica_url();
+        const items = JSON.parse(result);
+        if (!items.length) { c.innerHTML = emptyState('Nessun brano nel player'); return; }
+        c.innerHTML = items.map((f, i) => `
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="list-item-title">🎵 ${f.title}</div>
+              <div class="list-item-sub" style="word-break:break-all;">${f.src}</div>
+            </div>
+            <div class="list-item-actions">
+              <button class="btn btn-danger btn-sm" onclick="eliminaMusica(${i})">🗑</button>
+            </div>
+          </div>`).join('');
+      } catch(e) { c.innerHTML = emptyState('Impossibile caricare la lista'); }
+    } else { c.innerHTML = emptyState('Disponibile solo nell\'app desktop'); }
+  }
+
+  async function eliminaMusica(idx) {
+    if (!confirm('Eliminare questo brano dalla playlist?')) return;
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.elimina_musica_url(idx);
+      if (result === 'ok') { toast('🗑 Eliminato'); renderMusica(); }
+      else toast('❌ ' + result);
+    }
+  }
+
+  // ── BASI INNI (Archive.org) ─────────────────────────────────
+  async function aggiungiBasi() {
+    const url    = document.getElementById('basiUrlInput').value.trim();
+    const titolo = document.getElementById('basiTitoloInput').value.trim();
+    if (!url || !titolo) { toast('⚠ Inserisci URL e titolo'); return; }
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.aggiungi_base_url(url, titolo);
+      if (result === 'ok') {
+        document.getElementById('basiUrlInput').value = '';
+        document.getElementById('basiTitoloInput').value = '';
+        toast('✅ Base aggiunta'); renderBasi();
+      } else toast('❌ ' + result);
+    }
   }
 
   async function renderBasi() {
@@ -1008,31 +1041,115 @@
     if (!c) return;
     if (typeof window.pywebview !== 'undefined') {
       try {
-        const result = await window.pywebview.api.lista_basi();
-        const files = JSON.parse(result);
-        if (!files.length) { c.innerHTML = emptyState('Nessuna base nella cartella basi-inni/'); return; }
-        c.innerHTML = files.map(f => `
+        const result = await window.pywebview.api.lista_basi_url();
+        const items = JSON.parse(result);
+        if (!items.length) { c.innerHTML = emptyState('Nessuna base nella playlist'); return; }
+        c.innerHTML = items.map((f, i) => `
           <div class="list-item">
             <div class="list-item-info">
-              <div class="list-item-title">🎹 ${f}</div>
-              <div class="list-item-sub">basi-inni/${f}</div>
+              <div class="list-item-title">🎹 ${f.title}</div>
+              <div class="list-item-sub" style="word-break:break-all;">${f.src}</div>
             </div>
             <div class="list-item-actions">
-              <button class="btn btn-danger btn-sm" onclick="eliminaBasi('${f.replace(/'/g,"\\'")}')">🗑</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminaBasi(${i})">🗑</button>
             </div>
           </div>`).join('');
-      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la cartella basi-inni/'); }
+      } catch(e) { c.innerHTML = emptyState('Impossibile caricare la lista'); }
     } else { c.innerHTML = emptyState('Disponibile solo nell\'app desktop'); }
   }
 
-  async function eliminaBasi(filename) {
-    if (!confirm(`Eliminare "${filename}"?`)) return;
+  async function eliminaBasi(idx) {
+    if (!confirm('Eliminare questa base dalla playlist?')) return;
     if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_base(filename);
+      const result = await window.pywebview.api.elimina_base_url(idx);
       if (result === 'ok') { toast('🗑 Eliminata'); renderBasi(); }
       else toast('❌ ' + result);
     }
   }
+
+  // ── CHIAVI S3 ARCHIVE.ORG ──────────────────────────────────
+  function salvaChiaviS3() {
+    const access = document.getElementById('s3AccessKey').value.trim();
+    const secret = document.getElementById('s3SecretKey').value.trim();
+    if (!access || !secret) { toast('⚠ Inserisci entrambe le chiavi'); return; }
+    localStorage.setItem('s3_access', access);
+    localStorage.setItem('s3_secret', secret);
+    closeModal('s3');
+    toast('✅ Chiavi S3 salvate');
+  }
+
+  function getS3Keys() {
+    return {
+      access: localStorage.getItem('s3_access') || '',
+      secret: localStorage.getItem('s3_secret') || ''
+    };
+  }
+
+  async function caricaMusicaArchive(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const keys = getS3Keys();
+    if (!keys.access || !keys.secret) {
+      toast('⚠ Configura prima le chiavi S3'); openModal('s3'); return;
+    }
+    const log = document.getElementById('musicaUploadLog');
+    log.style.display = 'block'; log.textContent = '⏳ Caricamento su Archive.org...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await leggiBase64(file);
+        const result = await window.pywebview.api.carica_su_archive(
+          file.name, b64, 'Cem-Musica-Player', keys.access, keys.secret, 'musica'
+        );
+        if (result === 'ok') ok++; else { fail++; log.textContent = '❌ ' + result; }
+      } catch(e) { fail++; }
+    }
+    input.value = '';
+    log.textContent = ok > 0
+      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} su Archive.org${fail > 0 ? ` — ${fail} errori` : ''}`
+      : '❌ Errore caricamento';
+    if (ok > 0) { renderMusica(); markDirty(); }
+  }
+
+  async function caricaBasiArchive(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const keys = getS3Keys();
+    if (!keys.access || !keys.secret) {
+      toast('⚠ Configura prima le chiavi S3'); openModal('s3'); return;
+    }
+    const log = document.getElementById('basiUploadLog');
+    log.style.display = 'block'; log.textContent = '⏳ Caricamento su Archive.org...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await leggiBase64(file);
+        const result = await window.pywebview.api.carica_su_archive(
+          file.name, b64, 'Cem-basi-inni', keys.access, keys.secret, 'basi'
+        );
+        if (result === 'ok') ok++; else { fail++; log.textContent = '❌ ' + result; }
+      } catch(e) { fail++; }
+    }
+    input.value = '';
+    log.textContent = ok > 0
+      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} su Archive.org${fail > 0 ? ` — ${fail} errori` : ''}`
+      : '❌ Errore caricamento';
+    if (ok > 0) { renderBasi(); markDirty(); }
+  }
+
+  function leggiBase64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result.split(',')[1]);
+      r.onerror = rej; r.readAsDataURL(file);
+    });
+  }
+
+  window.addEventListener('load', () => {
+    const keys = getS3Keys();
+    if (keys.access) document.getElementById('s3AccessKey').value = keys.access;
+    if (keys.secret) document.getElementById('s3SecretKey').value = keys.secret;
+  });
 
   function switchTab(name, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1197,6 +1314,29 @@
     if (dirty) { e.preventDefault(); e.returnValue = ''; }
   });
 </script>
+
+<!-- ══ MODAL CHIAVI S3 ARCHIVE.ORG ══ -->
+<div class="modal-bg" id="modal-s3">
+  <div class="modal">
+    <h3>🔑 Chiavi S3 Archive.org</h3>
+    <p style="font-size:0.88rem;color:var(--muted);line-height:1.7;margin-bottom:16px;">
+      Le chiavi vengono salvate solo sul tuo PC, mai condivise.<br>
+      Trovi le chiavi su: <strong style="color:var(--white)">archive.org/account/s3.php</strong>
+    </p>
+    <div class="field">
+      <label>S3 Access Key</label>
+      <input type="text" id="s3AccessKey" placeholder="xxxxxxxxxxxx" style="font-family:monospace;">
+    </div>
+    <div class="field">
+      <label>S3 Secret Key</label>
+      <input type="password" id="s3SecretKey" placeholder="xxxxxxxxxxxx" style="font-family:monospace;">
+    </div>
+    <div class="btn-row-end" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('s3')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaChiaviS3()">💾 Salva</button>
+    </div>
+  </div>
+</div>
 
 <!-- LOG OVERLAY git push -->
 <div class="modal-bg" id="logOverlay">
