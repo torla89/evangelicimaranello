@@ -385,7 +385,7 @@
 <div class="save-bar" id="saveBar">
   <div class="save-bar-msg" id="saveBarMsg">Carica un file <strong>dati.json</strong> per iniziare</div>
   <div style="display:flex;gap:10px;flex-shrink:0;">
-    <button class="btn btn-ghost" onclick="openModal('s3')" title="Configura chiavi S3 Archive.org">
+    <button class="btn btn-ghost" onclick="apriModalS3()" title="Configura chiavi S3 Archive.org">
       🔑 Archive.org
     </button>
     <button class="btn btn-ghost" id="btnSalva" onclick="saveFile()" disabled
@@ -1068,27 +1068,31 @@
   }
 
   // ── CHIAVI S3 ARCHIVE.ORG ──────────────────────────────────
-  function salvaChiaviS3() {
+  async function salvaChiaviS3() {
     const access = document.getElementById('s3AccessKey').value.trim();
     const secret = document.getElementById('s3SecretKey').value.trim();
     if (!access || !secret) { toast('⚠ Inserisci entrambe le chiavi'); return; }
-    localStorage.setItem('s3_access', access);
-    localStorage.setItem('s3_secret', secret);
+    if (typeof window.pywebview !== 'undefined') {
+      await window.pywebview.api.salva_chiavi_s3(access, secret);
+    }
     closeModal('s3');
     toast('✅ Chiavi S3 salvate');
   }
 
-  function getS3Keys() {
-    return {
-      access: localStorage.getItem('s3_access') || '',
-      secret: localStorage.getItem('s3_secret') || ''
-    };
+  async function getS3Keys() {
+    if (typeof window.pywebview !== 'undefined') {
+      try {
+        const result = await window.pywebview.api.leggi_chiavi_s3();
+        return JSON.parse(result);
+      } catch(e) { return {}; }
+    }
+    return {};
   }
 
   async function caricaMusicaArchive(input) {
     const files = Array.from(input.files);
     if (!files.length) return;
-    const keys = getS3Keys();
+    const keys = await getS3Keys();
     if (!keys.access || !keys.secret) {
       toast('⚠ Configura prima le chiavi S3'); openModal('s3'); return;
     }
@@ -1102,19 +1106,19 @@
           file.name, b64, 'Cem-Musica-Player', keys.access, keys.secret, 'musica'
         );
         if (result === 'ok') ok++; else { fail++; log.textContent = '❌ ' + result; }
-      } catch(e) { fail++; }
+      } catch(e) { fail++; log.textContent = '❌ ' + e; }
     }
     input.value = '';
-    log.textContent = ok > 0
-      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} su Archive.org${fail > 0 ? ` — ${fail} errori` : ''}`
-      : '❌ Errore caricamento';
-    if (ok > 0) { renderMusica(); markDirty(); }
+    if (ok > 0) {
+      log.textContent = `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} su Archive.org`;
+      renderMusica(); markDirty();
+    }
   }
 
   async function caricaBasiArchive(input) {
     const files = Array.from(input.files);
     if (!files.length) return;
-    const keys = getS3Keys();
+    const keys = await getS3Keys();
     if (!keys.access || !keys.secret) {
       toast('⚠ Configura prima le chiavi S3'); openModal('s3'); return;
     }
@@ -1128,13 +1132,13 @@
           file.name, b64, 'Cem-basi-inni', keys.access, keys.secret, 'basi'
         );
         if (result === 'ok') ok++; else { fail++; log.textContent = '❌ ' + result; }
-      } catch(e) { fail++; }
+      } catch(e) { fail++; log.textContent = '❌ ' + e; }
     }
     input.value = '';
-    log.textContent = ok > 0
-      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} su Archive.org${fail > 0 ? ` — ${fail} errori` : ''}`
-      : '❌ Errore caricamento';
-    if (ok > 0) { renderBasi(); markDirty(); }
+    if (ok > 0) {
+      log.textContent = `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} su Archive.org`;
+      renderBasi(); markDirty();
+    }
   }
 
   function leggiBase64(file) {
@@ -1145,11 +1149,13 @@
     });
   }
 
-  window.addEventListener('load', () => {
-    const keys = getS3Keys();
+  // Precompila chiavi S3 all'apertura del modal
+  async function apriModalS3() {
+    const keys = await getS3Keys();
     if (keys.access) document.getElementById('s3AccessKey').value = keys.access;
     if (keys.secret) document.getElementById('s3SecretKey').value = keys.secret;
-  });
+    openModal('s3');
+  }
 
   function switchTab(name, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
