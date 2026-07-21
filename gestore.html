@@ -324,10 +324,16 @@
 
     <!-- ══ PREDICAZIONI ══ -->
     <div class="panel" id="panel-predicazioni">
-      <div class="section-label">Calendario predicazioni</div>
+      <div class="section-label">Nuove predicazioni</div>
       <div id="predicazioniList"></div>
       <div class="btn-row-start" style="margin-top:4px;">
         <button class="btn btn-ghost" onclick="openPredModal()">＋ Aggiungi predicazione</button>
+      </div>
+
+      <div class="section-label" style="margin-top:22px;">Vecchie predicazioni</div>
+      <div id="predicazioniVecchieList"></div>
+      <div class="btn-row-start" style="margin-top:4px;">
+        <button class="btn btn-ghost" onclick="openPredModal(-1, 'vecchia')">＋ Aggiungi predicazione vecchia</button>
       </div>
     </div>
 
@@ -477,12 +483,21 @@
   <div class="modal">
     <h3 id="modalPredTitle">Nuova predicazione</h3>
     <input type="hidden" id="predEditIdx" value="-1">
-    <div class="field-row">
-      <div class="field"><label>Data</label><input type="date" id="predData"></div>
-      <div class="field"><label>Referente</label><input type="text" id="predReferente" placeholder="es. Enrico Torlai"></div>
+    <input type="hidden" id="predVecchiaOrigPredicatore" value="">
+    <input type="hidden" id="predVecchiaOrigIndex" value="-1">
+    <div class="field"><label>Tipo</label>
+      <select id="predTipo" onchange="aggiornaCampiPredTipo()">
+        <option value="nuova">Nuova</option>
+        <option value="vecchia">Vecchia</option>
+      </select>
     </div>
-    <div class="field"><label>Riassunto</label><textarea id="predRiassunto" rows="4" placeholder="Breve sintesi della predicazione…"></textarea></div>
-    <div class="field">
+    <div class="field-row">
+      <div class="field" id="predCampoData"><label>Data</label><input type="date" id="predData"></div>
+      <div class="field"><label id="predReferenteLabel">Referente</label><input type="text" id="predReferente" placeholder="es. Enrico Torlai"></div>
+    </div>
+    <div class="field" id="predCampoRiassunto"><label>Riassunto</label><textarea id="predRiassunto" rows="4" placeholder="Breve sintesi della predicazione…"></textarea></div>
+    <div class="field" id="predCampoTitolo"><label>Titolo</label><input type="text" id="predVecchiaTitolo" placeholder="es. La fede che vince il mondo"></div>
+    <div class="field" id="predCampoPdf">
       <label>File PDF (opzionale)</label>
       <div style="display:flex;gap:8px;align-items:center;">
         <input type="text" id="predPdf" placeholder="es. pred_20260511.pdf" style="flex:1;">
@@ -541,6 +556,16 @@
 <script>
   let dati = null;
   let dirty = false;
+  let vecchie = {};
+
+  function caricaVecchie(jsonStr) {
+    try {
+      vecchie = JSON.parse(jsonStr) || {};
+    } catch(e) {
+      vecchie = {};
+    }
+    renderPredicazioniVecchie();
+  }
 
   function parsaECarica(jsonStr, filename) {
     try {
@@ -579,6 +604,7 @@
     renderSpese();
     renderRiunioni();
     renderPredicazioni();
+    renderPredicazioniVecchie();
     renderAttivita();
   }
 
@@ -715,7 +741,7 @@
   /* ── PREDICAZIONI ── */
   function renderPredicazioni() {
     const c = document.getElementById('predicazioniList');
-    if (!dati.predicazioni.length) { c.innerHTML = emptyState('Nessuna predicazione inserita'); return; }
+    if (!dati.predicazioni.length) { c.innerHTML = emptyState('Nessuna predicazione nuova inserita'); return; }
     c.innerHTML = [...dati.predicazioni].sort((a,b) => b.data.localeCompare(a.data)).map((p, i) => `
       <div class="list-item">
         <div class="list-item-info">
@@ -729,13 +755,50 @@
       </div>`).join('');
   }
 
-  function openPredModal(idx = -1) {
+  /* ── PREDICAZIONI VECCHIE ── */
+  function renderPredicazioniVecchie() {
+    const c = document.getElementById('predicazioniVecchieList');
+    const predicatori = Object.keys(vecchie).sort((a,b) => a.localeCompare(b));
+    const totale = predicatori.reduce((n, p) => n + vecchie[p].length, 0);
+    if (!totale) { c.innerHTML = emptyState('Nessuna predicazione vecchia inserita'); return; }
+    c.innerHTML = predicatori.map(predicatore => `
+      <div class="list-item-group-label" style="font-weight:600;margin:10px 0 4px;">${predicatore}</div>
+      ${vecchie[predicatore].map((item, i) => `
+        <div class="list-item">
+          <div class="list-item-info">
+            <div class="list-item-title">${item.titolo || '<em style="color:var(--muted)">Titolo non specificato</em>'}</div>
+            <div class="list-item-sub">${item.src ? '🎵 ' + item.src : ''}</div>
+          </div>
+          <div class="list-item-actions">
+            <button class="btn btn-ghost btn-sm" onclick="editPredVecchia('${predicatore.replace(/'/g, "\\'")}', ${i})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePredVecchia('${predicatore.replace(/'/g, "\\'")}', ${i})">🗑</button>
+          </div>
+        </div>`).join('')}
+    `).join('');
+  }
+
+  function aggiornaCampiPredTipo() {
+    const tipo = document.getElementById('predTipo').value;
+    const nuovaOnly = ['predCampoData', 'predCampoRiassunto', 'predCampoPdf'];
+    nuovaOnly.forEach(id => document.getElementById(id).style.display = (tipo === 'nuova') ? '' : 'none');
+    document.getElementById('predCampoTitolo').style.display = (tipo === 'vecchia') ? '' : 'none';
+    document.getElementById('predReferenteLabel').textContent = (tipo === 'vecchia') ? 'Predicatore' : 'Referente';
+  }
+
+  function openPredModal(idx = -1, tipo = 'nuova') {
     document.getElementById('predEditIdx').value = idx;
+    document.getElementById('predVecchiaOrigPredicatore').value = '';
+    document.getElementById('predVecchiaOrigIndex').value = -1;
+    document.getElementById('predTipo').disabled = false;
+
     if (idx >= 0) {
       const p = dati.predicazioni[idx];
+      document.getElementById('predTipo').value = 'nuova';
+      document.getElementById('predTipo').disabled = true;
       document.getElementById('predData').value         = p.data;
       document.getElementById('predReferente').value  = p.referente || p.predicatore || '';
       document.getElementById('predRiassunto').value    = p.riassunto || '';
+      document.getElementById('predVecchiaTitolo').value = '';
       document.getElementById('predPdf').value          = p.pdf || '';
       document.getElementById('predMp3').value          = p.mp3 || '';
       document.getElementById('predPdfStatus').style.display = 'none';
@@ -743,20 +806,53 @@
       _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
     } else {
+      document.getElementById('predTipo').value = tipo;
       document.getElementById('predData').value         = today();
       document.getElementById('predReferente').value  = '';
       document.getElementById('predRiassunto').value    = '';
+      document.getElementById('predVecchiaTitolo').value = '';
       document.getElementById('predPdf').value          = '';
       document.getElementById('predMp3').value          = '';
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
       _pdfPendingName = null; _pdfPendingData = null;
       _mp3PendingName = null; _mp3PendingData = null;
-      document.getElementById('modalPredTitle').textContent = 'Nuova predicazione';
+      document.getElementById('modalPredTitle').textContent = (tipo === 'vecchia') ? 'Nuova predicazione vecchia' : 'Nuova predicazione';
     }
+    aggiornaCampiPredTipo();
     document.getElementById('modal-predicazione').classList.add('open');
   }
-  function editPred(i) { openPredModal(i); }
+  function editPred(i) { openPredModal(i, 'nuova'); }
+
+  function editPredVecchia(predicatore, i) {
+    const item = vecchie[predicatore][i];
+    document.getElementById('predEditIdx').value = -1;
+    document.getElementById('predVecchiaOrigPredicatore').value = predicatore;
+    document.getElementById('predVecchiaOrigIndex').value = i;
+    document.getElementById('predTipo').value = 'vecchia';
+    document.getElementById('predTipo').disabled = true;
+    document.getElementById('predReferente').value = predicatore;
+    document.getElementById('predVecchiaTitolo').value = item.titolo || '';
+    document.getElementById('predData').value = today();
+    document.getElementById('predRiassunto').value = '';
+    document.getElementById('predPdf').value = '';
+    document.getElementById('predMp3').value = item.src || '';
+    document.getElementById('predPdfStatus').style.display = 'none';
+    document.getElementById('predMp3Status').style.display = 'none';
+    _pdfPendingName = null; _pdfPendingData = null;
+    _mp3PendingName = null; _mp3PendingData = null;
+    document.getElementById('modalPredTitle').textContent = 'Modifica predicazione vecchia';
+    aggiornaCampiPredTipo();
+    document.getElementById('modal-predicazione').classList.add('open');
+  }
+
+  function deletePredVecchia(predicatore, i) {
+    if (!confirm('Eliminare questo elemento?')) return;
+    if (!vecchie[predicatore]) return;
+    vecchie[predicatore].splice(i, 1);
+    if (!vecchie[predicatore].length) delete vecchie[predicatore];
+    renderPredicazioniVecchie(); markDirty(); toast('🗑 Eliminato');
+  }
 
   let _pdfPendingName = null;
   let _pdfPendingData = null;
@@ -793,8 +889,17 @@
   }
 
   async function salvaPred() {
-    const data = document.getElementById('predData').value;
-    if (!data) { toast('⚠ Inserisci la data'); return; }
+    const tipo = document.getElementById('predTipo').value;
+
+    if (tipo === 'nuova') {
+      const data = document.getElementById('predData').value;
+      if (!data) { toast('⚠ Inserisci la data'); return; }
+    } else {
+      const predicatore = document.getElementById('predReferente').value.trim();
+      const titolo = document.getElementById('predVecchiaTitolo').value.trim();
+      if (!predicatore) { toast('⚠ Inserisci il predicatore'); return; }
+      if (!titolo) { toast('⚠ Inserisci il titolo'); return; }
+    }
 
     // Salva PDF se presente
     if (_pdfPendingName && _pdfPendingData) {
@@ -816,20 +921,39 @@
       _mp3PendingName = null; _mp3PendingData = null;
     }
 
-    const val_referente = document.getElementById('predReferente').value.trim();
-    const obj = {
-      data,
-      predicatore: val_referente,
-      referente:   val_referente,
-      riassunto:   document.getElementById('predRiassunto').value.trim(),
-      pdf:         document.getElementById('predPdf').value.trim(),
-      mp3:         document.getElementById('predMp3').value.trim()
-    };
-    const idx = parseInt(document.getElementById('predEditIdx').value);
-    if (idx >= 0) dati.predicazioni[idx] = obj;
-    else dati.predicazioni.unshift(obj);
-    dati.predicazioni.sort((a,b) => b.data.localeCompare(a.data));
-    renderPredicazioni(); closeModal('predicazione'); markDirty(); toast('✅ Predicazione salvata');
+    if (tipo === 'nuova') {
+      const data = document.getElementById('predData').value;
+      const val_referente = document.getElementById('predReferente').value.trim();
+      const obj = {
+        data,
+        predicatore: val_referente,
+        referente:   val_referente,
+        riassunto:   document.getElementById('predRiassunto').value.trim(),
+        pdf:         document.getElementById('predPdf').value.trim(),
+        mp3:         document.getElementById('predMp3').value.trim()
+      };
+      const idx = parseInt(document.getElementById('predEditIdx').value);
+      if (idx >= 0) dati.predicazioni[idx] = obj;
+      else dati.predicazioni.unshift(obj);
+      dati.predicazioni.sort((a,b) => b.data.localeCompare(a.data));
+      renderPredicazioni(); closeModal('predicazione'); markDirty(); toast('✅ Predicazione salvata');
+    } else {
+      const predicatore = document.getElementById('predReferente').value.trim();
+      const obj = {
+        titolo: document.getElementById('predVecchiaTitolo').value.trim(),
+        src:    document.getElementById('predMp3').value.trim()
+      };
+      const origPredicatore = document.getElementById('predVecchiaOrigPredicatore').value;
+      const origIndex = parseInt(document.getElementById('predVecchiaOrigIndex').value);
+      if (origIndex >= 0 && vecchie[origPredicatore]) {
+        vecchie[origPredicatore].splice(origIndex, 1);
+        if (!vecchie[origPredicatore].length) delete vecchie[origPredicatore];
+      }
+      if (!vecchie[predicatore]) vecchie[predicatore] = [];
+      vecchie[predicatore].push(obj);
+      vecchie = Object.fromEntries(Object.entries(vecchie).sort((a,b) => a[0].localeCompare(b[0])));
+      renderPredicazioniVecchie(); closeModal('predicazione'); markDirty(); toast('✅ Predicazione vecchia salvata');
+    }
   }
 
   /* ── ATTIVITÀ ── */
@@ -1142,6 +1266,8 @@
       try {
         const result = await window.pywebview.api.salva_json(json);
         if (result === 'ok') {
+          const rv = await window.pywebview.api.salva_predicazioni_vecchie(JSON.stringify(vecchie, null, 2));
+          if (rv !== 'ok') { toast('❌ Errore salvataggio predicazioni vecchie: ' + rv); return; }
           dirty = false;
           setSaveMsg('ok', '✅ dati.json salvato con backup');
           toast('✅ Salvato!');
@@ -1174,6 +1300,8 @@
       try {
         const r = await window.pywebview.api.salva_json(json);
         if (r !== 'ok') { toast('❌ Errore salvataggio: ' + r); return; }
+        const rv = await window.pywebview.api.salva_predicazioni_vecchie(JSON.stringify(vecchie, null, 2));
+        if (rv !== 'ok') { toast('❌ Errore salvataggio predicazioni vecchie: ' + rv); return; }
       } catch(e) { toast('❌ ' + e); return; }
 
       // Poi apri log overlay e lancia git push
