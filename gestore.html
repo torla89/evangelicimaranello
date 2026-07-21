@@ -1050,22 +1050,69 @@
     openModal('s3');
   }
 
+  function uploadLog(msg) {
+    const el = document.getElementById('uploadLog');
+    el.textContent += msg + '\n'; el.scrollTop = el.scrollHeight;
+  }
+
   async function aggiungiFileArchive(tipo) {
-    if (typeof window.pywebview === 'undefined') return;
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
     const keys = await getS3Keys();
     if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return; }
-    const collezione = tipo === 'musica' ? 'Cem-Musica-Player' : 'Cem-basi-inni';
+
     const paths = await window.pywebview.api.seleziona_file_mp3();
-    if (!paths || !paths.length) return;
+    if (!paths || !paths.length) { toast('⚠ Nessun file selezionato'); return; }
+
+    const collezione = tipo === 'musica' ? 'Cem-Musica-Player' : 'Cem-basi-inni';
+
+    // Apri modal upload
+    document.getElementById('uploadLog').textContent = '';
+    document.getElementById('uploadBar').style.width = '0%';
+    document.getElementById('uploadPct').textContent = '0%';
+    document.getElementById('uploadSpeed').textContent = '';
+    document.getElementById('uploadCloseBtn').style.display = 'none';
+    document.getElementById('uploadOverlay').classList.add('open');
+
+    let tuttiOk = true;
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i];
       const nome = path.split('\\').pop().split('/').pop();
-      toast(`📡 ${i+1}/${paths.length}: ${nome} — caricamento...`);
-      const result = await window.pywebview.api.carica_file_su_archive(
-        path, collezione, keys.access, keys.secret, tipo
-      );
-      toast(result === 'ok' ? `✅ ${nome} caricato!` : `❌ ${result}`);
+      document.getElementById('uploadInfo').textContent = `File ${i+1} di ${paths.length}: ${nome}`;
+      uploadLog(`📡 Avvio upload: ${nome}`);
+      document.getElementById('uploadBar').style.width = '0%';
+      document.getElementById('uploadPct').textContent = '0%';
+      document.getElementById('uploadSpeed').textContent = '';
+
+      // Avvia upload in background
+      await window.pywebview.api.avvia_upload(path, collezione, keys.access, keys.secret, tipo);
+
+      // Polling stato
+      let done = false;
+      while (!done) {
+        await new Promise(r => setTimeout(r, 400));
+        try {
+          const statoStr = await window.pywebview.api.stato_upload();
+          const s = JSON.parse(statoStr);
+          document.getElementById('uploadBar').style.width = s.pct + '%';
+          document.getElementById('uploadPct').textContent = s.pct + '%';
+          if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
+          if (s.status === 'done') {
+            uploadLog(`✅ ${nome} caricato con successo!`);
+            document.getElementById('uploadBar').style.width = '100%';
+            document.getElementById('uploadPct').textContent = '100%';
+            done = true;
+          } else if (s.status === 'error') {
+            uploadLog(`❌ Errore: ${s.message}`);
+            tuttiOk = false; done = true;
+          }
+        } catch(e) { uploadLog('❌ Errore polling: ' + e); done = true; }
+      }
+      await new Promise(r => setTimeout(r, 500));
     }
+
+    uploadLog(tuttiOk ? '\n🎉 Tutti i file caricati!' : '\n⚠ Completato con errori.');
+    document.getElementById('uploadCloseBtn').style.display = 'inline-block';
+
     if (tipo === 'musica') renderMusica(); else renderBasi();
     markDirty();
   }
@@ -1262,6 +1309,32 @@
     <div class="btn-row-end">
       <button id="logCloseBtn" class="btn btn-primary" style="display:none;"
         onclick="document.getElementById('logOverlay').classList.remove('open')">
+        ✓ Chiudi
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL UPLOAD ARCHIVE.ORG ══ -->
+<div class="modal-bg" id="uploadOverlay">
+  <div class="modal" style="max-width:520px;">
+    <h3>📡 Caricamento su Archive.org</h3>
+    <div id="uploadInfo" style="font-size:0.85rem;color:var(--muted);margin:10px 0 6px;"></div>
+    <pre id="uploadLog" style="
+      background:rgba(0,0,0,0.40);border:1px solid var(--border);border-radius:8px;
+      padding:14px;font-family:'Consolas',monospace;font-size:0.82rem;
+      color:var(--white);min-height:80px;max-height:140px;overflow-y:auto;
+      white-space:pre-wrap;margin:10px 0 8px;"></pre>
+    <div style="background:var(--surf2);border-radius:8px;overflow:hidden;height:12px;margin-bottom:6px;">
+      <div id="uploadBar" style="height:100%;background:var(--gold);width:0%;transition:width 0.4s;border-radius:8px;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+      <div id="uploadPct" style="font-size:0.82rem;color:var(--muted);">0%</div>
+      <div id="uploadSpeed" style="font-size:0.82rem;color:var(--muted);font-family:monospace;"></div>
+    </div>
+    <div class="btn-row-end">
+      <button id="uploadCloseBtn" class="btn btn-primary" style="display:none;"
+        onclick="document.getElementById('uploadOverlay').classList.remove('open')">
         ✓ Chiudi
       </button>
     </div>
