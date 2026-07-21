@@ -164,6 +164,183 @@ class PythonBridge:
 
     # ──────────────────────────────────────────────────────────
 
+    def carica_su_archive(self, filename: str, base64_data: str,
+                           collezione: str, access_key: str, secret_key: str,
+                           tipo: str = 'musica') -> str:
+        """Carica un file su Archive.org via S3 e aggiorna il playlist.json locale."""
+        try:
+            import base64 as b64mod, urllib.request, re
+            data = b64mod.b64decode(base64_data)
+
+            # Upload su Archive.org via S3
+            url = f"https://s3.us.archive.org/{collezione}/{filename}"
+            req = urllib.request.Request(url, data=data, method='PUT')
+            req.add_header('Authorization', f'LOW {access_key}:{secret_key}')
+            req.add_header('x-archive-auto-make-bucket', '1')
+            req.add_header('x-archive-meta-mediatype', 'audio')
+            req.add_header('Content-Type', 'audio/mpeg')
+            req.add_header('Content-Length', str(len(data)))
+
+            with urllib.request.urlopen(req, timeout=120) as r:
+                if r.status not in (200, 201):
+                    return f"Errore HTTP {r.status}"
+
+            # Aggiorna playlist.json locale
+            from urllib.parse import quote
+            file_url = f"https://archive.org/download/{collezione}/{quote(filename)}"
+            # Per le basi mantieni il numero nel titolo per l'ordinamento
+            if tipo == 'basi':
+                title = filename.replace('.mp3','').replace('.MP3','').strip()
+            else:
+                title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
+
+            if tipo == 'musica':
+                self._aggiungi_a_playlist_musica(file_url, title)
+            elif tipo == 'basi':
+                self._aggiungi_a_playlist_basi(file_url, title)
+
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def _aggiungi_a_playlist_musica(self, url: str, titolo: str):
+        import json
+        path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        playlist = []
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as f:
+                playlist = json.load(f)
+        # Evita duplicati
+        if not any(p['src'] == url for p in playlist):
+            playlist.append({"src": url, "title": titolo, "artist": "Chiesa Evangelica Maranello", "cover": ""})
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+
+    def _aggiungi_a_playlist_basi(self, url: str, titolo: str):
+        import json, re
+        path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        playlist = []
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as f:
+                playlist = json.load(f)
+        if not any(p['src'] == url for p in playlist):
+            playlist.append({"src": url, "title": titolo, "cover": ""})
+            def sort_key(item):
+                # Estrae numero dal titolo (es. "68 - Il tempio" → 68)
+                # oppure dall'URL se il titolo non ha numero
+                t = item.get('title', '')
+                m = re.match(r'^(\d+)', t)
+                if not m:
+                    # Prova dall'URL
+                    fname = item.get('src', '').split('/')[-1]
+                    from urllib.parse import unquote
+                    fname = unquote(fname)
+                    m = re.match(r'^(\d+)', fname)
+                return int(m.group(1)) if m else 9999
+            playlist.sort(key=sort_key)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+
+    def aggiungi_musica_url(self, url: str, titolo: str, cover: str = '') -> str:
+        """Aggiunge un brano alla playlist musica-player/playlist.json tramite URL Archive.org."""
+        try:
+            import json
+            playlist_path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
+            os.makedirs(os.path.dirname(playlist_path), exist_ok=True)
+            playlist = []
+            if os.path.exists(playlist_path):
+                with open(playlist_path, encoding='utf-8') as f:
+                    playlist = json.load(f)
+            playlist.append({"src": url, "title": titolo, "artist": "Chiesa Evangelica Maranello", "cover": cover})
+            with open(playlist_path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def lista_musica_url(self) -> str:
+        """Restituisce la playlist musica-player/playlist.json."""
+        try:
+            import json
+            playlist_path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
+            if os.path.exists(playlist_path):
+                with open(playlist_path, encoding='utf-8') as f:
+                    return f.read()
+            return "[]"
+        except Exception as e:
+            return "[]"
+
+    def elimina_musica_url(self, idx: int) -> str:
+        """Rimuove un brano dalla playlist musica-player/playlist.json per indice."""
+        try:
+            import json
+            playlist_path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
+            with open(playlist_path, encoding='utf-8') as f:
+                playlist = json.load(f)
+            if 0 <= idx < len(playlist):
+                playlist.pop(idx)
+            with open(playlist_path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def aggiungi_base_url(self, url: str, titolo: str) -> str:
+        """Aggiunge una base a basi-inni/playlist.json tramite URL Archive.org."""
+        try:
+            self._aggiungi_a_playlist_basi(url, titolo)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def lista_basi_url(self) -> str:
+        """Restituisce la playlist basi-inni/playlist.json."""
+        try:
+            playlist_path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
+            if os.path.exists(playlist_path):
+                with open(playlist_path, encoding='utf-8') as f:
+                    return f.read()
+            return "[]"
+        except Exception as e:
+            return "[]"
+
+    def elimina_base_url(self, idx: int) -> str:
+        """Rimuove una base da basi-inni/playlist.json per indice."""
+        try:
+            import json
+            playlist_path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
+            with open(playlist_path, encoding='utf-8') as f:
+                playlist = json.load(f)
+            if 0 <= idx < len(playlist):
+                playlist.pop(idx)
+            with open(playlist_path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def aggiungi_predicazione_vecchia(self, predicatore: str, titolo: str, mp3_url: str) -> str:
+        """Aggiunge un messaggio a predicazioni_vecchie.json raggruppato per predicatore."""
+        try:
+            import json
+            path = os.path.join(SITE_DIR, "predicazioni_vecchie.json")
+            data = {}
+            if os.path.exists(path):
+                with open(path, encoding='utf-8') as f:
+                    data = json.load(f)
+            if predicatore not in data:
+                data[predicatore] = []
+            data[predicatore].append({"titolo": titolo, "src": mp3_url})
+            # Riordina predicatori alfabeticamente
+            data = dict(sorted(data.items()))
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
     def salva_pdf(self, filename: str, base64_data: str) -> str:
         try:
             import base64 as b64mod
@@ -230,9 +407,28 @@ class PythonBridge:
         try:
             log(f"📁 {SITE_DIR}")
             log("")
+
+            # Configura credential helper per non chiedere password
+            run("git config credential.helper manager-core")
+
             log("📡 git add...")
-            if run("git add dati.json predicazioni/ musica-player/ basi-inni/ *.html") != 0:
-                log("❌ git add fallito"); log("__ERROR__"); return
+            # Aggiungi solo ciò che esiste
+            run("git add dati.json")
+            run("git add predicazioni_vecchie.json")
+            run("git add musica-player/playlist.json")
+            run("git add basi-inni/playlist.json")
+            run("git add canti/playlist.json")
+            run("git add *.html")
+            # Cartella predicazioni solo se esiste
+            import os as _os
+            if _os.path.exists(_os.path.join(SITE_DIR, "predicazioni")):
+                run("git add predicazioni/")
+
+            # Verifica che ci sia qualcosa da committare
+            status = subprocess.run("git status --porcelain", cwd=SITE_DIR,
+                                   capture_output=True, text=True, shell=True)
+            if not status.stdout.strip():
+                log("⚠  Nessuna modifica da pubblicare"); log("__DONE__"); return
 
             msg = f"aggiorna dati.json - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
             log(f"📝 commit: {msg}")
