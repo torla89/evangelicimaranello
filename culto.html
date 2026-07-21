@@ -454,58 +454,98 @@
         return;
       }
 
-      let html = `
-        <table class="pred-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Referente</th>
-              <th>Riassunto</th>
-              <th>Ascolta</th>
-              <th>PDF</th>
-            </tr>
-          </thead>
-          <tbody>`;
-
-      pred.forEach((p, i) => {
-        const referente = p.referente || p.predicatore || '';
-        // Normalizza path: se non ha cartella, aggiunge predicazioni/
-        const pdfPath = p.pdf ? (p.pdf.includes('/') ? p.pdf : 'predicazioni/' + p.pdf) : null;
-        const mp3Path = p.mp3 ? (p.mp3.includes('/') ? p.mp3 : 'predicazioni/' + p.mp3) : null;
-        html += `<tr>
-          <td><div class="pred-data">${formatData(p.data)}</div></td>
-          <td>${referente
-            ? `<div class="pred-predicatore">${referente}</div>`
-            : `<div class="pred-vuoto">—</div>`}
-          </td>
-          <td>${p.riassunto
-            ? `<div class="pred-riassunto">${p.riassunto}</div>`
-            : `<div class="pred-vuoto">Non ancora disponibile</div>`}
-          </td>
-          <td>${mp3Path
-            ? `<button class="btn-pdf" id="pred-play-${i}" onclick="suonaMessaggio(${i}, this)"
-                style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.20);
-                border-radius:20px;padding:5px 12px;cursor:pointer;color:#fff;font-size:0.82rem;">
-                ▶ Ascolta
-               </button>`
-            : `<span class="pred-vuoto">—</span>`}
-          </td>
-          <td>${pdfPath
-            ? `<a href="${pdfPath}" target="_blank" class="btn-pdf">📄 Apri</a>`
-            : `<span class="pred-vuoto">—</span>`}
-          </td>
-        </tr>`;
-      });
-
-      html += '</tbody></table>';
-      c.innerHTML = html;
-
-      // Salva i dati per la funzione suonaMessaggio
+      // Salva i dati globalmente
       window._predDati = pred;
+
+      // Estrai referenti e anni unici
+      const referenti = [...new Set(pred.map(p => p.referente || p.predicatore || '').filter(Boolean))].sort();
+      const anni = [...new Set(pred.map(p => p.data ? p.data.substring(0,4) : '').filter(Boolean))].sort().reverse();
+
+      // Barra filtri
+      c.innerHTML = `
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+          <select id="filtroReferente" onchange="renderPred()"
+            style="background:rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.22);
+            border-radius:8px;color:#fff;padding:7px 12px;font-size:0.85rem;cursor:pointer;flex:1;min-width:140px;">
+            <option value="">👤 Tutti i referenti</option>
+            ${referenti.map(r => `<option value="${r}">${r}</option>`).join('')}
+          </select>
+          <select id="filtroAnno" onchange="renderPred()"
+            style="background:rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.22);
+            border-radius:8px;color:#fff;padding:7px 12px;font-size:0.85rem;cursor:pointer;min-width:110px;">
+            <option value="">📅 Tutti gli anni</option>
+            ${anni.map(a => `<option value="${a}">${a}</option>`).join('')}
+          </select>
+          <button onclick="document.getElementById('filtroReferente').value='';document.getElementById('filtroAnno').value='';renderPred();"
+            style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);
+            border-radius:8px;color:rgba(255,255,255,0.55);padding:7px 12px;font-size:0.82rem;cursor:pointer;">
+            ✕ Reset
+          </button>
+        </div>
+        <div id="pred-table-container"></div>`;
+
+      renderPred();
 
     } catch(e) {
       c.innerHTML = '<p style="color:rgba(255,120,120,0.8);font-size:0.88rem;">Impossibile caricare dati.json</p>';
     }
+  }
+
+  function renderPred() {
+    const filtroRef  = document.getElementById('filtroReferente')?.value || '';
+    const filtroAnno = document.getElementById('filtroAnno')?.value || '';
+    const pred = window._predDati || [];
+
+    const filtrati = pred.filter(p => {
+      const ref  = p.referente || p.predicatore || '';
+      const anno = p.data ? p.data.substring(0,4) : '';
+      return (!filtroRef  || ref  === filtroRef)
+          && (!filtroAnno || anno === filtroAnno);
+    });
+
+    const tc = document.getElementById('pred-table-container');
+    if (!tc) return;
+
+    if (filtrati.length === 0) {
+      tc.innerHTML = '<p style="color:rgba(255,255,255,0.40);font-size:0.9rem;margin-top:10px;">Nessun risultato per i filtri selezionati.</p>';
+      return;
+    }
+
+    let html = `
+      <table class="pred-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Referente</th>
+            <th>Riassunto</th>
+            <th>Ascolta</th>
+            <th>PDF</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+    filtrati.forEach((p, i) => {
+      const realIdx = pred.indexOf(p);
+      const referente = p.referente || p.predicatore || '';
+      const pdfPath = p.pdf ? (p.pdf.includes('/') ? p.pdf : 'predicazioni/' + p.pdf) : null;
+      const mp3Path = p.mp3 ? (p.mp3.includes('/') ? p.mp3 : 'predicazioni/' + p.mp3) : null;
+      html += `<tr>
+        <td><div class="pred-data">${formatData(p.data)}</div></td>
+        <td>${referente ? `<div class="pred-predicatore">${referente}</div>` : `<div class="pred-vuoto">—</div>`}</td>
+        <td>${p.riassunto ? `<div class="pred-riassunto">${p.riassunto}</div>` : `<div class="pred-vuoto">Non ancora disponibile</div>`}</td>
+        <td>${mp3Path
+          ? `<button class="btn-pdf" id="pred-play-${realIdx}" onclick="suonaMessaggio(${realIdx}, this)"
+              style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.20);
+              border-radius:20px;padding:5px 12px;cursor:pointer;color:#fff;font-size:0.82rem;">
+              ▶ Ascolta</button>`
+          : `<span class="pred-vuoto">—</span>`}
+        </td>
+        <td>${pdfPath ? `<a href="${pdfPath}" target="_blank" class="btn-pdf">📄 Apri</a>` : `<span class="pred-vuoto">—</span>`}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    tc.innerHTML = html;
   }
 
   let _predPlayingBtn = null;
