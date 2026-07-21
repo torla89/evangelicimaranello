@@ -10,5 +10,17 @@
     "title": "E torno a Te",
     "artist": "Chiesa Evangelica Maranello",
     "cover": "https://archive.org/download/Cem-Musica-Player/E%20torno%20a%20Te_cover.jpg"
+  },
+  {
+    "src": "https://archive.org/download/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3",
+    "title": "Gioia nel tuo nome",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.jpg"
+  },
+  {
+    "src": "https://archive.org/download/Cem-Musica-Player/Roveto%20Bruciante.mp3",
+    "title": "Roveto Bruciante",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Musica-Player/Roveto%20Bruciante_cover.jpg"
   }
 ]
