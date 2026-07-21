@@ -947,10 +947,11 @@
   }
 
   async function eliminaMusica(idx) {
-    if (!confirm('Eliminare questo brano dalla playlist?')) return;
+    if (!confirm('Eliminare questo brano dalla playlist E da Archive.org?\n⚠ Operazione irreversibile!')) return;
+    const keys = await getS3Keys();
     if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_musica_url(idx);
-      if (result === 'ok') { toast('🗑 Eliminato'); renderMusica(); }
+      const result = await window.pywebview.api.elimina_musica_url(idx, keys.access || '', keys.secret || '');
+      if (result === 'ok') { toast('🗑 Eliminato da playlist e Archive.org'); renderMusica(); }
       else toast('❌ ' + result);
     }
   }
@@ -1018,10 +1019,11 @@
   }
 
   async function eliminaBasi(idx) {
-    if (!confirm('Eliminare questa base?')) return;
+    if (!confirm('Eliminare questa base dalla playlist E da Archive.org?\n⚠ Operazione irreversibile!')) return;
+    const keys = await getS3Keys();
     if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_base_url(idx);
-      if (result === 'ok') { toast('🗑 Eliminata'); renderBasi(); }
+      const result = await window.pywebview.api.elimina_base_url(idx, keys.access || '', keys.secret || '');
+      if (result === 'ok') { toast('🗑 Eliminata da playlist e Archive.org'); renderBasi(); }
       else toast('❌ ' + result);
     }
   }
