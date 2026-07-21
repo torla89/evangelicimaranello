@@ -344,12 +344,16 @@
     <div class="panel" id="panel-musica">
       <div class="section-label">🎵 Brani riprodotti in maniera casuale nel player</div>
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
-        I brani sono su <strong style="color:var(--white)">Archive.org</strong> — collezione <strong style="color:var(--white)">Cem-Musica-Player</strong>.
+        I file MP3 vengono salvati nella cartella <strong style="color:var(--white)">musica-player/</strong>
+        e riprodotti in ordine casuale nel player in fondo al sito.
       </p>
+
       <div id="musicaList"></div>
+
       <div class="btn-row-start" style="margin-top:12px;">
         <button class="btn btn-ghost" onclick="aggiungiFileArchive('musica')">🎵 Aggiungi MP3</button>
       </div>
+
       <div id="musicaUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
     </div>
 
@@ -359,10 +363,13 @@
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
         Le basi sono su <strong style="color:var(--white)">Archive.org</strong> — collezione <strong style="color:var(--white)">Cem-basi-inni</strong>.
       </p>
+
       <div id="basiList"></div>
+
       <div class="btn-row-start" style="margin-top:12px;">
         <button class="btn btn-ghost" onclick="aggiungiFileArchive('basi')">🎹 Aggiungi base</button>
       </div>
+
       <div id="basiUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
     </div>
 
@@ -374,7 +381,14 @@
   <div class="save-bar-msg" id="saveBarMsg">Carica un file <strong>dati.json</strong> per iniziare</div>
   <div style="display:flex;gap:10px;flex-shrink:0;">
     <button class="btn btn-ghost" onclick="apriModalS3()" title="Chiavi Archive.org">🔑 Archive.org</button>
-    <button class="btn btn-primary" id="btnGithub" onclick="salvaEPubblica()" disabled>🚀 Salva e Pubblica</button>
+    <button class="btn btn-ghost" id="btnSalva" onclick="saveFile()" disabled
+      title="Salva dati.json con backup automatico">
+      💾 Salva dati.json
+    </button>
+    <button class="btn btn-primary" id="btnGithub" onclick="pubblicaSuGithub()" disabled
+      title="Salva e pubblica su GitHub">
+      🚀 Salva e Pubblica
+    </button>
   </div>
 </div>
 
@@ -463,14 +477,6 @@
   <div class="modal">
     <h3 id="modalPredTitle">Nuova predicazione</h3>
     <input type="hidden" id="predEditIdx" value="-1">
-    <div class="field">
-      <label>Tipo</label>
-      <select id="predTipo" onchange="aggiornaTipoPred()" style="width:100%;">
-        <option value="nuova">📅 Messaggio nuova associazione</option>
-        <option value="vecchia">📦 Messaggio vecchia associazione (Archivio storico)</option>
-      </select>
-    </div>
-    <div id="campNuova">
     <div class="field-row">
       <div class="field"><label>Data</label><input type="date" id="predData"></div>
       <div class="field"><label>Referente</label><input type="text" id="predReferente" placeholder="es. Enrico Torlai"></div>
@@ -502,17 +508,6 @@
     <div class="btn-row-end">
       <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
       <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
-    </div>
-    </div><!-- fine campNuova -->
-
-    <div id="campVecchia" style="display:none;">
-      <div class="field"><label>Predicatore</label><input type="text" id="predVecchiaPredicatore" placeholder="es. Berri"></div>
-      <div class="field"><label>Titolo</label><input type="text" id="predVecchiaTitolo" placeholder="es. La tentazione"></div>
-      <div class="field"><label>URL MP3 su Archive.org</label><input type="text" id="predVecchiaMp3" placeholder="https://archive.org/download/predicazioni-vecchie/..."></div>
-      <div class="btn-row-end">
-        <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
-        <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
-      </div>
     </div>
   </div>
 </div>
@@ -558,7 +553,7 @@
       renderAll();
       document.getElementById('mainApp').style.display = 'block';
       document.getElementById('loadCard').style.display = 'none';
-      
+      document.getElementById('btnSalva').disabled  = false;
       document.getElementById('btnGithub').disabled = false;
       setStatus('ok', `${filename} caricato`);
       setSaveMsg('neutral', 'File caricato — modifica e poi salva');
@@ -734,36 +729,25 @@
       </div>`).join('');
   }
 
-  function aggiornaTipoPred() {
-    const tipo = document.getElementById('predTipo').value;
-    document.getElementById('campNuova').style.display  = tipo === 'nuova'   ? '' : 'none';
-    document.getElementById('campVecchia').style.display = tipo === 'vecchia' ? '' : 'none';
-  }
-
   function openPredModal(idx = -1) {
     document.getElementById('predEditIdx').value = idx;
-    document.getElementById('predTipo').value = 'nuova';
-    aggiornaTipoPred();
-    document.getElementById('predVecchiaPredicatore').value = '';
-    document.getElementById('predVecchiaTitolo').value = '';
-    document.getElementById('predVecchiaMp3').value = '';
     if (idx >= 0) {
       const p = dati.predicazioni[idx];
-      document.getElementById('predData').value        = p.data;
-      document.getElementById('predReferente').value   = p.referente || p.predicatore || '';
-      document.getElementById('predRiassunto').value   = p.riassunto || '';
-      document.getElementById('predPdf').value         = p.pdf || '';
-      document.getElementById('predMp3').value         = p.mp3 || '';
+      document.getElementById('predData').value         = p.data;
+      document.getElementById('predReferente').value  = p.referente || p.predicatore || '';
+      document.getElementById('predRiassunto').value    = p.riassunto || '';
+      document.getElementById('predPdf').value          = p.pdf || '';
+      document.getElementById('predMp3').value          = p.mp3 || '';
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
       _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
     } else {
-      document.getElementById('predData').value        = today();
-      document.getElementById('predReferente').value   = '';
-      document.getElementById('predRiassunto').value   = '';
-      document.getElementById('predPdf').value         = '';
-      document.getElementById('predMp3').value         = '';
+      document.getElementById('predData').value         = today();
+      document.getElementById('predReferente').value  = '';
+      document.getElementById('predRiassunto').value    = '';
+      document.getElementById('predPdf').value          = '';
+      document.getElementById('predMp3').value          = '';
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
       _pdfPendingName = null; _pdfPendingData = null;
@@ -809,22 +793,6 @@
   }
 
   async function salvaPred() {
-    const tipo = document.getElementById('predTipo').value;
-
-    // ── VECCHIA ASSOCIAZIONE ──
-    if (tipo === 'vecchia') {
-      const predicatore = document.getElementById('predVecchiaPredicatore').value.trim();
-      const titolo      = document.getElementById('predVecchiaTitolo').value.trim();
-      const mp3         = document.getElementById('predVecchiaMp3').value.trim();
-      if (!predicatore || !titolo) { toast('⚠ Inserisci predicatore e titolo'); return; }
-      if (typeof window.pywebview !== 'undefined') {
-        const result = await window.pywebview.api.aggiungi_predicazione_vecchia(predicatore, titolo, mp3);
-        if (result !== 'ok') { toast('❌ ' + result); return; }
-      }
-      closeModal('predicazione'); toast('✅ Aggiunto all\'archivio storico'); return;
-    }
-
-    // ── NUOVA ASSOCIAZIONE ──
     const data = document.getElementById('predData').value;
     if (!data) { toast('⚠ Inserisci la data'); return; }
 
@@ -966,14 +934,16 @@
           <div class="list-item">
             <div class="list-item-info">
               <div class="list-item-title">🎵 ${f.title}</div>
-              <div class="list-item-sub" style="word-break:break-all;font-size:0.75rem;">${f.src}</div>
+              <div class="list-item-sub" style="font-size:0.75rem;word-break:break-all;">${f.src}</div>
             </div>
             <div class="list-item-actions">
               <button class="btn btn-danger btn-sm" onclick="eliminaMusica(${i})">🗑</button>
             </div>
           </div>`).join('');
       } catch(e) { c.innerHTML = emptyState('Impossibile leggere la playlist'); }
-    } else { c.innerHTML = emptyState('Disponibile solo nell\'app desktop'); }
+    } else {
+      c.innerHTML = emptyState('Lista disponibile solo nell\'app desktop');
+    }
   }
 
   async function eliminaMusica(idx) {
@@ -992,6 +962,7 @@
   function closeModal(name) {
     document.getElementById('modal-' + name).classList.remove('open');
   }
+  // Chiudi modal cliccando fuori
   document.querySelectorAll('.modal-bg').forEach(bg => {
     bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
   });
@@ -1000,6 +971,30 @@
   });
 
   /* ── TABS ── */
+  // ── BASI INNI ──────────────────────────────────────────────
+  async function caricaBasi(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const log = document.getElementById('basiUploadLog');
+    log.style.display = 'block'; log.textContent = '⏳ Caricamento...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result.split(',')[1]);
+          r.onerror = rej; r.readAsDataURL(file);
+        });
+        if (typeof window.pywebview !== 'undefined') {
+          const result = await window.pywebview.api.salva_base(file.name, b64);
+          if (result === 'ok') ok++; else fail++;
+        } else ok++;
+      } catch(e) { fail++; }
+    }
+    log.textContent = ok > 0 ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''}${fail > 0 ? ` — ${fail} errori` : ''}` : '❌ Errore';
+    input.value = ''; renderBasi();
+  }
+
   async function renderBasi() {
     const c = document.getElementById('basiList');
     if (!c) return;
@@ -1012,7 +1007,7 @@
           <div class="list-item">
             <div class="list-item-info">
               <div class="list-item-title">🎹 ${f.title}</div>
-              <div class="list-item-sub" style="word-break:break-all;font-size:0.75rem;">${f.src}</div>
+              <div class="list-item-sub" style="font-size:0.75rem;word-break:break-all;">${f.src}</div>
             </div>
             <div class="list-item-actions">
               <button class="btn btn-danger btn-sm" onclick="eliminaBasi(${i})">🗑</button>
@@ -1031,6 +1026,30 @@
     }
   }
 
+  // ── ARCHIVE.ORG ────────────────────────────────────────────
+  async function getS3Keys() {
+    if (typeof window.pywebview !== 'undefined') {
+      try { return JSON.parse(await window.pywebview.api.leggi_chiavi_s3() || '{}'); }
+      catch(e) { return {}; }
+    }
+    return {};
+  }
+
+  async function salvaChiaviS3() {
+    const access = document.getElementById('s3AccessKey').value.trim();
+    const secret = document.getElementById('s3SecretKey').value.trim();
+    if (!access || !secret) { toast('⚠ Inserisci entrambe le chiavi'); return; }
+    await window.pywebview.api.salva_chiavi_s3(access, secret);
+    closeModal('s3'); toast('✅ Chiavi S3 salvate');
+  }
+
+  async function apriModalS3() {
+    const keys = await getS3Keys();
+    if (keys.access) document.getElementById('s3AccessKey').value = keys.access;
+    if (keys.secret) document.getElementById('s3SecretKey').value = keys.secret;
+    openModal('s3');
+  }
+
   async function aggiungiFileArchive(tipo) {
     if (typeof window.pywebview === 'undefined') return;
     const keys = await getS3Keys();
@@ -1041,7 +1060,7 @@
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i];
       const nome = path.split('\\').pop().split('/').pop();
-      toast(`📡 ${i+1}/${paths.length}: ${nome}...`);
+      toast(`📡 ${i+1}/${paths.length}: ${nome} — caricamento...`);
       const result = await window.pywebview.api.carica_file_su_archive(
         path, collezione, keys.access, keys.secret, tipo
       );
@@ -1064,61 +1083,6 @@
 
   // Rileva se siamo dentro pywebview (app desktop) o browser normale
   const IS_APP = typeof window.pywebview !== 'undefined' && typeof window.pywebview.api !== 'undefined';
-
-  async function salvaEPubblica() {
-    if (!dati) return;
-    await saveFile();
-    await pubblicaSuGithub();
-  }
-
-  async function caricaFileSuArchive(paths, collezione, tipo) {
-    const keys = await getS3Keys();
-    if (!keys.access || !keys.secret) {
-      toast('⚠ Configura le chiavi S3 Archive.org — clicca 🔑 in basso'); return;
-    }
-    for (let i = 0; i < paths.length; i++) {
-      const path = paths[i];
-      const nome = path.split('\\').pop().split('/').pop();
-      toast(`📡 Caricamento ${i+1}/${paths.length}: ${nome}...`);
-      const result = await window.pywebview.api.carica_file_su_archive(
-        path, collezione, keys.access, keys.secret, tipo
-      );
-      if (result === 'ok') {
-        toast(`✅ ${nome} caricato!`);
-      } else {
-        toast(`❌ Errore: ${result}`);
-      }
-    }
-    if (tipo === 'musica') renderMusica();
-    else renderBasi();
-    markDirty();
-  }
-
-  async function getS3Keys() {
-    if (typeof window.pywebview !== 'undefined') {
-      try {
-        const r = await window.pywebview.api.leggi_chiavi_s3();
-        return JSON.parse(r || '{}');
-      } catch(e) { return {}; }
-    }
-    return {};
-  }
-
-  async function salvaChiaviS3() {
-    const access = document.getElementById('s3AccessKey').value.trim();
-    const secret = document.getElementById('s3SecretKey').value.trim();
-    if (!access || !secret) { toast('⚠ Inserisci entrambe le chiavi'); return; }
-    await window.pywebview.api.salva_chiavi_s3(access, secret);
-    closeModal('s3');
-    toast('✅ Chiavi S3 salvate');
-  }
-
-  async function apriModalS3() {
-    const keys = await getS3Keys();
-    if (keys.access) document.getElementById('s3AccessKey').value = keys.access;
-    if (keys.secret) document.getElementById('s3SecretKey').value = keys.secret;
-    openModal('s3');
-  }
 
   async function saveFile() {
     if (!dati) return;
