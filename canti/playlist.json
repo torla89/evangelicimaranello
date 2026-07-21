@@ -1,0 +1,919 @@
+[
+  {
+    "num": "1",
+    "src": "https://archive.org/download/Cem-Canti/001%20-%20T%27adoriamo%20e%20celebriamo.mp3",
+    "title": "T'adoriamo e celebriamo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "2",
+    "src": "https://archive.org/download/Cem-Canti/002%20-%20Vieni%20con%20noi.mp3",
+    "title": "Vieni con noi",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "3",
+    "src": "https://archive.org/download/Cem-Canti/003%20-%20Voi%20tutti%20giubilate%20-%20Voi%20tutti%20gli%20abitanti.mp3",
+    "title": "Voi tutti giubilate - Voi tutti gli abitanti",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "4",
+    "src": "https://archive.org/download/Cem-Canti/004%20-%20Lodate%20tutti%20insieme.mp3",
+    "title": "Lodate tutti insieme",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "5",
+    "src": "https://archive.org/download/Cem-Canti/005%20-%20Dai%20la%20mano.mp3",
+    "title": "Dai la mano",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "6",
+    "src": "https://archive.org/download/Cem-Canti/006%20-%20Cantiam%20lode%20a%20Dio.mp3",
+    "title": "Cantiam lode a Dio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "7",
+    "src": "https://archive.org/download/Cem-Canti/007%20-%20Lode%20al%20nome%20di%20Ges%C3%B9%20-%20Lode%20a%20te%20Ges%C3%B9.mp3",
+    "title": "Lode al nome di Gesù - Lode a te Gesù",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "8",
+    "src": "https://archive.org/download/Cem-Canti/008%20-%20Cantate%20al%20Signor.mp3",
+    "title": "Cantate al Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/008%20-%20Cantate%20al%20Signor.png"
+  },
+  {
+    "num": "9",
+    "src": "https://archive.org/download/Cem-Canti/009%20-%20Grande%20tu%20sei.mp3",
+    "title": "Grande tu sei",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/009%20-%20Grande%20tu%20sei.png"
+  },
+  {
+    "num": "10",
+    "src": "https://archive.org/download/Cem-Canti/010%20-%20Su%2C%20lodiamo%20il%20Signor.mp3",
+    "title": "Su, lodiamo il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/010%20-%20Su%2C%20lodiamo%20il%20Signor.png"
+  },
+  {
+    "num": "11",
+    "src": "https://archive.org/download/Cem-Canti/011%20-%20Cercate%20prima%20il%20regno%20di%20Dio.mp3",
+    "title": "Cercate prima il regno di Dio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "12",
+    "src": "https://archive.org/download/Cem-Canti/012%20-%20Questo%20%C3%A8%20il%20d%C3%AC.mp3",
+    "title": "Questo è il dì",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "13",
+    "src": "https://archive.org/download/Cem-Canti/013%20-%20Liberamente%20-%20Un%20po%27%20di%20fede.mp3",
+    "title": "Liberamente - Un po' di fede",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "14",
+    "src": "https://archive.org/download/Cem-Canti/014%20-%20Dalla%20nascita%20del%20sol.mp3",
+    "title": "Dalla nascita del sol",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "15",
+    "src": "https://archive.org/download/Cem-Canti/015%20-%20Entrer%C3%B2%20nelle%20sue%20porte.mp3",
+    "title": "Entrerò nelle sue porte",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "16",
+    "src": "https://archive.org/download/Cem-Canti/016%20-%20Benedici%20il%20Signor.mp3",
+    "title": "Benedici il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "17",
+    "src": "https://archive.org/download/Cem-Canti/017%20-%20Ges%C3%B9%20vogliam%20dirti%20grazie.mp3",
+    "title": "Gesù vogliam dirti grazie",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "18",
+    "src": "https://archive.org/download/Cem-Canti/018%20-%20Vai%2C%20vai%20non%20ti%20fermar.mp3",
+    "title": "Vai, vai non ti fermar",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "19",
+    "src": "https://archive.org/download/Cem-Canti/019%20-%20Canta%20alleluia%20al%20Signor.mp3",
+    "title": "Canta alleluia al Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/019%20-%20Canta%20alleluia%20al%20Signor.png"
+  },
+  {
+    "num": "20",
+    "src": "https://archive.org/download/Cem-Canti/020%20-%20Canter%C3%B2%20un%20bel%20canto.mp3",
+    "title": "Canterò un bel canto",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "21",
+    "src": "https://archive.org/download/Cem-Canti/021%20-%20Con%20le%20mani%20alzate.mp3",
+    "title": "Con le mani alzate",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "22",
+    "src": "https://archive.org/download/Cem-Canti/022%20-%20Grazie%20a%20te.mp3",
+    "title": "Grazie a te",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "23",
+    "src": "https://archive.org/download/Cem-Canti/023%20-%20Grazie%20Signor.mp3",
+    "title": "Grazie Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "24",
+    "src": "https://archive.org/download/Cem-Canti/024%20-%20Ti%20loder%C3%B2%20Signor.mp3",
+    "title": "Ti loderò Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "25",
+    "src": "https://archive.org/download/Cem-Canti/025%20-%20Dio%20ti%20lodo.mp3",
+    "title": "Dio ti lodo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "26",
+    "src": "https://archive.org/download/Cem-Canti/026%20-%20Ti%20amo%20dell%27amor%20del%20Signor.mp3",
+    "title": "Ti amo dell'amor del Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "27",
+    "src": "https://archive.org/download/Cem-Canti/027%20-%20Tu%20sei%20lodato.mp3",
+    "title": "Tu sei lodato",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "28",
+    "src": "https://archive.org/download/Cem-Canti/028%20-%20Grazie.mp3",
+    "title": "Grazie",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/028%20-%20Grazie.png"
+  },
+  {
+    "num": "29",
+    "src": "https://archive.org/download/Cem-Canti/029%20-%20Alleluia%2C%20amen.mp3",
+    "title": "Alleluia, amen",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "30",
+    "src": "https://archive.org/download/Cem-Canti/030%20-%20A%20Dio%20sia%20la%20gloria.mp3",
+    "title": "A Dio sia la gloria",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/030%20-%20A%20Dio%20sia%20la%20gloria.png"
+  },
+  {
+    "num": "31",
+    "src": "https://archive.org/download/Cem-Canti/031%20-%20Che%20la%20gloria%20del%20Signor%20-%20La%20gloria%20del%20Signore.mp3",
+    "title": "Che la gloria del Signor - La gloria del Signore",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/031%20-%20Che%20la%20gloria%20del%20Signor%20-%20La%20gloria%20del%20Signore.png"
+  },
+  {
+    "num": "32",
+    "src": "https://archive.org/download/Cem-Canti/032%20-%20Venite%20adoriamo.mp3",
+    "title": "Venite adoriamo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "33",
+    "src": "https://archive.org/download/Cem-Canti/033%20-%20Siam%20riuniti%20tutti%20qui.mp3",
+    "title": "Siam riuniti tutti qui",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/033%20-%20Siam%20riuniti%20tutti%20qui.png"
+  },
+  {
+    "num": "34",
+    "src": "https://archive.org/download/Cem-Canti/034%20-%20Degno%20sei%20tu.mp3",
+    "title": "Degno sei tu",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/034%20-%20Degno%20sei%20tu.png"
+  },
+  {
+    "num": "35",
+    "src": "https://archive.org/download/Cem-Canti/035%20-%20Egli%20%C3%A8%20qui%20-%20Ges%C3%B9%20%C3%A8%20qui.mp3",
+    "title": "Egli è qui - Gesù è qui",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/035%20-%20Egli%20%C3%A8%20qui%20-%20Ges%C3%B9%20%C3%A8%20qui.png"
+  },
+  {
+    "num": "36",
+    "src": "https://archive.org/download/Cem-Canti/036%20-%20Iddio%20dimora.mp3",
+    "title": "Iddio dimora",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "37",
+    "src": "https://archive.org/download/Cem-Canti/037%20-%20Le%20sofferenze%20di%20Ges%C3%B9.mp3",
+    "title": "Le sofferenze di Gesù",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "38",
+    "src": "https://archive.org/download/Cem-Canti/038%20-%20Alleluia%20no.1.mp3",
+    "title": "Alleluia no.1",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "39",
+    "src": "https://archive.org/download/Cem-Canti/039%20-%20Egli%20%C3%A8%20il%20Salvator.mp3",
+    "title": "Egli è il Salvator",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "40",
+    "src": "https://archive.org/download/Cem-Canti/040%20-%20Alleluia.mp3",
+    "title": "Alleluia",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "41",
+    "src": "https://archive.org/download/Cem-Canti/041%20-%20Alleluia%2C%20Ges%C3%B9%20%C3%A8%20il%20Re%20-%20Alleluia%2C%20Ges%C3%B9%20%C3%A8%20il%20Signor.mp3",
+    "title": "Alleluia, Gesù è il Re - Alleluia, Gesù è il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "42",
+    "src": "https://archive.org/download/Cem-Canti/042%20-%20Santo%20%C3%A8%20il%20Signor.mp3",
+    "title": "Santo è il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "43",
+    "src": "https://archive.org/download/Cem-Canti/043%20-%20%C3%88%20il%20Signor.mp3",
+    "title": "È il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "44",
+    "src": "https://archive.org/download/Cem-Canti/044%20-%20Poich%C3%A9%20lass%C3%B9%20Signor.mp3",
+    "title": "Poiché lassù Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "45",
+    "src": "https://archive.org/download/Cem-Canti/045%20-%20Alleluia%2C%20il%20Signore%20regna.mp3",
+    "title": "Alleluia, il Signore regna",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "46",
+    "src": "https://archive.org/download/Cem-Canti/046%20-%20Gloria%20e%20potenza.mp3",
+    "title": "Gloria e potenza",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "47",
+    "src": "https://archive.org/download/Cem-Canti/047%20-%20Re%20dei%20re.mp3",
+    "title": "Re dei re",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "48",
+    "src": "https://archive.org/download/Cem-Canti/048%20-%20Canto%20di%20vittoria%20-%20Con%20Dio%20farem%20prodigi.mp3",
+    "title": "Canto di vittoria - Con Dio farem prodigi",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "49",
+    "src": "https://archive.org/download/Cem-Canti/049%20-%20L%27Eterno%20%C3%A8%20potente%20-%20L%27Eterno%20Iddio.mp3",
+    "title": "L'Eterno è potente - L'Eterno Iddio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "50",
+    "src": "https://archive.org/download/Cem-Canti/050%20-%20Santo%2C%20santo%2C%20santo.mp3",
+    "title": "Santo, santo, santo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "51",
+    "src": "https://archive.org/download/Cem-Canti/051%20-%20Il%20suo%20nome%20%C3%A8%20grande.mp3",
+    "title": "Il suo nome è grande",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "52",
+    "src": "https://archive.org/download/Cem-Canti/052%20-%20Ges%C3%B9%2C%20l%27unico%20nome.mp3",
+    "title": "Gesù, l'unico nome",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "53",
+    "src": "https://archive.org/download/Cem-Canti/053%20-%20Ges%C3%B9%20quanto%20grande%20sei%20tu.mp3",
+    "title": "Gesù quanto grande sei tu",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "54",
+    "src": "https://archive.org/download/Cem-Canti/054%20-%20Ges%C3%B9%2C%20Ges%C3%B9%2C%20Ges%C3%B9%20-%20%C3%88%20un%20nome%20che%20pari%20non%20ha.mp3",
+    "title": "Gesù, Gesù, Gesù - È un nome che pari non ha",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "55",
+    "src": "https://archive.org/download/Cem-Canti/055%20-%20Padre%20buono.mp3",
+    "title": "Padre buono",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "56",
+    "src": "https://archive.org/download/Cem-Canti/056%20-%20Gloria%2C%20alleluia.mp3",
+    "title": "Gloria, alleluia",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "57",
+    "src": "https://archive.org/download/Cem-Canti/057%20-%20Padre%20ti%20adoro.mp3",
+    "title": "Padre ti adoro",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "58",
+    "src": "https://archive.org/download/Cem-Canti/058%20-%20Con%20le%20mani%20al%20cielo%20-%20Esaltiam%20Ges%C3%B9.mp3",
+    "title": "Con le mani al cielo - Esaltiam Gesù",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "59",
+    "src": "https://archive.org/download/Cem-Canti/059%20-%20Grazie%20a%20te%20io%20render%C3%B2%20-%20Sii%20esaltato.mp3",
+    "title": "Grazie a te io renderò - Sii esaltato",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "60",
+    "src": "https://archive.org/download/Cem-Canti/060%20-%20T%27amer%C3%B2%20Signor.mp3",
+    "title": "T'amerò Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "61",
+    "src": "https://archive.org/download/Cem-Canti/061%20-%20Fammi%20veder%2C%20Signor.mp3",
+    "title": "Fammi veder, Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "62",
+    "src": "https://archive.org/download/Cem-Canti/062%20-%20Abba%20Padre.mp3",
+    "title": "Abba Padre",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "63",
+    "src": "https://archive.org/download/Cem-Canti/063%20-%20Santo%20tu%20sei%20Signor.mp3",
+    "title": "Santo tu sei Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "64",
+    "src": "https://archive.org/download/Cem-Canti/064%20-%20%C3%88%20verso%20di%20te%20che%20guardo.mp3",
+    "title": "È verso di te che guardo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "65",
+    "src": "https://archive.org/download/Cem-Canti/065%20-%20Padre%20ascolta.mp3",
+    "title": "Padre ascolta",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "66",
+    "src": "https://archive.org/download/Cem-Canti/066%20-%20Mi%20cercherete%20e%20mi%20troverete.mp3",
+    "title": "Mi cercherete e mi troverete",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "67",
+    "src": "https://archive.org/download/Cem-Canti/067%20-%20Il%20vasellaio%20tu%20sei%20Signor.mp3",
+    "title": "Il vasellaio tu sei Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "68",
+    "src": "https://archive.org/download/Cem-Canti/068%20-%20Con%20gran%20tremor%20-%20Il%20tempio%20di%20Dio.mp3",
+    "title": "Con gran tremor - Il tempio di Dio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "69",
+    "src": "https://archive.org/download/Cem-Canti/069%20-%20O%20Ges%C3%B9%20-%20Sento%20pace.mp3",
+    "title": "O Gesù - Sento pace",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "70",
+    "src": "https://archive.org/download/Cem-Canti/070%20-%20Solo%20a%20te%20Signor.mp3",
+    "title": "Solo a te Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "71",
+    "src": "https://archive.org/download/Cem-Canti/071%20-%20Ruah.mp3",
+    "title": "Ruah",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "72",
+    "src": "https://archive.org/download/Cem-Canti/072%20-%20Gerico%20cadr%C3%A0%20-%20Leviamo%20i%20vessilli%20d%27amor.mp3",
+    "title": "Gerico cadrà - Leviamo i vessilli d'amor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "73",
+    "src": "https://archive.org/download/Cem-Canti/073%20-%20Mia%20luce%20%C3%A8%20il%20Signor.mp3",
+    "title": "Mia luce è il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "74",
+    "src": "https://archive.org/download/Cem-Canti/074%20-%20Certo%20beni.mp3",
+    "title": "Certo beni",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "75",
+    "src": "https://archive.org/download/Cem-Canti/075%20-%20Ges%C3%B9%20ci%20ha%20dato%20-%20Un%20nuovo%20comandamento.mp3",
+    "title": "Gesù ci ha dato - Un nuovo comandamento",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "76",
+    "src": "https://archive.org/download/Cem-Canti/076%20-%20Si%20rallegreranno.mp3",
+    "title": "Si rallegreranno",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "77",
+    "src": "https://archive.org/download/Cem-Canti/077%20-%20Ho%20stretto%20un%27alleanza%20-%20Sempre%20canter%C3%B2.mp3",
+    "title": "Ho stretto un'alleanza - Sempre canterò",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "78",
+    "src": "https://archive.org/download/Cem-Canti/078%20-%20Padre%20ti%20preghiam.mp3",
+    "title": "Padre ti preghiam",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "79",
+    "src": "https://archive.org/download/Cem-Canti/079%20-%20Salmo%2047%20-%20Le%20vostre%20mani%20battete%20a%20Dio.mp3",
+    "title": "Salmo 47 - Le vostre mani battete a Dio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "80",
+    "src": "https://archive.org/download/Cem-Canti/080%20-%20Tutti%20insiem.mp3",
+    "title": "Tutti insiem",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "81",
+    "src": "https://archive.org/download/Cem-Canti/081%20-%20Batti%20le%20mani.mp3",
+    "title": "Batti le mani",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "82",
+    "src": "https://archive.org/download/Cem-Canti/082%20-%20Grande%20Signor.mp3",
+    "title": "Grande Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "83",
+    "src": "https://archive.org/download/Cem-Canti/083%20-%20Canter%C3%B2%20al%20Signore.mp3",
+    "title": "Canterò al Signore",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "84",
+    "src": "https://archive.org/download/Cem-Canti/084%20-%20Amo%20il%20Signor.mp3",
+    "title": "Amo il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "85",
+    "src": "https://archive.org/download/Cem-Canti/085%20-%20Canto%20di%20lode%20-%20Tutti%20uniti.mp3",
+    "title": "Canto di lode - Tutti uniti",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "86",
+    "src": "https://archive.org/download/Cem-Canti/086%20-%20Dio%20%C3%A8%20Re.mp3",
+    "title": "Dio è Re",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "87",
+    "src": "https://archive.org/download/Cem-Canti/087%20-%20Di%20gioia%20salterem.mp3",
+    "title": "Di gioia salterem",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "88",
+    "src": "https://archive.org/download/Cem-Canti/088%20-%20Grande%20in%20potenza.mp3",
+    "title": "Grande in potenza",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "89",
+    "src": "https://archive.org/download/Cem-Canti/089%20-%20Diamo%20gloria%20a%20Dio.mp3",
+    "title": "Diamo gloria a Dio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "90",
+    "src": "https://archive.org/download/Cem-Canti/090%20-%20Grazie%20Ges%C3%B9.mp3",
+    "title": "Grazie Gesù",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "91",
+    "src": "https://archive.org/download/Cem-Canti/091%20-%20Sia%20lode%20e%20gloria.mp3",
+    "title": "Sia lode e gloria",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "92",
+    "src": "https://archive.org/download/Cem-Canti/092%20-%20Davanti%20al%20Re.mp3",
+    "title": "Davanti al Re",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "93",
+    "src": "https://archive.org/download/Cem-Canti/093%20-%20Tu%20regni%20nella%20gloria.mp3",
+    "title": "Tu regni nella gloria",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "94",
+    "src": "https://archive.org/download/Cem-Canti/094%20-%20Maest%C3%A0.mp3",
+    "title": "Maestà",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "95",
+    "src": "https://archive.org/download/Cem-Canti/095%20-%20Grande%20%C3%A8%20il%20Signor.mp3",
+    "title": "Grande è il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "96",
+    "src": "https://archive.org/download/Cem-Canti/096%20-%20Su%20nei%20cieli.mp3",
+    "title": "Su nei cieli",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "97",
+    "src": "https://archive.org/download/Cem-Canti/097%20-%20Con%20potenza%20risuscit%C3%B2%20-%20Risuscit%C3%B2.mp3",
+    "title": "Con potenza risuscitò - Risuscitò",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "98",
+    "src": "https://archive.org/download/Cem-Canti/098%20-%20Benedite%20Dio.mp3",
+    "title": "Benedite Dio",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "99",
+    "src": "https://archive.org/download/Cem-Canti/099%20-%20Canter%C3%B2%20un%20canto%20nuovo.mp3",
+    "title": "Canterò un canto nuovo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "100",
+    "src": "https://archive.org/download/Cem-Canti/100%20-%20Chi%20lass%C3%B9%20nel%20ciel.mp3",
+    "title": "Chi lassù nel ciel",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "101",
+    "src": "https://archive.org/download/Cem-Canti/101%20-%20Tu%20sei%20il%20creator.mp3",
+    "title": "Tu sei il creator",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "102",
+    "src": "https://archive.org/download/Cem-Canti/102%20-%20S%C3%AC%2C%20magnifico%20%C3%A8%20il%20Signor.mp3",
+    "title": "Sì, magnifico è il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "103",
+    "src": "https://archive.org/download/Cem-Canti/103%20-%20Adoriam.mp3",
+    "title": "Adoriam",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "104",
+    "src": "https://archive.org/download/Cem-Canti/104%20-%20Adoriamo%20il%20Signor.mp3",
+    "title": "Adoriamo il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "105",
+    "src": "https://archive.org/download/Cem-Canti/105%20-%20Noi%20t%27adoriam.mp3",
+    "title": "Noi t'adoriam",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "106",
+    "src": "https://archive.org/download/Cem-Canti/106%20-%20Gloria%20a%20te.mp3",
+    "title": "Gloria a te",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "107",
+    "src": "https://archive.org/download/Cem-Canti/107%20-%20Padre%20t%27amiamo.mp3",
+    "title": "Padre t'amiamo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/107%20-%20Padre%20t%27amiamo.png"
+  },
+  {
+    "num": "108",
+    "src": "https://archive.org/download/Cem-Canti/108%20-%20Signor%20Ges%C3%B9.mp3",
+    "title": "Signor Gesù",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "109",
+    "src": "https://archive.org/download/Cem-Canti/109%20-%20Signor%20Ges%C3%B9%20io%20amo%20te.mp3",
+    "title": "Signor Gesù io amo te",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "110",
+    "src": "https://archive.org/download/Cem-Canti/110%20-%20Ges%C3%B9%20dolce%20musica.mp3",
+    "title": "Gesù dolce musica",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "111",
+    "src": "https://archive.org/download/Cem-Canti/111%20-%20Ges%C3%B9%20sei%20meraviglioso%20-%20Ges%C3%B9%2C%20sei%20per%20me.mp3",
+    "title": "Gesù sei meraviglioso - Gesù, sei per me",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "112",
+    "src": "https://archive.org/download/Cem-Canti/112%20-%20Lodato%20sia%20il%20Signor.mp3",
+    "title": "Lodato sia il Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "113",
+    "src": "https://archive.org/download/Cem-Canti/113%20-%20Degno%20%C3%A8%20l%27Agnel.mp3",
+    "title": "Degno è l'Agnel",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "114",
+    "src": "https://archive.org/download/Cem-Canti/114%20-%20Ges%C3%B9%20t%27innalziamo.mp3",
+    "title": "Gesù t'innalziamo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "115",
+    "src": "https://archive.org/download/Cem-Canti/115%20-%20Per%20me%20Signor.mp3",
+    "title": "Per me Signor",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "116",
+    "src": "https://archive.org/download/Cem-Canti/116%20-%20Dammi%20le%20ali%20della%20lode.mp3",
+    "title": "Dammi le ali della lode",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "117",
+    "src": "https://archive.org/download/Cem-Canti/117%20-%20Fammi%20restar%20con%20te%20-%20Ges%C3%B9%2C%20quando%20temo.mp3",
+    "title": "Fammi restar con te - Gesù, quando temo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "118",
+    "src": "https://archive.org/download/Cem-Canti/118%20-%20Il%20Signore%20%C3%A8%20la%20mia%20roccia.mp3",
+    "title": "Il Signore è la mia roccia",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "119",
+    "src": "https://archive.org/download/Cem-Canti/119%20-%20Io%20posso%20ogni%20cosa.mp3",
+    "title": "Io posso ogni cosa",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "120",
+    "src": "https://archive.org/download/Cem-Canti/120%20-%20Quando%20su%20di%20me.mp3",
+    "title": "Quando su di me",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "121",
+    "src": "https://archive.org/download/Cem-Canti/121%20-%20Grazie%20%28R.%20Romeo%29.mp3",
+    "title": "Grazie (R. Romeo)",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "122",
+    "src": "https://archive.org/download/Cem-Canti/122%20-%20Redentor%20del%20mondo.mp3",
+    "title": "Redentor del mondo",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "123",
+    "src": "https://archive.org/download/Cem-Canti/123%20-%20Per%20quel%20sangue.mp3",
+    "title": "Per quel sangue",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "124",
+    "src": "https://archive.org/download/Cem-Canti/124%20-%20Lasciati%20andare.mp3",
+    "title": "Lasciati andare",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "125",
+    "src": "https://archive.org/download/Cem-Canti/125%20-%20Una%20nuova%20vita.mp3",
+    "title": "Una nuova vita",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "126",
+    "src": "https://archive.org/download/Cem-Canti/126%20-%20Non%20c%27%C3%A8%20niente%20di%20pi%C3%B9%20bello.mp3",
+    "title": "Non c'è niente di più bello",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "127",
+    "src": "https://archive.org/download/Cem-Canti/127%20-%20Il%20regno%20dentro%20me%20-%20Tutta%20la%20gioia.mp3",
+    "title": "Il regno dentro me - Tutta la gioia",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "128",
+    "src": "https://archive.org/download/Cem-Canti/128%20-%20La%20famiglia%20di%20Dio%20%C3%A8%20qua.mp3",
+    "title": "La famiglia di Dio è qua",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "129",
+    "src": "https://archive.org/download/Cem-Canti/129%20-%20Io%20alzo%20i%20miei%20occhi%20-%20Maranata.mp3",
+    "title": "Io alzo i miei occhi - Maranata",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "130",
+    "src": "https://archive.org/download/Cem-Canti/130%20-%20Hai%20portato%20gioia.mp3",
+    "title": "Hai portato gioia",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": ""
+  },
+  {
+    "num": "131",
+    "src": "https://archive.org/download/Cem-Canti/131%20-%20Insieme.mp3",
+    "title": "Insieme",
+    "artist": "Chiesa Evangelica Maranello",
+    "cover": "https://archive.org/download/Cem-Canti/131%20-%20Insieme.png"
+  }
+]

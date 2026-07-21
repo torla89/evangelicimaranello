@@ -1,20 +1,20 @@
 [
   {
-    "src": "musica-player/Croce%20Bussola.mp3",
+    "src": "https://archive.org/download/Cem-Musica-Player/Croce%20Bussola.mp3",
     "title": "Croce Bussola",
     "artist": "Chiesa Evangelica Maranello",
-    "cover": "musica-player/Croce%20Bussola_cover.jpg"
+    "cover": "https://archive.org/download/Cem-Musica-Player/Croce%20Bussola_cover.jpg"
   },
   {
-    "src": "musica-player/E%20torno%20a%20Te.mp3",
+    "src": "https://archive.org/download/Cem-Musica-Player/E%20torno%20a%20Te.mp3",
     "title": "E torno a Te",
     "artist": "Chiesa Evangelica Maranello",
-    "cover": "musica-player/E%20torno%20a%20Te_cover.jpg"
+    "cover": "https://archive.org/download/Cem-Musica-Player/E%20torno%20a%20Te_cover.jpg"
   },
   {
-    "src": "musica-player/Gioia%20nel%20tuo%20nome.mp3",
+    "src": "https://archive.org/download/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3",
     "title": "Gioia nel tuo nome",
     "artist": "Chiesa Evangelica Maranello",
-    "cover": "musica-player/Gioia%20nel%20tuo%20nome_cover.jpg"
+    "cover": "https://archive.org/download/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.jpg"
   }
 ]
