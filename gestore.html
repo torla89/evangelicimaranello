@@ -345,9 +345,14 @@
       <div id="sezionePredVecchie" style="margin-top:14px;">
         <div class="section-label">Vecchie predicazioni</div>
         <div id="predicazioniVecchieList"></div>
-        <div class="btn-row-start" style="margin-top:4px;">
+        <div class="btn-row-start" style="margin-top:4px;gap:8px;">
           <button class="btn btn-ghost" onclick="openPredModal(-1, 'vecchia')">＋ Aggiungi predicazione vecchia</button>
+          <label class="btn btn-ghost" style="cursor:pointer;">
+            📥 Importa da JSON
+            <input type="file" accept=".json" id="importVecchieFile" style="display:none;" onchange="importaVecchieJSON(this)">
+          </label>
         </div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Importa un file con la struttura {"Predicatore": [{"titolo":"...","src":"..."}, ...]} — i brani già presenti (stesso link) non vengono duplicati.</div>
       </div>
     </div>
 
@@ -581,6 +586,54 @@
       vecchie = {};
     }
     renderPredicazioniVecchie();
+  }
+
+  function importaVecchieJSON(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      let importati;
+      try {
+        importati = JSON.parse(e.target.result);
+      } catch(err) {
+        toast('❌ File JSON non valido');
+        input.value = '';
+        return;
+      }
+      if (typeof importati !== 'object' || Array.isArray(importati)) {
+        toast('❌ Formato non riconosciuto: serve { "Predicatore": [{titolo,src}, ...] }');
+        input.value = '';
+        return;
+      }
+
+      let aggiunti = 0, duplicati = 0;
+      Object.keys(importati).forEach(predicatore => {
+        const voci = importati[predicatore];
+        if (!Array.isArray(voci)) return;
+        if (!vecchie[predicatore]) vecchie[predicatore] = [];
+        const srcEsistenti = new Set(vecchie[predicatore].map(v => v.src));
+        voci.forEach(v => {
+          if (!v || !v.src) return;
+          if (srcEsistenti.has(v.src)) { duplicati++; return; }
+          vecchie[predicatore].push({ titolo: v.titolo || '', src: v.src });
+          srcEsistenti.add(v.src);
+          aggiunti++;
+        });
+      });
+
+      vecchie = Object.fromEntries(Object.entries(vecchie).sort((a,b) => a[0].localeCompare(b[0])));
+      renderPredicazioniVecchie();
+      input.value = '';
+
+      if (aggiunti > 0) {
+        markDirty();
+        toast(`✅ ${aggiunti} predicazioni importate${duplicati ? ` (${duplicati} già presenti, saltate)` : ''}`);
+      } else {
+        toast(duplicati ? '⚠ Tutte le voci erano già presenti' : '⚠ Nessuna voce importata');
+      }
+    };
+    reader.readAsText(file);
   }
 
   function parsaECarica(jsonStr, filename) {

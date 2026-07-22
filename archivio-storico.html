@@ -102,6 +102,41 @@
     .btn-play:hover { background: rgba(255,255,255,0.18); }
     .btn-play.playing { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
 
+    /* GRUPPO MESSAGGI (Lato A/B, parti numerate) con menu a tendina */
+    .msg-group { position: relative; flex-shrink: 0; }
+    .btn-group-toggle {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 20px; padding: 6px 14px;
+      cursor: pointer; color: #fff; font-size: 0.80rem;
+      transition: background 0.2s; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-group-toggle:hover { background: rgba(255,255,255,0.18); }
+    .btn-group-toggle.playing { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
+    .btn-group-toggle .grp-arrow { font-size: 0.65rem; transition: transform 0.2s; }
+    .btn-group-toggle.open .grp-arrow { transform: rotate(180deg); }
+
+    .msg-dropdown {
+      display: none;
+      position: absolute; top: calc(100% + 6px); right: 0; z-index: 20;
+      min-width: 230px; max-height: 260px; overflow-y: auto;
+      background: rgba(15,10,4,0.97); backdrop-filter: blur(6px);
+      border: 1px solid rgba(200,150,60,0.35); border-radius: 10px;
+      padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    }
+    .msg-dropdown.open { display: block; }
+    .msg-dropdown-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      width: 100%; text-align: left; background: none; border: none;
+      color: rgba(255,255,255,0.85); font-size: 0.80rem;
+      padding: 8px 10px; border-radius: 6px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .msg-dropdown-item:hover { background: rgba(255,255,255,0.08); }
+    .msg-dropdown-item.playing { background: rgba(200,150,60,0.22); color: #fff; }
+    .msg-dropdown-item .item-icon { flex-shrink: 0; opacity: 0.7; }
+
     .nota {
       margin-top: 32px; padding: 16px 20px;
       background: rgba(200,150,60,0.08);
@@ -186,6 +221,70 @@
 <script>
   let _playingBtn = null;
 
+  /* ── RAGGRUPPAMENTO MESSAGGI ──
+     Regole:
+     - "Titolo - Lato A" / "Titolo - Lato B" -> stesso messaggio (1 solo), con scelta del lato.
+     - "Titolo 1", "Titolo_2", "Titolo - 3. Descrizione" -> messaggi DIVERSI con lo stesso
+       titolo base, raggruppati sotto un unico bottone/menu a tendina.
+     Logica generica: si applica a qualsiasi predicatore, non solo a nomi specifici. */
+
+  function normalizzaSpazi(s) {
+    return s.trim().replace(/\s+/g, ' ');
+  }
+
+  function parseTitoloVariante(raw) {
+    let base = normalizzaSpazi(raw);
+    let lato = null;
+    let m = base.match(/^(.*?)\s*-\s*[Ll]ato\s+([AB])\s*$/);
+    if (m) { base = normalizzaSpazi(m[1]); lato = m[2].toUpperCase(); }
+
+    let seriesBase = base, numero = null, extra = null;
+    m = base.match(/^(.*?)\s*-\s*(\d+)\.\s*(.+)$/);
+    if (m) {
+      seriesBase = normalizzaSpazi(m[1]); numero = m[2]; extra = normalizzaSpazi(m[3]);
+    } else {
+      m = base.match(/^(.*?)_(\d+)$/);
+      if (m) {
+        seriesBase = normalizzaSpazi(m[1]); numero = m[2];
+      } else {
+        m = base.match(/^(.*?)\s+(\d+)$/);
+        if (m) { seriesBase = normalizzaSpazi(m[1]); numero = m[2]; }
+      }
+    }
+    return { seriesBase, numero, extra, lato };
+  }
+
+  function raggruppaMessaggi(msgs) {
+    const gruppi = {};
+    const ordineGruppi = [];
+    msgs.forEach(m => {
+      const p = parseTitoloVariante(m.titolo);
+      if (!gruppi[p.seriesBase]) { gruppi[p.seriesBase] = {}; ordineGruppi.push(p.seriesBase); }
+      const mKey = p.numero !== null ? p.numero : '_singolo';
+      if (!gruppi[p.seriesBase][mKey]) {
+        gruppi[p.seriesBase][mKey] = { numero: p.numero, extra: p.extra, varianti: [] };
+      }
+      gruppi[p.seriesBase][mKey].varianti.push({ lato: p.lato, src: m.src, titoloOriginale: m.titolo });
+    });
+
+    return ordineGruppi.map(seriesBase => {
+      const messaggiObj = gruppi[seriesBase];
+      const chiavi = Object.keys(messaggiObj).sort((a, b) => {
+        if (a === '_singolo') return -1;
+        if (b === '_singolo') return 1;
+        return parseInt(a) - parseInt(b);
+      });
+      const messaggi = chiavi.map(k => messaggiObj[k]);
+      const totaleFile = messaggi.reduce((n, m) => n + m.varianti.length, 0);
+      return { titolo: seriesBase, messaggi, numMessaggi: messaggi.length, totaleFile };
+    });
+  }
+
+  function labelMessaggio(m) {
+    if (m.numero !== null) return m.extra ? `${m.numero}. ${m.extra}` : `Parte ${m.numero}`;
+    return 'Predicazione originale';
+  }
+
   async function caricaArchivio() {
     const c = document.getElementById('archivio-container');
     try {
@@ -200,26 +299,67 @@
 
       let html = '';
       predicatori.forEach((pred, pi) => {
-        const msgs = data[pred];
+        const gruppi = raggruppaMessaggi(data[pred]);
+        const numMessaggiTotali = gruppi.reduce((n, g) => n + g.numMessaggi, 0);
+
         html += `
           <div class="predicatore-block">
             <div class="predicatore-header" onclick="togglePred(this, ${pi})" id="pred-hdr-${pi}">
               <div class="pred-nome-wrap">
                 <span class="pred-icona">👤</span>
                 <span class="pred-nome">${pred}</span>
-                <span class="pred-count">${msgs.length} messaggio${msgs.length !== 1 ? 'i' : ''}</span>
+                <span class="pred-count">${numMessaggiTotali} messaggio${numMessaggiTotali !== 1 ? 'i' : ''}</span>
               </div>
               <span class="pred-arrow">▼</span>
             </div>
             <div class="predicatore-body" id="pred-body-${pi}">
-              ${msgs.map((m, mi) => `
-                <div class="msg-row">
-                  <span class="msg-titolo">${m.titolo}</span>
-                  <button class="btn-play" id="btn-${pi}-${mi}"
-                    onclick="suona('${m.src.replace(/'/g,"\\'")}', '${m.titolo.replace(/'/g,"\\'")}', '${pred}', this)">
-                    ▶ Ascolta
-                  </button>
-                </div>`).join('')}
+              ${gruppi.map((g, gi) => {
+                const escTitolo = g.titolo.replace(/'/g, "\\'");
+                const escPred = pred.replace(/'/g, "\\'");
+
+                if (g.totaleFile === 1) {
+                  const v = g.messaggi[0].varianti[0];
+                  const escSrc = v.src.replace(/'/g, "\\'");
+                  return `
+                    <div class="msg-row">
+                      <span class="msg-titolo">${g.titolo}</span>
+                      <button class="btn-play" id="btn-${pi}-${gi}-0-0"
+                        onclick="suona('${escSrc}', '${escTitolo}', '${escPred}', this)">
+                        ▶ Ascolta
+                      </button>
+                    </div>`;
+                }
+
+                const voci = [];
+                g.messaggi.forEach((m, mi) => {
+                  const molteplici = m.varianti.length > 1;
+                  m.varianti.forEach((v, vi) => {
+                    const label = molteplici ? `${labelMessaggio(m)} — Lato ${v.lato}` : labelMessaggio(m);
+                    const escLabel = label.replace(/'/g, "\\'");
+                    const escSrc = v.src.replace(/'/g, "\\'");
+                    voci.push({ mi, vi, label, escLabel, escSrc });
+                  });
+                });
+
+                return `
+                  <div class="msg-row">
+                    <span class="msg-titolo">${g.titolo}</span>
+                    <div class="msg-group">
+                      <button class="btn-group-toggle" id="grp-btn-${pi}-${gi}" onclick="toggleDropdown(${pi}, ${gi})">
+                        <span id="grp-label-${pi}-${gi}">${g.numMessaggi} messaggio${g.numMessaggi !== 1 ? 'i' : ''}</span>
+                        <span class="grp-arrow">▼</span>
+                      </button>
+                      <div class="msg-dropdown" id="grp-dropdown-${pi}-${gi}">
+                        ${voci.map(v => `
+                          <button class="msg-dropdown-item" id="btn-${pi}-${gi}-${v.mi}-${v.vi}"
+                            onclick="suona('${v.escSrc}', '${escTitolo} — ${v.escLabel}', '${escPred}', this)">
+                            <span>${v.label}</span>
+                            <span class="item-icon">▶</span>
+                          </button>`).join('')}
+                      </div>
+                    </div>
+                  </div>`;
+              }).join('')}
             </div>
           </div>`;
       });
@@ -236,17 +376,53 @@
     body.classList.toggle('open');
   }
 
+  function chiudiTutteLeTendine(tranneId) {
+    document.querySelectorAll('.msg-dropdown.open').forEach(dd => {
+      if (dd.id !== tranneId) {
+        dd.classList.remove('open');
+        const btn = document.getElementById(dd.id.replace('grp-dropdown-', 'grp-btn-'));
+        if (btn) btn.classList.remove('open');
+      }
+    });
+  }
+
+  function toggleDropdown(pi, gi) {
+    const id = `grp-dropdown-${pi}-${gi}`;
+    const dd = document.getElementById(id);
+    const btn = document.getElementById(`grp-btn-${pi}-${gi}`);
+    const isOpen = dd.classList.contains('open');
+    chiudiTutteLeTendine(id);
+    dd.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.msg-group')) chiudiTutteLeTendine(null);
+  });
+
   function suona(src, titolo, predicatore, btn) {
+    const isGroupItem = btn.classList.contains('msg-dropdown-item');
+    const groupBtn = isGroupItem ? btn.closest('.msg-group').querySelector('.btn-group-toggle') : null;
+
     if (_playingBtn === btn) {
       if (window._player) window._player.toggle();
-      btn.textContent = btn.classList.contains('playing') ? '▶ Ascolta' : '⏸ In ascolto';
+      const inAscolto = btn.classList.contains('playing');
       btn.classList.toggle('playing');
+      if (!isGroupItem) btn.textContent = inAscolto ? '▶ Ascolta' : '⏸ In ascolto';
+      if (groupBtn) groupBtn.classList.toggle('playing', !inAscolto);
       return;
     }
-    if (_playingBtn) { _playingBtn.textContent = '▶ Ascolta'; _playingBtn.classList.remove('playing'); }
+    if (_playingBtn) {
+      _playingBtn.classList.remove('playing');
+      if (!_playingBtn.classList.contains('msg-dropdown-item')) _playingBtn.textContent = '▶ Ascolta';
+      const prevGroupBtn = _playingBtn.closest && _playingBtn.closest('.msg-group')
+        ? _playingBtn.closest('.msg-group').querySelector('.btn-group-toggle') : null;
+      if (prevGroupBtn) prevGroupBtn.classList.remove('playing');
+    }
     _playingBtn = btn;
-    btn.textContent = '⏸ In ascolto';
     btn.classList.add('playing');
+    if (!isGroupItem) btn.textContent = '⏸ In ascolto';
+    if (groupBtn) { groupBtn.classList.add('playing'); chiudiTutteLeTendine(null); }
 
     if (window._player) {
       window._player.playUrl(src, titolo, predicatore, '', true);
@@ -255,8 +431,9 @@
     const audio = document.getElementById('cemAudio');
     if (audio) {
       const onEnded = () => {
-        btn.textContent = '▶ Ascolta';
         btn.classList.remove('playing');
+        if (!isGroupItem) btn.textContent = '▶ Ascolta';
+        if (groupBtn) groupBtn.classList.remove('playing');
         _playingBtn = null;
         audio.removeEventListener('ended', onEnded);
       };
