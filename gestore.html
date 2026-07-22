@@ -324,16 +324,30 @@
 
     <!-- ══ PREDICAZIONI ══ -->
     <div class="panel" id="panel-predicazioni">
-      <div class="section-label">Nuove predicazioni</div>
-      <div id="predicazioniList"></div>
-      <div class="btn-row-start" style="margin-top:4px;">
-        <button class="btn btn-ghost" onclick="openPredModal()">＋ Aggiungi predicazione</button>
+      <div class="field" style="max-width:220px;">
+        <label>Mostra</label>
+        <select id="predFiltroTipo" onchange="filtraPredicazioni()">
+          <option value="nuova">Nuova</option>
+          <option value="vecchia">Vecchia</option>
+        </select>
       </div>
 
-      <div class="section-label" style="margin-top:22px;">Vecchie predicazioni</div>
-      <div id="predicazioniVecchieList"></div>
-      <div class="btn-row-start" style="margin-top:4px;">
-        <button class="btn btn-ghost" onclick="openPredModal(-1, 'vecchia')">＋ Aggiungi predicazione vecchia</button>
+      <div id="sezionePredNuove" style="margin-top:14px;">
+        <div class="section-label">Nuove predicazioni</div>
+        <div id="predicazioniList"></div>
+        <div class="btn-row-start" style="margin-top:4px;gap:8px;">
+          <button class="btn btn-ghost" onclick="openPredModal()">＋ Aggiungi predicazione</button>
+          <button class="btn btn-ghost" onclick="caricaMp3BulkNuove()">📦 Carica più file MP3</button>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">"Carica più file MP3" prepara e carica tutti i file scelti su Archive.org in coda, creando una predicazione per ciascuno da completare poi con ✏️.</div>
+      </div>
+
+      <div id="sezionePredVecchie" style="margin-top:14px;">
+        <div class="section-label">Vecchie predicazioni</div>
+        <div id="predicazioniVecchieList"></div>
+        <div class="btn-row-start" style="margin-top:4px;">
+          <button class="btn btn-ghost" onclick="openPredModal(-1, 'vecchia')">＋ Aggiungi predicazione vecchia</button>
+        </div>
       </div>
     </div>
 
@@ -509,20 +523,22 @@
       <div id="predPdfStatus" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ PDF pronto per il salvataggio</div>
     </div>
 
-    <div class="field">
-      <label>File MP3 (opzionale)</label>
+    <div class="field" id="predCampoMp3Singolo">
+      <label>File MP3 (caricato su Archive.org)</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="predMp3" placeholder="es. pred_20260511.mp3" style="flex:1;">
-        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;">
-          🎵 Sfoglia
-          <input type="file" accept=".mp3,audio/*" id="predMp3File" style="display:none;" onchange="caricaMp3(this)">
-        </label>
+        <input type="text" id="predMp3" placeholder="URL Archive.org" style="flex:1;" readonly>
+        <button type="button" class="btn btn-ghost" style="flex-shrink:0;" onclick="caricaMp3Singolo()">🎵 Carica su Archive.org</button>
       </div>
-      <div id="predMp3Status" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ MP3 pronto per il salvataggio</div>
+      <div id="predMp3Status" style="font-size:0.75rem;color:var(--green);margin-top:4px;display:none;">✅ MP3 caricato su Archive.org</div>
+    </div>
+    <div class="field" id="predCampoMp3Bulk">
+      <label>Oppure carica più file insieme (titolo automatico dal nome file)</label>
+      <button type="button" class="btn btn-ghost" onclick="caricaMp3BulkVecchie()">🎵 Seleziona e carica più file MP3</button>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Ogni file selezionato viene aggiunto subito come predicazione separata per il predicatore indicato sopra.</div>
     </div>
     <div class="btn-row-end">
       <button class="btn btn-ghost" onclick="closeModal('predicazione')">Annulla</button>
-      <button class="btn btn-primary" onclick="salvaPred()">💾 Salva</button>
+      <button class="btn btn-primary" id="predBtnSalva" onclick="salvaPred()">💾 Salva</button>
     </div>
   </div>
 </div>
@@ -605,6 +621,7 @@
     renderRiunioni();
     renderPredicazioni();
     renderPredicazioniVecchie();
+    filtraPredicazioni();
     renderAttivita();
   }
 
@@ -755,6 +772,12 @@
       </div>`).join('');
   }
 
+  function filtraPredicazioni() {
+    const tipo = document.getElementById('predFiltroTipo').value;
+    document.getElementById('sezionePredNuove').style.display  = (tipo === 'nuova')  ? '' : 'none';
+    document.getElementById('sezionePredVecchie').style.display = (tipo === 'vecchia') ? '' : 'none';
+  }
+
   /* ── PREDICAZIONI VECCHIE ── */
   function renderPredicazioniVecchie() {
     const c = document.getElementById('predicazioniVecchieList');
@@ -781,8 +804,15 @@
     const tipo = document.getElementById('predTipo').value;
     const nuovaOnly = ['predCampoData', 'predCampoRiassunto', 'predCampoPdf'];
     nuovaOnly.forEach(id => document.getElementById(id).style.display = (tipo === 'nuova') ? '' : 'none');
-    document.getElementById('predCampoTitolo').style.display = (tipo === 'vecchia') ? '' : 'none';
     document.getElementById('predReferenteLabel').textContent = (tipo === 'vecchia') ? 'Predicatore' : 'Referente';
+
+    const origIndex = parseInt(document.getElementById('predVecchiaOrigIndex').value);
+    const isVecchiaEdit = tipo === 'vecchia' && origIndex >= 0;
+    const isVecchiaAdd = tipo === 'vecchia' && !isVecchiaEdit;
+    document.getElementById('predCampoTitolo').style.display = (tipo === 'vecchia') ? '' : 'none';
+    document.getElementById('predCampoMp3Singolo').style.display = '';
+    document.getElementById('predCampoMp3Bulk').style.display = isVecchiaAdd ? '' : 'none';
+    document.getElementById('predBtnSalva').style.display = '';
   }
 
   function openPredModal(idx = -1, tipo = 'nuova') {
@@ -803,7 +833,6 @@
       document.getElementById('predMp3').value          = p.mp3 || '';
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
-      _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = 'Modifica predicazione';
     } else {
       document.getElementById('predTipo').value = tipo;
@@ -816,7 +845,6 @@
       document.getElementById('predPdfStatus').style.display = 'none';
       document.getElementById('predMp3Status').style.display = 'none';
       _pdfPendingName = null; _pdfPendingData = null;
-      _mp3PendingName = null; _mp3PendingData = null;
       document.getElementById('modalPredTitle').textContent = (tipo === 'vecchia') ? 'Nuova predicazione vecchia' : 'Nuova predicazione';
     }
     aggiornaCampiPredTipo();
@@ -840,7 +868,6 @@
     document.getElementById('predPdfStatus').style.display = 'none';
     document.getElementById('predMp3Status').style.display = 'none';
     _pdfPendingName = null; _pdfPendingData = null;
-    _mp3PendingName = null; _mp3PendingData = null;
     document.getElementById('modalPredTitle').textContent = 'Modifica predicazione vecchia';
     aggiornaCampiPredTipo();
     document.getElementById('modal-predicazione').classList.add('open');
@@ -856,8 +883,6 @@
 
   let _pdfPendingName = null;
   let _pdfPendingData = null;
-  let _mp3PendingName = null;
-  let _mp3PendingData = null;
 
   function caricaPdf(input) {
     const file = input.files[0];
@@ -874,18 +899,199 @@
     reader.readAsDataURL(file);
   }
 
-  function caricaMp3(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      _mp3PendingName = file.name;
-      _mp3PendingData = e.target.result.split(',')[1];
-      document.getElementById('predMp3').value = file.name;
+  /* ── UPLOAD MP3 PREDICAZIONI SU ARCHIVE.ORG ── */
+
+  async function uploadUnFileArchive(path, collezione, uploadTipo) {
+    const keys = await getS3Keys();
+    if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return null; }
+    const nome = path.split('\\').pop().split('/').pop();
+
+    document.getElementById('uploadLog').textContent = '';
+    document.getElementById('uploadBar').style.width = '0%';
+    document.getElementById('uploadPct').textContent = '0%';
+    document.getElementById('uploadSpeed').textContent = '';
+    document.getElementById('uploadCloseBtn').style.display = 'none';
+    document.getElementById('uploadInfo').textContent = `File: ${nome}`;
+    document.getElementById('uploadOverlay').classList.add('open');
+    uploadLog(`📡 Avvio upload: ${nome}`);
+
+    await window.pywebview.api.avvia_upload(path, collezione, keys.access, keys.secret, uploadTipo);
+
+    let url = null, done = false;
+    while (!done) {
+      await new Promise(r => setTimeout(r, 400));
+      try {
+        const statoStr = await window.pywebview.api.stato_upload();
+        const s = JSON.parse(statoStr);
+        document.getElementById('uploadBar').style.width = s.pct + '%';
+        document.getElementById('uploadPct').textContent = s.pct + '%';
+        if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
+        if (s.status === 'done') {
+          uploadLog(`✅ ${nome} caricato con successo!`);
+          document.getElementById('uploadBar').style.width = '100%';
+          document.getElementById('uploadPct').textContent = '100%';
+          url = s.url || '';
+          done = true;
+        } else if (s.status === 'error') {
+          uploadLog(`❌ Errore: ${s.message}`);
+          done = true;
+        }
+      } catch(e) { uploadLog('❌ Errore polling: ' + e); done = true; }
+    }
+    document.getElementById('uploadCloseBtn').style.display = 'inline-block';
+    return url;
+  }
+
+  async function caricaMp3Singolo() {
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
+    const paths = await window.pywebview.api.seleziona_file_mp3();
+    if (!paths || !paths.length) return;
+    const tipo = document.getElementById('predTipo').value;
+    const collezione  = tipo === 'vecchia' ? 'predicazioni-vecchie' : 'cem-predicazioni';
+    const uploadTipo  = tipo === 'vecchia' ? 'predicazione_vecchia' : 'predicazione_nuova';
+    const url = await uploadUnFileArchive(paths[0], collezione, uploadTipo);
+    if (url) {
+      document.getElementById('predMp3').value = url;
       document.getElementById('predMp3Status').style.display = 'block';
-      toast('🎵 MP3 selezionato: ' + file.name);
-    };
-    reader.readAsDataURL(file);
+      toast('✅ MP3 caricato su Archive.org');
+    }
+  }
+
+  async function caricaMp3BulkVecchie() {
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
+    const predicatore = document.getElementById('predReferente').value.trim();
+    if (!predicatore) { toast('⚠ Inserisci il predicatore prima di caricare i file'); return; }
+    const keys = await getS3Keys();
+    if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return; }
+
+    const paths = await window.pywebview.api.seleziona_file_mp3();
+    if (!paths || !paths.length) return;
+
+    document.getElementById('uploadLog').textContent = '';
+    document.getElementById('uploadCloseBtn').style.display = 'none';
+    document.getElementById('uploadOverlay').classList.add('open');
+
+    let aggiunte = 0;
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+      const nome = path.split('\\').pop().split('/').pop();
+      document.getElementById('uploadInfo').textContent = `File ${i+1} di ${paths.length}: ${nome}`;
+      document.getElementById('uploadBar').style.width = '0%';
+      document.getElementById('uploadPct').textContent = '0%';
+      document.getElementById('uploadSpeed').textContent = '';
+      uploadLog(`📡 Avvio upload: ${nome}`);
+
+      await window.pywebview.api.avvia_upload(path, 'predicazioni-vecchie', keys.access, keys.secret, 'predicazione_vecchia');
+
+      let url = null, done = false;
+      while (!done) {
+        await new Promise(r => setTimeout(r, 400));
+        try {
+          const statoStr = await window.pywebview.api.stato_upload();
+          const s = JSON.parse(statoStr);
+          document.getElementById('uploadBar').style.width = s.pct + '%';
+          document.getElementById('uploadPct').textContent = s.pct + '%';
+          if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
+          if (s.status === 'done') {
+            uploadLog(`✅ ${nome} caricato con successo!`);
+            url = s.url || '';
+            done = true;
+          } else if (s.status === 'error') {
+            uploadLog(`❌ Errore: ${s.message}`);
+            done = true;
+          }
+        } catch(e) { uploadLog('❌ Errore polling: ' + e); done = true; }
+      }
+
+      if (url) {
+        const titolo = nome.replace(/\.mp3$/i, '');
+        if (!vecchie[predicatore]) vecchie[predicatore] = [];
+        vecchie[predicatore].push({ titolo, src: url });
+        aggiunte++;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    vecchie = Object.fromEntries(Object.entries(vecchie).sort((a,b) => a[0].localeCompare(b[0])));
+    document.getElementById('uploadCloseBtn').style.display = 'inline-block';
+    uploadLog(aggiunte ? `\n🎉 ${aggiunte} predicazioni aggiunte per ${predicatore}!` : '\n⚠ Nessun file caricato con successo.');
+
+    if (aggiunte) {
+      renderPredicazioniVecchie();
+      closeModal('predicazione');
+      markDirty();
+      toast(`✅ ${aggiunte} predicazioni vecchie aggiunte`);
+    }
+  }
+
+  async function caricaMp3BulkNuove() {
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
+    const keys = await getS3Keys();
+    if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return; }
+
+    const paths = await window.pywebview.api.seleziona_file_mp3();
+    if (!paths || !paths.length) return;
+
+    document.getElementById('uploadLog').textContent = '';
+    document.getElementById('uploadCloseBtn').style.display = 'none';
+    document.getElementById('uploadOverlay').classList.add('open');
+
+    let aggiunte = 0;
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+      const nome = path.split('\\').pop().split('/').pop();
+      document.getElementById('uploadInfo').textContent = `File ${i+1} di ${paths.length}: ${nome}`;
+      document.getElementById('uploadBar').style.width = '0%';
+      document.getElementById('uploadPct').textContent = '0%';
+      document.getElementById('uploadSpeed').textContent = '';
+      uploadLog(`📡 Avvio upload: ${nome}`);
+
+      await window.pywebview.api.avvia_upload(path, 'cem-predicazioni', keys.access, keys.secret, 'predicazione_nuova');
+
+      let url = null, done = false;
+      while (!done) {
+        await new Promise(r => setTimeout(r, 400));
+        try {
+          const statoStr = await window.pywebview.api.stato_upload();
+          const s = JSON.parse(statoStr);
+          document.getElementById('uploadBar').style.width = s.pct + '%';
+          document.getElementById('uploadPct').textContent = s.pct + '%';
+          if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
+          if (s.status === 'done') {
+            uploadLog(`✅ ${nome} caricato con successo!`);
+            url = s.url || '';
+            done = true;
+          } else if (s.status === 'error') {
+            uploadLog(`❌ Errore: ${s.message}`);
+            done = true;
+          }
+        } catch(e) { uploadLog('❌ Errore polling: ' + e); done = true; }
+      }
+
+      if (url) {
+        const nomeSenzaEst = nome.replace(/\.(mp3|wav)$/i, '');
+        dati.predicazioni.unshift({
+          data: today(),
+          predicatore: '',
+          referente: '',
+          riassunto: `[Da completare] ${nomeSenzaEst}`,
+          pdf: '',
+          mp3: url
+        });
+        aggiunte++;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    document.getElementById('uploadCloseBtn').style.display = 'inline-block';
+    uploadLog(aggiunte ? `\n🎉 ${aggiunte} predicazioni create, completa referente e riassunto con ✏️!` : '\n⚠ Nessun file caricato con successo.');
+
+    if (aggiunte) {
+      dati.predicazioni.sort((a,b) => b.data.localeCompare(a.data));
+      renderPredicazioni();
+      markDirty();
+      toast(`✅ ${aggiunte} predicazioni create — completale con ✏️`);
+    }
   }
 
   async function salvaPred() {
@@ -909,16 +1115,6 @@
       }
       document.getElementById('predPdf').value = 'predicazioni/' + _pdfPendingName;
       _pdfPendingName = null; _pdfPendingData = null;
-    }
-
-    // Salva MP3 se presente
-    if (_mp3PendingName && _mp3PendingData) {
-      if (typeof window.pywebview !== 'undefined') {
-        const result = await window.pywebview.api.salva_pdf(_mp3PendingName, _mp3PendingData);
-        if (result !== 'ok') { toast('❌ Errore salvataggio MP3: ' + result); return; }
-      }
-      document.getElementById('predMp3').value = 'predicazioni/' + _mp3PendingName;
-      _mp3PendingName = null; _mp3PendingData = null;
     }
 
     if (tipo === 'nuova') {
@@ -1250,6 +1446,7 @@
     document.getElementById('panel-' + name).classList.add('active');
     if (name === 'musica') renderMusica();
     if (name === 'basi') renderBasi();
+    if (name === 'predicazioni') filtraPredicazioni();
   }
 
   /* ── SALVA/PUBBLICA tramite bridge Python ── */
