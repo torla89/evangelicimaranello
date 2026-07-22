@@ -82,7 +82,7 @@
 
     /* RIGA MESSAGGIO */
     .msg-row {
-      display: flex; align-items: center; gap: 14px;
+      display: flex; align-items: flex-start; gap: 14px;
       padding: 12px 20px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       transition: background 0.2s;
@@ -90,7 +90,7 @@
     .msg-row:last-child { border-bottom: none; }
     .msg-row:hover { background: rgba(255,255,255,0.04); }
 
-    .msg-titolo { flex: 1; font-size: 0.93rem; color: rgba(255,255,255,0.85); }
+    .msg-titolo { flex: 1; font-size: 0.93rem; color: rgba(255,255,255,0.85); padding-top: 6px; }
 
     .btn-play {
       background: rgba(255,255,255,0.08);
@@ -103,14 +103,17 @@
     .btn-play.playing { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
 
     /* GRUPPO MESSAGGI (Lato A/B, parti numerate) con menu a tendina */
-    .msg-group { position: relative; flex-shrink: 0; }
+    .msg-group {
+      flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: stretch;
+    }
     .btn-group-toggle {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.20);
       border-radius: 20px; padding: 6px 14px;
       cursor: pointer; color: #fff; font-size: 0.80rem;
       transition: background 0.2s; white-space: nowrap;
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
     }
     .btn-group-toggle:hover { background: rgba(255,255,255,0.18); }
     .btn-group-toggle.playing { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
@@ -119,22 +122,23 @@
 
     .msg-dropdown {
       display: none;
-      position: absolute; top: calc(100% + 6px); right: 0; z-index: 20;
-      min-width: 230px; max-height: 260px; overflow-y: auto;
-      background: rgba(15,10,4,0.97); backdrop-filter: blur(6px);
-      border: 1px solid rgba(200,150,60,0.35); border-radius: 10px;
-      padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      width: 100%; margin-top: 8px;
+      max-height: 320px; overflow-y: auto;
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(3px);
+      border: 1px solid rgba(200,150,60,0.28); border-radius: 10px;
+      padding: 6px; box-shadow: inset 0 1px 6px rgba(0,0,0,0.20);
     }
     .msg-dropdown.open { display: block; }
     .msg-dropdown-item {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
       width: 100%; text-align: left; background: none; border: none;
-      color: rgba(255,255,255,0.85); font-size: 0.80rem;
+      color: rgba(255,255,255,0.85); font-size: 0.80rem; line-height: 1.35;
       padding: 8px 10px; border-radius: 6px; cursor: pointer;
       transition: background 0.15s;
     }
     .msg-dropdown-item:hover { background: rgba(255,255,255,0.08); }
     .msg-dropdown-item.playing { background: rgba(200,150,60,0.22); color: #fff; }
+    .msg-dropdown-item span:first-child { word-break: break-word; }
     .msg-dropdown-item .item-icon { flex-shrink: 0; opacity: 0.7; }
 
     .nota {
