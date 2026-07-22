@@ -438,7 +438,7 @@
     _playingBtn = btn;
     btn.classList.add('playing');
     if (!isGroupItem) btn.textContent = '⏸ In ascolto';
-    if (groupBtn) { groupBtn.classList.add('playing'); chiudiTutteLeTendine(null); }
+    if (groupBtn) { groupBtn.classList.add('playing'); }
 
     if (window._player) {
       window._player.playUrl(src, titolo, predicatore, '', true);
