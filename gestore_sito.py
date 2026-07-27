@@ -21,14 +21,17 @@ SITE_DIR   = r"C:\Users\torla\OneDrive\Documenti\Chiesa\sito web evangelicimaran
 JSON_FILE  = os.path.join(SITE_DIR, "dati.json")
 BACKUP_DIR = os.path.join(SITE_DIR, "backup")
 HTML_FILE  = os.path.join(SITE_DIR, "gestore.html")
+PRED_VECCHIE_FILE = os.path.join(SITE_DIR, "predicazioni_vecchie.json")
 # ──────────────────────────────────────────────────────────────
 
 
 class PythonBridge:
 
     def __init__(self):
-        self._log_q   = queue.Queue()
-        self._running = False
+        self._log_q      = queue.Queue()
+        self._running    = False
+        self._window     = None
+        self._upload_stato = {"status": "idle", "pct": 0, "speed": "", "message": ""}
 
     def _estrai_copertina(self, mp3_path: str, filename: str) -> str:
         try:
@@ -164,76 +167,327 @@ class PythonBridge:
 
     # ──────────────────────────────────────────────────────────
 
-    def carica_su_archive(self, filename: str, base64_data: str,
-                           collezione: str, access_key: str, secret_key: str,
-                           tipo: str = 'musica') -> str:
-        """Carica un file su Archive.org via S3 e aggiorna il playlist.json locale."""
+    def avvia_upload(self, filepath: str, collezione: str,
+                      access_key: str, secret_key: str, tipo: str = 'musica') -> str:
+        """Avvia upload in background e aggiorna lo stato."""
+        self._upload_stato = {"status": "uploading", "pct": 0, "speed": "", "message": ""}
+        threading.Thread(
+            target=self._upload_thread,
+            args=(filepath, collezione, access_key, secret_key, tipo),
+            daemon=True
+        ).start()
+        return "started"
+
+    def stato_upload(self) -> str:
+        """Restituisce lo stato corrente dell'upload come JSON."""
+        import json
+        return json.dumps(getattr(self, '_upload_stato', {"status": "idle", "pct": 0}))
+
+    def _upload_thread(self, filepath: str, collezione: str,
+                        access_key: str, secret_key: str, tipo: str):
+        import re, time, requests
+        from urllib.parse import quote
         try:
-            import base64 as b64mod, urllib.request, re
-            data = b64mod.b64decode(base64_data)
+            with open(filepath, 'rb') as f:
+                data = f.read()
+            total = len(data)
+            filename = os.path.basename(filepath)
+            filename_encoded = quote(filename, safe='')
+            url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
 
-            # Upload su Archive.org via S3
-            url = f"https://s3.us.archive.org/{collezione}/{filename}"
-            req = urllib.request.Request(url, data=data, method='PUT')
-            req.add_header('Authorization', f'LOW {access_key}:{secret_key}')
-            req.add_header('x-archive-auto-make-bucket', '1')
-            req.add_header('x-archive-meta-mediatype', 'audio')
-            req.add_header('Content-Type', 'audio/mpeg')
-            req.add_header('Content-Length', str(len(data)))
+            self._upload_stato = {"status": "uploading", "pct": 10, "speed": "Connessione...", "message": ""}
 
-            with urllib.request.urlopen(req, timeout=120) as r:
-                if r.status not in (200, 201):
-                    return f"Errore HTTP {r.status}"
+            headers = {
+                'Authorization': f'LOW {access_key}:{secret_key}',
+                'x-archive-auto-make-bucket': '1',
+                'x-archive-meta-mediatype': 'audio',
+                'Content-Type': 'audio/mpeg',
+            }
 
-            # Aggiorna playlist.json locale
+            # Upload senza streaming, con tentativi automatici in caso di timeout/
+            # connessione interrotta (i file grandi su reti lente vanno spesso in timeout).
+            speed_str = ""
+            r = None
+            last_err = None
+            MAX_TENTATIVI = 4
+            for tentativo in range(1, MAX_TENTATIVI + 1):
+                try:
+                    label = "Upload in corso..." if tentativo == 1 else f"Nuovo tentativo {tentativo}/{MAX_TENTATIVI}..."
+                    self._upload_stato = {"status": "uploading", "pct": 20, "speed": label, "message": ""}
+                    start_time = time.time()
+                    # Nessun timeout: con file grandi su reti lente l'upload può richiedere
+                    # molto tempo, meglio aspettare che la richiesta si completi (o fallisca
+                    # per connessione persa, gestito sotto) piuttosto che interromperla.
+                    r = requests.put(url, data=data, headers=headers, timeout=None,
+                                    verify=True, stream=False)
+                    elapsed = time.time() - start_time
+                    if elapsed > 0:
+                        speed_bps = total / elapsed
+                        speed_str = f"{speed_bps/1024/1024:.1f} MB/s" if speed_bps > 1024*1024 else f"{speed_bps/1024:.0f} KB/s"
+                    break
+                except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                    last_err = e
+                    try:
+                        with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as f:
+                            f.write(f"\nTentativo {tentativo}/{MAX_TENTATIVI} fallito per {filename}: {e}\n")
+                    except: pass
+                    if tentativo < MAX_TENTATIVI:
+                        attesa = tentativo * 8
+                        self._upload_stato = {"status": "uploading", "pct": 15,
+                                               "speed": f"Connessione interrotta, nuovo tentativo tra {attesa}s...",
+                                               "message": ""}
+                        time.sleep(attesa)
+
+            if r is None:
+                raise last_err or Exception("Upload fallito dopo più tentativi")
+
+            # Log risposta su file
+            try:
+                with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as f:
+                    f.write(f"\nURL: {url}\nStatus: {r.status_code}\nResponse: {r.text[:300]}\n")
+            except: pass
+
+            if r.status_code in (200, 201):
+                # Estrai e carica copertina se presente nei tag ID3
+                cover_url = ""
+                try:
+                    from mutagen.id3 import ID3
+                    tags = ID3(filepath)
+                    # Cerca qualsiasi tag APIC (es. APIC:, APIC:Cover, ecc.)
+                    apic_tag = None
+                    for k, v in tags.items():
+                        if k.startswith('APIC'):
+                            apic_tag = v
+                            break
+                    if apic_tag:
+                        ext = 'jpg' if 'jpeg' in apic_tag.mime else 'png'
+                        cover_filename = os.path.splitext(filename)[0] + '_cover.' + ext
+                        cover_encoded = quote(cover_filename, safe='')
+                        cover_url_s3 = f"https://s3.us.archive.org/{collezione}/{cover_encoded}"
+                        cover_headers = {
+                            'Authorization': f'LOW {access_key}:{secret_key}',
+                            'x-archive-auto-make-bucket': '1',
+                            'Content-Type': f'image/{ext}',
+                        }
+                        rc = requests.put(cover_url_s3, data=apic_tag.data,
+                                        headers=cover_headers, timeout=60, verify=True, stream=False)
+                        try:
+                            with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as lf:
+                                lf.write(f"COVER URL: {cover_url_s3}\nCOVER Status: {rc.status_code}\n")
+                        except: pass
+                        if rc.status_code in (200, 201):
+                            cover_url = f"https://archive.org/download/{collezione}/{cover_encoded}"
+                except Exception as ex:
+                    try:
+                        with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as lf:
+                            lf.write(f"COVER ERROR: {ex}\n")
+                    except: pass
+
+                file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
+                if tipo == 'basi':
+                    title = filename.replace('.mp3','').replace('.MP3','').strip()
+                    self._aggiungi_a_playlist_basi(file_url, title)
+                elif tipo in ('predicazione_nuova', 'predicazione_vecchia'):
+                    # Le predicazioni (nuove e vecchie) sono gestite lato client:
+                    # qui carichiamo solo il file e restituiamo l'URL, senza toccare playlist.json.
+                    pass
+                else:
+                    title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
+                    self._aggiungi_a_playlist_musica(file_url, title, cover_url)
+                self._upload_stato = {"status": "done", "pct": 100, "speed": speed_str, "message": "", "url": file_url}
+            else:
+                self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": f"HTTP {r.status_code}: {r.text[:150]}"}
+        except Exception as e:
+            # Scrivi errore su file per debug
+            try:
+                with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as f:
+                    import traceback
+                    f.write(f"\n=== ERRORE ===\n{traceback.format_exc()}\n")
+            except: pass
+            self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": str(e)}
+
+    def seleziona_file_mp3(self) -> list:
+        """Apre il dialogo nativo di pywebview per selezionare file MP3."""
+        try:
+            import webview
+            result = self._window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                allow_multiple=True,
+                file_types=('File audio (*.mp3;*.wav;*.MP3)', 'Tutti i file (*.*)')
+            )
+            if result:
+                return list(result)
+            return []
+        except Exception as e:
+            return []
+
+    def carica_file_su_archive(self, filepath: str, collezione: str,
+                                access_key: str, secret_key: str,
+                                tipo: str = 'musica') -> str:
+        """Carica un file direttamente dal path locale su Archive.org."""
+        try:
+            import re, requests, io
             from urllib.parse import quote
-            file_url = f"https://archive.org/download/{collezione}/{quote(filename)}"
-            # Per le basi mantieni il numero nel titolo per l'ordinamento
+
+            filename = os.path.basename(filepath)
+            with open(filepath, 'rb') as f:
+                data = f.read()
+
+            if not data:
+                return "Errore: file vuoto"
+
+            filename_encoded = quote(filename, safe='')
+            url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
+
+            headers = {
+                'Authorization': f'LOW {access_key}:{secret_key}',
+                'x-archive-auto-make-bucket': '1',
+                'x-archive-meta-mediatype': 'audio',
+                'Content-Type': 'audio/mpeg',
+                'Content-Length': str(len(data)),
+            }
+            r = requests.put(url, data=io.BytesIO(data), headers=headers, timeout=600)
+            if r.status_code not in (200, 201):
+                return f"Errore HTTP {r.status_code}: {r.text[:200]}"
+
+            file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
             if tipo == 'basi':
-                title = filename.replace('.mp3','').replace('.MP3','').strip()
+                title = filename.replace('.mp3','').replace('.MP3','').replace('.wav','').replace('.WAV','').strip()
+                self._aggiungi_a_playlist_basi(file_url, title)
             else:
                 title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
-
-            if tipo == 'musica':
                 self._aggiungi_a_playlist_musica(file_url, title)
-            elif tipo == 'basi':
-                self._aggiungi_a_playlist_basi(file_url, title)
 
             return "ok"
         except Exception as e:
             return str(e)
 
-    def _aggiungi_a_playlist_musica(self, url: str, titolo: str):
+    def salva_chiavi_s3(self, access: str, secret: str) -> str:
+        """Salva le chiavi S3 in un file locale."""
+        try:
+            import json
+            path = os.path.join(SITE_DIR, ".s3keys")
+            with open(path, 'w') as f:
+                json.dump({"access": access, "secret": secret}, f)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def leggi_chiavi_s3(self) -> str:
+        """Legge le chiavi S3 dal file locale."""
+        try:
+            import json
+            path = os.path.join(SITE_DIR, ".s3keys")
+            if os.path.exists(path):
+                with open(path) as f:
+                    return f.read()
+            return "{}"
+        except Exception as e:
+            return "{}"
+
+    def carica_su_archive(self, filename: str, base64_data: str,
+                           collezione: str, access_key: str, secret_key: str,
+                           tipo: str = 'musica') -> str:
+        """Carica un file su Archive.org via S3 e aggiorna il playlist.json locale."""
+        try:
+            import base64 as b64mod, re, io
+            from urllib.parse import quote
+            data = b64mod.b64decode(base64_data)
+            if not data:
+                return "Errore: file vuoto"
+
+            filename_encoded = quote(filename, safe='')
+            url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
+
+            try:
+                import requests
+                headers = {
+                    'Authorization': f'LOW {access_key}:{secret_key}',
+                    'x-archive-auto-make-bucket': '1',
+                    'x-archive-meta-mediatype': 'audio',
+                    'Content-Type': 'audio/mpeg',
+                    'Content-Length': str(len(data)),
+                }
+                r = requests.put(url, data=io.BytesIO(data), headers=headers, timeout=600)
+                if r.status_code not in (200, 201):
+                    return f"Errore HTTP {r.status_code}: {r.text[:200]}"
+            except ImportError:
+                # Fallback a urllib se requests non è installato
+                import urllib.request, urllib.error
+                req = urllib.request.Request(url, data=data, method='PUT')
+                req.add_header('Authorization', f'LOW {access_key}:{secret_key}')
+                req.add_header('x-archive-auto-make-bucket', '1')
+                req.add_header('x-archive-meta-mediatype', 'audio')
+                req.add_header('Content-Type', 'audio/mpeg')
+                req.add_header('Content-Length', str(len(data)))
+                try:
+                    with urllib.request.urlopen(req, timeout=600) as r:
+                        if r.status not in (200, 201):
+                            return f"Errore HTTP {r.status}"
+                except urllib.error.HTTPError as e:
+                    return f"Errore HTTP {e.code}: {e.reason}"
+
+            # Aggiorna playlist.json locale
+            file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
+            if tipo == 'basi':
+                title = filename.replace('.mp3','').replace('.MP3','').strip()
+                self._aggiungi_a_playlist_basi(file_url, title)
+            else:
+                title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
+                self._aggiungi_a_playlist_musica(file_url, title)
+
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def _aggiungi_a_playlist_musica(self, url: str, titolo: str, cover: str = ''):
         import json
         path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         playlist = []
         if os.path.exists(path):
-            with open(path, encoding='utf-8') as f:
-                playlist = json.load(f)
-        # Evita duplicati
-        if not any(p['src'] == url for p in playlist):
-            playlist.append({"src": url, "title": titolo, "artist": "Chiesa Evangelica Maranello", "cover": ""})
-            with open(path, 'w', encoding='utf-8') as f:
-                json.dump(playlist, f, ensure_ascii=False, indent=2)
+            try:
+                with open(path, encoding='utf-8') as f:
+                    playlist = json.load(f)
+            except: playlist = []
+        # Aggiorna se esiste già, altrimenti aggiungi
+        existing = next((p for p in playlist if p['src'] == url), None)
+        if existing:
+            if cover: existing['cover'] = cover
+        else:
+            playlist.append({"src": url, "title": titolo,
+                            "artist": "Chiesa Evangelica Maranello", "cover": cover})
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(playlist, f, ensure_ascii=False, indent=2)
 
     def _aggiungi_a_playlist_basi(self, url: str, titolo: str):
-        import json, re
+        import json, re, shutil
         path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         playlist = []
         if os.path.exists(path):
-            with open(path, encoding='utf-8') as f:
-                playlist = json.load(f)
+            try:
+                with open(path, encoding='utf-8') as f:
+                    content = f.read().strip()
+                if content:
+                    playlist = json.loads(content)
+                # Backup prima di modificare
+                shutil.copy2(path, path + '.bak')
+            except Exception:
+                # File corrotto — ripristina dal backup se esiste
+                bak = path + '.bak'
+                if os.path.exists(bak):
+                    shutil.copy2(bak, path)
+                    with open(path, encoding='utf-8') as f:
+                        playlist = json.load(f)
+                else:
+                    playlist = []
         if not any(p['src'] == url for p in playlist):
             playlist.append({"src": url, "title": titolo, "cover": ""})
             def sort_key(item):
-                # Estrae numero dal titolo (es. "68 - Il tempio" → 68)
-                # oppure dall'URL se il titolo non ha numero
                 t = item.get('title', '')
                 m = re.match(r'^(\d+)', t)
                 if not m:
-                    # Prova dall'URL
                     fname = item.get('src', '').split('/')[-1]
                     from urllib.parse import unquote
                     fname = unquote(fname)
@@ -272,15 +526,50 @@ class PythonBridge:
         except Exception as e:
             return "[]"
 
-    def elimina_musica_url(self, idx: int) -> str:
-        """Rimuove un brano dalla playlist musica-player/playlist.json per indice."""
+    def _elimina_da_archive(self, url: str, access_key: str, secret_key: str) -> str:
+        """Elimina un file da Archive.org via S3 DELETE."""
+        try:
+            import requests
+            # Converte URL download in URL S3
+            # https://archive.org/download/COLLEZIONE/FILE → https://s3.us.archive.org/COLLEZIONE/FILE
+            s3_url = url.replace('https://archive.org/download/', 'https://s3.us.archive.org/')
+            headers = {'Authorization': f'LOW {access_key}:{secret_key}'}
+            r = requests.delete(s3_url, headers=headers, timeout=30)
+            if r.status_code in (200, 204):
+                return "ok"
+            return f"HTTP {r.status_code}: {r.text[:100]}"
+        except Exception as e:
+            return str(e)
+
+    def elimina_musica_url(self, idx: int, access_key: str = '', secret_key: str = '') -> str:
+        """Rimuove un brano dal playlist.json e lo elimina da Archive.org."""
         try:
             import json
             playlist_path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
             with open(playlist_path, encoding='utf-8') as f:
                 playlist = json.load(f)
             if 0 <= idx < len(playlist):
-                playlist.pop(idx)
+                item = playlist.pop(idx)
+                # Elimina da Archive.org se le chiavi sono disponibili
+                if access_key and item.get('src'):
+                    self._elimina_da_archive(item['src'], access_key, secret_key)
+            with open(playlist_path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def elimina_base_url(self, idx: int, access_key: str = '', secret_key: str = '') -> str:
+        """Rimuove una base dal playlist.json e la elimina da Archive.org."""
+        try:
+            import json
+            playlist_path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
+            with open(playlist_path, encoding='utf-8') as f:
+                playlist = json.load(f)
+            if 0 <= idx < len(playlist):
+                item = playlist.pop(idx)
+                if access_key and item.get('src'):
+                    self._elimina_da_archive(item['src'], access_key, secret_key)
             with open(playlist_path, 'w', encoding='utf-8') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
             return "ok"
@@ -306,36 +595,46 @@ class PythonBridge:
         except Exception as e:
             return "[]"
 
-    def elimina_base_url(self, idx: int) -> str:
-        """Rimuove una base da basi-inni/playlist.json per indice."""
-        try:
-            import json
-            playlist_path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
-            with open(playlist_path, encoding='utf-8') as f:
-                playlist = json.load(f)
-            if 0 <= idx < len(playlist):
-                playlist.pop(idx)
-            with open(playlist_path, 'w', encoding='utf-8') as f:
-                json.dump(playlist, f, ensure_ascii=False, indent=2)
-            return "ok"
-        except Exception as e:
-            return str(e)
-
     def aggiungi_predicazione_vecchia(self, predicatore: str, titolo: str, mp3_url: str) -> str:
         """Aggiunge un messaggio a predicazioni_vecchie.json raggruppato per predicatore."""
         try:
             import json
-            path = os.path.join(SITE_DIR, "predicazioni_vecchie.json")
             data = {}
-            if os.path.exists(path):
-                with open(path, encoding='utf-8') as f:
+            if os.path.exists(PRED_VECCHIE_FILE):
+                with open(PRED_VECCHIE_FILE, encoding='utf-8') as f:
                     data = json.load(f)
             if predicatore not in data:
                 data[predicatore] = []
             data[predicatore].append({"titolo": titolo, "src": mp3_url})
             # Riordina predicatori alfabeticamente
             data = dict(sorted(data.items()))
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(PRED_VECCHIE_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
+    def leggi_predicazioni_vecchie(self) -> str:
+        """Restituisce il contenuto di predicazioni_vecchie.json (raggruppato per predicatore)."""
+        try:
+            if os.path.exists(PRED_VECCHIE_FILE):
+                with open(PRED_VECCHIE_FILE, encoding='utf-8') as f:
+                    return f.read()
+            return "{}"
+        except Exception as e:
+            return "{}"
+
+    def salva_predicazioni_vecchie(self, json_str: str) -> str:
+        """Sovrascrive predicazioni_vecchie.json con backup, come per dati.json."""
+        try:
+            import json
+            data = json.loads(json_str)
+            os.makedirs(BACKUP_DIR, exist_ok=True)
+            if os.path.exists(PRED_VECCHIE_FILE):
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                dst = os.path.join(BACKUP_DIR, f"predicazioni_vecchie_backup_{ts}.json")
+                shutil.copy2(PRED_VECCHIE_FILE, dst)
+            with open(PRED_VECCHIE_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:
@@ -464,6 +763,9 @@ def main():
         confirm_close    = True,
     )
 
+    # Passa la finestra al bridge così può aprire dialoghi nativi
+    bridge._window = window
+
     def on_loaded():
         try:
             if os.path.exists(JSON_FILE):
@@ -478,8 +780,20 @@ def main():
         except Exception as e:
             window.evaluate_js(f"setStatus('warn', 'Errore: {e}')")
 
+        try:
+            if os.path.exists(PRED_VECCHIE_FILE):
+                with open(PRED_VECCHIE_FILE, encoding="utf-8") as f:
+                    vecchie_content = f.read()
+            else:
+                vecchie_content = "{}"
+            vecchie_escaped = vecchie_content.replace("\\", "\\\\").replace("`", "\\`")
+            window.evaluate_js(f"caricaVecchie(`{vecchie_escaped}`)")
+        except Exception as e:
+            window.evaluate_js(f"setStatus('warn', 'Errore predicazioni vecchie: {e}')")
+
     webview.start(on_loaded, debug=False)
 
 
 if __name__ == "__main__":
     main()
+

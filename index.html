@@ -103,20 +103,6 @@
     }
     nav a:hover { opacity: 1; }
 
-    .nav-search {
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      padding: 0;
-      opacity: 0.88;
-      line-height: 1;
-      font-size: 1.05em;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-    }
-
     /* hamburger mobile */
     .hamburger {
       display: none;
@@ -299,7 +285,7 @@
 
       /* Navbar */
       header { padding: 0 18px; height: 56px; }
-      nav, .nav-search { display: none; }
+      nav { display: none; }
       .hamburger { display: flex; }
 
       /* Hero: testo centrato, più compatto */
@@ -426,9 +412,8 @@
       <a href="index.html" class="active">Home</a>
       <a href="contatti.html">Contattaci</a>
       <a href="area-privata.html">Area Privata</a>
-      <a href="cerca.html">Cerca nel sito</a>
+      <a href="segnalazioni.html">Segnalazioni</a>
     </nav>
-    <a href="segnalazioni.html" class="nav-search" aria-label="Segnala un problema o un'idea" title="Segnala un problema o un'idea">&#128172;</a>
     <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -500,8 +485,7 @@
   <a href="index.html"        onclick="document.getElementById('mob').classList.remove('open')">Home</a>
   <a href="contatti.html"     onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
   <a href="area-privata.html" onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
-  <a href="cerca.html"        onclick="document.getElementById('mob').classList.remove('open')">Cerca nel sito</a>
-  <a href="segnalazioni.html" onclick="document.getElementById('mob').classList.remove('open')">Segnala un problema</a>
+  <a href="segnalazioni.html" onclick="document.getElementById('mob').classList.remove('open')">Segnalazioni</a>
 </div>
 
 

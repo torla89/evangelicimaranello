@@ -1,0 +1,247 @@
+
+URL: https://s3.us.archive.org/Cem-basi-inni/10%20-%20Roveto%20Bruciante.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Roveto%20Bruciante.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Roveto%20Bruciante.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.jpg
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Roveto%20Bruciante.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Roveto%20Bruciante_cover.jpg
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.jpg
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Roveto%20Bruciante.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Roveto%20Bruciante_cover.jpg
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.png
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-basi-inni/00%20-%20Gioia%20nel%20tuo%20nome.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-basi-inni/00%20-%20Gioia%20nel%20tuo%20nome_cover.jpg
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.png
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.wav
+Status: 200
+Response: 
+COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\Gioia nel tuo nome.wav' doesn't start with an ID3 tag
+
+URL: https://s3.us.archive.org/Cem-basi-inni/15%20-%20entret%C3%B2%20nelle%20sue%20porte.mp3
+Status: 200
+Response: 
+
+=== ERRORE ===
+Traceback (most recent call last):
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 493, in _make_request
+    conn.request(
+  File "C:\Python311\Lib\site-packages\urllib3\connection.py", line 514, in request
+    self.send(chunk)
+  File "C:\Python311\Lib\http\client.py", line 1019, in send
+    self.sock.sendall(data)
+  File "C:\Python311\Lib\ssl.py", line 1273, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\ssl.py", line 1242, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The write operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python311\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\util\retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 493, in _make_request
+    conn.request(
+  File "C:\Python311\Lib\site-packages\urllib3\connection.py", line 514, in request
+    self.send(chunk)
+  File "C:\Python311\Lib\http\client.py", line 1019, in send
+    self.sock.sendall(data)
+  File "C:\Python311\Lib\ssl.py", line 1273, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\ssl.py", line 1242, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\torla\OneDrive\Documenti\Chiesa\sito web evangelicimaranello\gestore_sito.py", line 211, in _upload_thread
+    r = requests.put(url, data=data, headers=headers, timeout=600,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\api.py", line 130, in put
+    return request("put", url, data=data, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\adapters.py", line 660, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+
+Tentativo 1/4 fallito per Albert - l'intercessione di mose. - LATO A.wav: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+Tentativo 2/4 fallito per Albert - l'intercessione di mose. - LATO A.wav: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+Tentativo 3/4 fallito per Albert - l'intercessione di mose. - LATO A.wav: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+Tentativo 4/4 fallito per Albert - l'intercessione di mose. - LATO A.wav: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+=== ERRORE ===
+Traceback (most recent call last):
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 493, in _make_request
+    conn.request(
+  File "C:\Python311\Lib\site-packages\urllib3\connection.py", line 514, in request
+    self.send(chunk)
+  File "C:\Python311\Lib\http\client.py", line 1019, in send
+    self.sock.sendall(data)
+  File "C:\Python311\Lib\ssl.py", line 1273, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\ssl.py", line 1242, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The write operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Python311\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\util\retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\urllib3\connectionpool.py", line 493, in _make_request
+    conn.request(
+  File "C:\Python311\Lib\site-packages\urllib3\connection.py", line 514, in request
+    self.send(chunk)
+  File "C:\Python311\Lib\http\client.py", line 1019, in send
+    self.sock.sendall(data)
+  File "C:\Python311\Lib\ssl.py", line 1273, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\ssl.py", line 1242, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\torla\OneDrive\Documenti\Chiesa\sito web evangelicimaranello\gestore_sito.py", line 240, in _upload_thread
+    raise last_err or Exception("Upload fallito dopo più tentativi")
+  File "C:\Users\torla\OneDrive\Documenti\Chiesa\sito web evangelicimaranello\gestore_sito.py", line 219, in _upload_thread
+    r = requests.put(url, data=data, headers=headers, timeout=(30, 3600),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\api.py", line 130, in put
+    return request("put", url, data=data, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python311\Lib\site-packages\requests\adapters.py", line 660, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', TimeoutError('The write operation timed out'))
+
+
+URL: https://s3.us.archive.org/predicazioni-vecchie/Albert%20-%20l%27intercessione%20di%20mose.%20-%20LATO%20A.wav
+Status: 200
+Response: 
+COVER ERROR: "C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\predicazioni\\altri\\Albert - l'intercessione di mose. - LATO A.wav" doesn't start with an ID3 tag
+
+URL: https://s3.us.archive.org/predicazioni-vecchie/Arini%20-%20il%20diaconato%20-%20Lato%20A.wav
+Status: 200
+Response: 
+COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\predicazioni\\altri\\Arini - il diaconato - Lato A.wav' doesn't start with an ID3 tag
+
+URL: https://s3.us.archive.org/predicazioni-vecchie/Ivaldo%20-%20La%20grazia%20di%20Dio-%20lato%20B.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/predicazioni-vecchie/Ivaldo%20-%20La%20grazia%20di%20Dio-%20lato%20A.wav
+Status: 200
+Response: 
+COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\predicazioni\\altri\\Ivaldo - La grazia di Dio- lato A.wav' doesn't start with an ID3 tag
+
+URL: https://s3.us.archive.org/predicazioni-vecchie/Ivaldo%20-%20La%20grazia%20di%20Dio-%20lato%20B.wav
+Status: 200
+Response: 
+COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\predicazioni\\altri\\Ivaldo - La grazia di Dio- lato B.wav' doesn't start with an ID3 tag

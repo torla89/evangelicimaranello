@@ -270,7 +270,9 @@
       document.getElementById('segMessaggio').value = '';
       btn.textContent = '📨 Invia segnalazione';
     } catch (e) {
-      mostraAvviso('❌ Invio automatico non riuscito. Usa "Invio manuale" qui sotto per essere sicuro che ci arrivi.');
+      console.error('EmailJS error:', e);
+      const dettaglio = (e && (e.text || e.message)) ? ` (${e.text || e.message})` : '';
+      mostraAvviso(`❌ Invio automatico non riuscito${dettaglio}. Usa "Invio manuale" qui sotto per essere sicuro che ci arrivi.`);
       btn.textContent = '📨 Invia segnalazione';
     } finally {
       btn.disabled = false;
