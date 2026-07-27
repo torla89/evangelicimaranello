@@ -92,7 +92,6 @@
 
     /* RIGA MESSAGGIO */
     .msg-row {
-      display: flex; align-items: center; gap: 14px;
       padding: 12px 20px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       transition: background 0.2s;
@@ -100,29 +99,43 @@
     .msg-row:last-child { border-bottom: none; }
     .msg-row:hover { background: rgba(255,255,255,0.04); }
 
-    .msg-titolo { flex: 1; font-size: 0.93rem; color: rgba(255,255,255,0.85); }
-    .msg-data { display: block; font-size: 0.76rem; color: rgba(255,255,255,0.42); margin-top: 3px; }
+    .msg-row-main { display: flex; align-items: center; gap: 14px; }
+
+    .msg-titolo { flex: 1; font-size: 0.93rem; font-weight: 600; color: rgba(255,255,255,0.90); }
+    .msg-data { display: block; font-size: 0.76rem; font-weight: 400; color: rgba(255,255,255,0.42); margin-top: 3px; }
 
     .msg-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-    .btn-play {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.20);
-      border-radius: 20px; padding: 6px 14px;
-      cursor: pointer; color: #fff; font-size: 0.80rem;
-      transition: background 0.2s; white-space: nowrap; flex-shrink: 0;
-    }
-    .btn-play:hover { background: rgba(255,255,255,0.18); }
-    .btn-play.playing { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
-    .btn-play:disabled { opacity: 0.35; cursor: default; }
-
-    .btn-pdf-link {
-      display: inline-flex; align-items: center; justify-content: center;
+    /* Bottoni tondi: info / pdf / play */
+    .icon-btn {
+      position: relative;
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
       background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.20);
-      border-radius: 20px; padding: 6px 12px; color: #fff; font-size: 0.80rem;
-      text-decoration: none; transition: background 0.2s; flex-shrink: 0;
+      color: #fff; font-size: 0.92rem; line-height: 1; cursor: pointer;
+      text-decoration: none; transition: background 0.2s, border-color 0.2s;
     }
-    .btn-pdf-link:hover { background: rgba(255,255,255,0.18); }
+    .icon-btn:hover { background: rgba(255,255,255,0.18); }
+    .icon-btn.playing, .icon-btn.attivo { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
+    .icon-btn.disabled {
+      opacity: 0.40; cursor: default; pointer-events: none;
+      background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12);
+    }
+    .icon-btn.disabled::after {
+      content: "✕";
+      position: absolute; top: -3px; right: -3px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: rgba(130,45,45,0.90); color: #fff;
+      font-size: 0.55rem; display: flex; align-items: center; justify-content: center; line-height: 1;
+    }
+
+    /* Descrizione (dietro il bottone info) */
+    .msg-desc {
+      display: none; margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.85rem; color: rgba(255,255,255,0.68); line-height: 1.65;
+    }
+    .msg-desc.open { display: block; }
 
     .nota, .loading { color: rgba(255,255,255,0.40); font-size: 0.90rem; padding: 20px 0; }
 
@@ -233,6 +246,21 @@
     return `${parseInt(d)} ${mesi[parseInt(m)]} ${y}`;
   }
 
+  /* ── Separa il titolo (scritto in MAIUSCOLO) dalla descrizione ──
+     Scorre le parole del riassunto finché non ne trova una che contiene
+     una lettera minuscola: tutto quello prima è il titolo, il resto
+     (ripulito da un eventuale trattino/punto iniziale) è la descrizione. */
+  function separaTitoloDescrizione(testo) {
+    if (!testo) return { titolo: '', descrizione: '' };
+    const parole = testo.trim().split(/\s+/);
+    let i = 0;
+    while (i < parole.length && !/[a-zà-ÿ]/.test(parole[i])) i++;
+    let titolo = parole.slice(0, i).join(' ').trim().replace(/[-–.:,;]+$/, '').trim();
+    let descrizione = parole.slice(i).join(' ').trim().replace(/^[-–.:,;]+\s*/, '');
+    if (!titolo) { titolo = testo.trim(); descrizione = ''; }
+    return { titolo, descrizione };
+  }
+
   async function caricaArchivio() {
     const c = document.getElementById('archivio-container');
     try {
@@ -271,22 +299,30 @@
             </div>
             <div class="predicatore-body" id="pred-body-${pi}">
               ${msgs.map(m => {
-                const titolo = m.riassunto ? m.riassunto : 'Predicazione non ancora descritta';
-                const escTitolo = titolo.replace(/'/g, "\\'");
+                const { titolo, descrizione } = separaTitoloDescrizione(m.riassunto || '');
+                const titoloFinale = titolo || 'Predicazione non ancora descritta';
+                const hasDesc = !!descrizione;
+                const escTitolo = titoloFinale.replace(/'/g, "\\'");
                 const escNome = nome.replace(/'/g, "\\'");
                 const hasMp3 = !!(m.mp3 && m.mp3.trim());
                 const escSrc = hasMp3 ? m.mp3.trim().replace(/'/g, "\\'") : '';
                 const pdfPath = m.pdf ? (m.pdf.includes('/') ? m.pdf : 'predicazioni/' + m.pdf) : null;
+                const descId = `desc-${m._idx}`;
                 return `
                   <div class="msg-row">
-                    <span class="msg-titolo">${titolo}<span class="msg-data">${formatData(m.data)}</span></span>
-                    <div class="msg-actions">
-                      ${pdfPath ? `<a href="${pdfPath}" target="_blank" class="btn-pdf-link">📄</a>` : ''}
-                      <button class="btn-play" id="btn-${m._idx}"
-                        ${hasMp3 ? `onclick="suona('${escSrc}', '${escTitolo}', '${escNome}', this)"` : 'disabled'}>
-                        ${hasMp3 ? '▶ Ascolta' : '— Non disponibile'}
-                      </button>
+                    <div class="msg-row-main">
+                      <span class="msg-titolo">${titoloFinale}<span class="msg-data">${formatData(m.data)}</span></span>
+                      <div class="msg-actions">
+                        <button class="icon-btn ${hasDesc ? '' : 'disabled'}" title="Info"
+                          ${hasDesc ? `onclick="toggleInfo('${descId}', this)"` : 'disabled'}>ℹ</button>
+                        ${pdfPath
+                          ? `<a href="${pdfPath}" target="_blank" class="icon-btn" title="Apri PDF">📄</a>`
+                          : `<span class="icon-btn disabled" title="PDF non disponibile">📄</span>`}
+                        <button class="icon-btn ${hasMp3 ? '' : 'disabled'}" id="btn-${m._idx}" title="Ascolta"
+                          ${hasMp3 ? `onclick="suona('${escSrc}', '${escTitolo}', '${escNome}', this)"` : 'disabled'}>▶</button>
+                      </div>
                     </div>
+                    ${hasDesc ? `<div class="msg-desc" id="${descId}">${descrizione}</div>` : ''}
                   </div>`;
               }).join('')}
             </div>
@@ -305,21 +341,29 @@
     body.classList.toggle('open');
   }
 
+  function toggleInfo(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isOpen = el.classList.contains('open');
+    el.classList.toggle('open', !isOpen);
+    btn.classList.toggle('attivo', !isOpen);
+  }
+
   function suona(src, titolo, predicatore, btn) {
     if (_playingBtn === btn) {
       if (window._player) window._player.toggle();
       const inAscolto = btn.classList.contains('playing');
       btn.classList.toggle('playing');
-      btn.textContent = inAscolto ? '▶ Ascolta' : '⏸ In ascolto';
+      btn.textContent = inAscolto ? '▶' : '⏸';
       return;
     }
     if (_playingBtn) {
       _playingBtn.classList.remove('playing');
-      _playingBtn.textContent = '▶ Ascolta';
+      _playingBtn.textContent = '▶';
     }
     _playingBtn = btn;
     btn.classList.add('playing');
-    btn.textContent = '⏸ In ascolto';
+    btn.textContent = '⏸';
 
     if (window._player) {
       window._player.playUrl(src, titolo, predicatore, '', true);
@@ -329,7 +373,7 @@
     if (audio) {
       const onEnded = () => {
         btn.classList.remove('playing');
-        btn.textContent = '▶ Ascolta';
+        btn.textContent = '▶';
         _playingBtn = null;
         audio.removeEventListener('ended', onEnded);
       };
