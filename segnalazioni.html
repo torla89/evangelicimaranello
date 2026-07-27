@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segnalazioni e Proposte – Chiesa Evangelica Maranello</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; font-family: "Segoe UI", Roboto, sans-serif; color: #fff; background: #1a0e04; }
+
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: url("bg.jpg") no-repeat center center / cover;
+      filter: brightness(1.18) saturate(1.25) contrast(1.05);
+    }
+    .bg::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
+
+    .page { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 52px; height: 62px; flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+    }
+    .logo { display: flex; align-items: center; font-size: 1.05em; font-weight: 500; text-decoration: none; color: #fff; }
+    .logo::before { content: "✝"; margin-right: 9px; font-size: 1.2em; font-weight: 300; }
+    nav { display: flex; align-items: center; gap: 24px; }
+    nav a { color: #fff; text-decoration: none; font-size: 0.93em; font-weight: 500; opacity: 0.85; transition: opacity 0.2s; }
+    nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
+    nav a:hover { opacity: 1; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
+
+    main { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 52px 24px 80px; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 36px;
+      color: rgba(255,255,255,0.65); text-decoration: none; font-size: 0.88rem; transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+
+    .page-header { margin-bottom: 36px; }
+    .page-header .label { font-size: 0.75rem; letter-spacing: 0.30em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+    .page-header h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+    .page-header .sottotitolo { font-size: 0.97rem; color: rgba(255,255,255,0.65); line-height: 1.6; }
+
+    .form-card {
+      background: rgba(0,0,0,0.25); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+      padding: 28px 26px;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field:last-of-type { margin-bottom: 0; }
+    .field label { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.75); margin-bottom: 7px; }
+    .field .facolt { color: rgba(255,255,255,0.40); font-weight: 400; }
+
+    .field input[type="text"],
+    .field input[type="email"],
+    .field select,
+    .field textarea {
+      width: 100%; font-family: inherit; font-size: 0.92rem; color: #fff;
+      background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px; padding: 11px 13px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(200,150,60,0.55); }
+    .field textarea { resize: vertical; min-height: 130px; line-height: 1.5; }
+    .field select { cursor: pointer; }
+    .field select option { background: #241407; color: #fff; }
+
+    .field-row { display: flex; gap: 16px; }
+    .field-row .field { flex: 1; }
+
+    .btn-invia {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(200,150,60,0.22); border: 1px solid rgba(200,150,60,0.55);
+      color: #fff; font-size: 0.92rem; font-weight: 600;
+      padding: 12px 22px; border-radius: 24px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-invia:hover { background: rgba(200,150,60,0.35); }
+    .btn-invia:disabled { opacity: 0.55; cursor: default; }
+
+    .fallback-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+    }
+    .fallback-row span { font-size: 0.82rem; color: rgba(255,255,255,0.50); }
+    .btn-manuale {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.20);
+      color: #fff; font-size: 0.80rem; font-weight: 500;
+      padding: 7px 14px; border-radius: 20px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-manuale:hover { background: rgba(255,255,255,0.14); }
+
+    .nota {
+      margin-top: 18px; padding: 14px 16px;
+      background: rgba(200,150,60,0.08);
+      border: 1px solid rgba(200,150,60,0.25);
+      border-radius: 10px;
+      font-size: 0.82rem; color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+    }
+
+    .msg-avviso {
+      display: none;
+      margin-top: 16px; padding: 12px 16px;
+      background: rgba(200,150,60,0.15);
+      border: 1px solid rgba(200,150,60,0.40);
+      border-radius: 8px;
+      font-size: 0.85rem; color: #fff; line-height: 1.5;
+    }
+    .msg-avviso.show { display: block; }
+
+    @media (max-width: 680px) {
+      .bg { position: absolute; background-attachment: scroll; }
+      html, body { background: #1a0e04; overflow: auto; }
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .hamburger { display: flex; }
+      main { padding: 28px 16px 60px; }
+      .field-row { flex-direction: column; gap: 0; }
+    }
+
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(8,5,1,0.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2.4rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="page">
+
+  <header>
+    <a href="index.html" class="logo">chiesa evangelica Maranello</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="chi-siamo.html">Chi Siamo</a>
+      <a href="culto.html">Il Culto</a>
+      <a href="comunita.html">Attività</a>
+      <a href="risorse.html">Risorse</a>
+      <a href="contatti.html">Contattaci</a>
+    </nav>
+    <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <a href="index.html" class="back-link">← Home</a>
+
+    <div class="page-header">
+      <p class="label">💬 Segnalazioni e proposte</p>
+      <h1>Aiutaci a migliorare il sito</h1>
+      <p class="sottotitolo">
+        Hai trovato un errore, un link che non funziona o qualcosa che non torna? Oppure hai un'idea
+        per rendere il sito più utile? Scrivicelo qui sotto: ogni messaggio ci aiuta a migliorare.
+      </p>
+    </div>
+
+    <div class="form-card">
+      <div class="field">
+        <label for="segTipo">Tipo di segnalazione</label>
+        <select id="segTipo">
+          <option value="Problema o errore">🐞 Problema o errore sul sito</option>
+          <option value="Proposta o miglioramento">💡 Proposta o idea per migliorare</option>
+          <option value="Altro">✉️ Altro</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="segNome">Nome <span class="facolt">(facoltativo)</span></label>
+          <input type="text" id="segNome" placeholder="Il tuo nome">
+        </div>
+        <div class="field">
+          <label for="segEmail">Email <span class="facolt">(facoltativo, se vuoi una risposta)</span></label>
+          <input type="email" id="segEmail" placeholder="nome@esempio.it">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="segMessaggio">Messaggio</label>
+        <textarea id="segMessaggio" placeholder="Descrivi il problema riscontrato o la tua proposta..."></textarea>
+      </div>
+
+      <button class="btn-invia" id="btnInvia" onclick="inviaSegnalazione()">📨 Invia segnalazione</button>
+
+      <div class="msg-avviso" id="segAvviso"></div>
+
+      <div class="fallback-row">
+        <span>In caso di problemi:</span>
+        <button class="btn-manuale" onclick="inviaManuale()">✉️ Invio manuale</button>
+      </div>
+    </div>
+
+    <div class="nota">
+      📌 "Invia segnalazione" manda il messaggio direttamente, senza bisogno di programmi di posta.
+      Se qualcosa non dovesse funzionare, usa "Invio manuale": si aprirà il tuo programma di posta
+      con l'email già pronta da inviare tu stesso.
+    </div>
+  </main>
+</div>
+
+<div class="mob-menu" id="mob">
+  <a href="index.html"         onclick="document.getElementById('mob').classList.remove('open')">Home</a>
+  <a href="chi-siamo.html"     onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
+  <a href="culto.html"         onclick="document.getElementById('mob').classList.remove('open')">Il Culto</a>
+  <a href="comunita.html"      onclick="document.getElementById('mob').classList.remove('open')">Attività</a>
+  <a href="risorse.html"       onclick="document.getElementById('mob').classList.remove('open')">Risorse</a>
+  <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+</div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  const DESTINATARIO = "chiesaevangelicamaranello@outlook.it";
+
+  const EMAILJS_PUBLIC_KEY = "c8AZw9t_jFrlFmaK-";
+  const EMAILJS_SERVICE_ID = "service_ay33ukk";
+  // Template dedicato su EmailJS con variabili: {{tipo}} {{nome}} {{email}} {{messaggio}}
+  const EMAILJS_TEMPLATE_ID = "template_6pvireb";
+
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+  function leggiCampi() {
+    return {
+      tipo: document.getElementById('segTipo').value,
+      nome: document.getElementById('segNome').value.trim(),
+      email: document.getElementById('segEmail').value.trim(),
+      messaggio: document.getElementById('segMessaggio').value.trim()
+    };
+  }
+
+  function mostraAvviso(testo) {
+    const avviso = document.getElementById('segAvviso');
+    avviso.textContent = testo;
+    avviso.classList.add('show');
+  }
+
+  async function inviaSegnalazione() {
+    const { tipo, nome, email, messaggio } = leggiCampi();
+
+    if (!messaggio) {
+      mostraAvviso('⚠ Scrivi un messaggio prima di inviare.');
+      document.getElementById('segMessaggio').focus();
+      return;
+    }
+
+    const btn = document.getElementById('btnInvia');
+    btn.disabled = true;
+    btn.textContent = '⏳ Invio in corso...';
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        tipo,
+        nome: nome || '(non specificato)',
+        email: email || '(non specificata)',
+        messaggio
+      });
+      mostraAvviso('✅ Segnalazione inviata, grazie! Ti risponderemo se hai lasciato la tua email.');
+      document.getElementById('segMessaggio').value = '';
+      btn.textContent = '📨 Invia segnalazione';
+    } catch (e) {
+      mostraAvviso('❌ Invio automatico non riuscito. Usa "Invio manuale" qui sotto per essere sicuro che ci arrivi.');
+      btn.textContent = '📨 Invia segnalazione';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function inviaManuale() {
+    const { tipo, nome, email, messaggio } = leggiCampi();
+
+    const subject = `[Sito CEM] ${tipo}`;
+    let body = '';
+    if (nome)  body += `Nome: ${nome}\n`;
+    if (email) body += `Email: ${email}\n`;
+    body += `\n${messaggio}`;
+
+    const mailto = `mailto:${DESTINATARIO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    mostraAvviso('✉️ Si sta aprendo il tuo programma di posta con il messaggio pronto — premi Invia per completare.');
+    window.location.href = mailto;
+  }
+</script>
+
+</body>
+</html>

@@ -112,6 +112,9 @@
       opacity: 0.88;
       line-height: 1;
       font-size: 1.05em;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
     }
 
     /* hamburger mobile */
@@ -425,7 +428,7 @@
       <a href="area-privata.html">Area Privata</a>
       <a href="cerca.html">Cerca nel sito</a>
     </nav>
-    <button class="nav-search" aria-label="Cerca">&#128269;</button>
+    <a href="segnalazioni.html" class="nav-search" aria-label="Segnala un problema o un'idea" title="Segnala un problema o un'idea">&#128172;</a>
     <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -498,6 +501,7 @@
   <a href="contatti.html"     onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
   <a href="area-privata.html" onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
   <a href="cerca.html"        onclick="document.getElementById('mob').classList.remove('open')">Cerca nel sito</a>
+  <a href="segnalazioni.html" onclick="document.getElementById('mob').classList.remove('open')">Segnala un problema</a>
 </div>
 
 
