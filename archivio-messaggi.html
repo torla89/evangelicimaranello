@@ -3,433 +3,342 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contattaci – Chiesa Evangelica Maranello</title>
-
+  <title>Archivio Messaggi – Chiesa Evangelica Maranello</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      min-height: 100%;
-      font-family: "Segoe UI", Roboto, sans-serif;
-      color: #fff;
-      background: #1a0e04;
-    }
+    html, body { min-height: 100%; font-family: "Segoe UI", Roboto, sans-serif; color: #fff; background: #1a0e04; }
 
     .bg {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0; z-index: 0;
       background: url("bg.jpg") no-repeat center center / cover;
-      z-index: 0;
       filter: brightness(1.18) saturate(1.25) contrast(1.05);
     }
-    .bg::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.72);
-    }
+    .bg::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
 
-    .page {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    .page { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
-    /* HEADER */
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 52px;
-      height: 62px;
-      flex-shrink: 0;
-      background-color: rgba(0,0,0,0.22);
-      backdrop-filter: blur(2px);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 52px; height: 62px; flex-shrink: 0;
+      background-color: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      font-size: 1.05em;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      text-decoration: none;
-      color: #fff;
-    }
-    .logo::before {
-      content: "✝";
-      margin-right: 9px;
-      font-size: 1.2em;
-      font-weight: 300;
-    }
-    nav { display: flex; align-items: center; gap: 32px; }
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.97em;
-      font-weight: 500;
-      opacity: 0.85;
-      transition: opacity 0.2s;
-    }
+    .logo { display: flex; align-items: center; font-size: 1.05em; font-weight: 500; text-decoration: none; color: #fff; }
+    .logo::before { content: "✝"; margin-right: 9px; font-size: 1.2em; font-weight: 300; }
+    nav { display: flex; align-items: center; gap: 24px; }
+    nav a { color: #fff; text-decoration: none; font-size: 0.93em; font-weight: 500; opacity: 0.85; transition: opacity 0.2s; }
     nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
     nav a:hover { opacity: 1; }
-    .nav-search {
-      background: none; border: none; color: #fff;
-      cursor: pointer; opacity: 0.88; font-size: 1.05em;
-    }
-    .hamburger {
-      display: none; flex-direction: column; gap: 5px;
-      background: none; border: none; cursor: pointer;
-    }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
     .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
 
-    /* CONTENUTO */
-    main {
-      flex: 1;
-      max-width: 640px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 52px 24px 64px;
-    }
+    main { flex: 1; max-width: 860px; width: 100%; margin: 0 auto; padding: 52px 24px 80px; }
 
     .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 40px;
-      color: rgba(255,255,255,0.65);
-      text-decoration: none;
-      font-size: 0.88rem;
-      transition: color 0.2s;
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 36px;
+      color: rgba(255,255,255,0.65); text-decoration: none; font-size: 0.88rem; transition: color 0.2s;
     }
     .back-link:hover { color: #fff; }
 
-    .page-header {
-      margin-bottom: 44px;
-    }
-    .page-header .label {
-      font-size: 0.75rem;
-      letter-spacing: 0.30em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
-      margin-bottom: 6px;
-    }
-    .page-header h1 {
-      font-size: clamp(1.9rem, 4vw, 2.8rem);
-      font-weight: 700;
-      line-height: 1.15;
-      margin-bottom: 10px;
-    }
-    .page-header .sottotitolo {
-      font-size: 0.97rem;
-      color: rgba(255,255,255,0.68);
-      line-height: 1.6;
-    }
+    .page-header { margin-bottom: 36px; }
+    .page-header .label { font-size: 0.75rem; letter-spacing: 0.30em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+    .page-header h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
+    .page-header .sottotitolo { font-size: 0.97rem; color: rgba(255,255,255,0.65); line-height: 1.6; }
 
-    .divider {
-      border: none;
-      border-top: 1px solid rgba(255,255,255,0.12);
-      margin: 10px 0 32px;
+    /* FILTRI */
+    .filtri {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 24px;
     }
+    .filtri select {
+      background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px; color: #fff; padding: 8px 12px; font-size: 0.85rem; cursor: pointer;
+    }
+    .filtri select:first-of-type { flex: 1; min-width: 160px; }
 
-    /* Card contatto */
-    .contatto {
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(2px);
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 10px;
-      padding: 22px 24px;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      text-decoration: none;
-      color: #fff;
-      transition: background 0.25s, border-color 0.25s;
-    }
-    .contatto:hover {
-      background: rgba(0,0,0,0.38);
-      border-color: rgba(255,255,255,0.45);
-    }
+    /* ACCORDION PREDICATORE */
+    .predicatore-block { margin-bottom: 10px; }
 
-    .contatto-icon {
-      font-size: 1.8rem;
-      flex-shrink: 0;
-      width: 48px;
-      text-align: center;
+    .predicatore-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; cursor: pointer;
+      background: rgba(0,0,0,0.25); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+      transition: background 0.2s, border-color 0.2s;
+      user-select: none;
     }
+    .predicatore-header:hover { background: rgba(0,0,0,0.38); border-color: rgba(255,255,255,0.28); }
+    .predicatore-header.open { border-radius: 10px 10px 0 0; border-color: rgba(200,150,60,0.45); }
 
-    .contatto-body { flex: 1; }
-    .contatto-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.50);
-      margin-bottom: 4px;
+    .pred-nome-wrap { display: flex; align-items: center; gap: 12px; }
+    .pred-icona { font-size: 1.2rem; }
+    .pred-nome { font-size: 1.05rem; font-weight: 700; }
+    .pred-count {
+      font-size: 0.72rem; color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.08); border-radius: 20px; padding: 2px 10px;
     }
-    .contatto-valore {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #fff;
-      word-break: break-all;
+    .pred-arrow {
+      font-size: 0.75rem; color: rgba(255,255,255,0.45);
+      transition: transform 0.25s;
     }
-    .contatto-desc {
-      font-size: 0.82rem;
-      color: rgba(255,255,255,0.55);
-      margin-top: 3px;
-    }
+    .predicatore-header.open .pred-arrow { transform: rotate(180deg); }
 
-    .contatto-arrow {
-      font-size: 1rem;
-      opacity: 0.45;
-      flex-shrink: 0;
+    .predicatore-body {
+      display: none;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(200,150,60,0.25);
+      border-top: none; border-radius: 0 0 10px 10px;
+      padding: 4px 0;
     }
+    .predicatore-body.open { display: block; }
 
-    /* Sezione comunicazioni ufficiali — visivamente separata */
-    .sezione-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.40);
-      margin: 30px 0 12px;
+    /* RIGA MESSAGGIO */
+    .msg-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.2s;
     }
+    .msg-row:last-child { border-bottom: none; }
+    .msg-row:hover { background: rgba(255,255,255,0.04); }
 
-    /* Link non cliccabile (Facebook da aggiungere) */
-    .contatto.presto {
-      opacity: 0.55;
-      cursor: default;
-      pointer-events: none;
-    }
-    .badge-presto {
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: rgba(255,255,255,0.12);
+    .msg-titolo { flex: 1; font-size: 0.93rem; color: rgba(255,255,255,0.85); }
+    .msg-data { display: block; font-size: 0.76rem; color: rgba(255,255,255,0.42); margin-top: 3px; }
+
+    .msg-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .btn-play {
+      background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.20);
-      border-radius: 4px;
-      padding: 2px 8px;
-      color: rgba(255,255,255,0.55);
-      flex-shrink: 0;
+      border-radius: 20px; padding: 6px 14px;
+      cursor: pointer; color: #fff; font-size: 0.80rem;
+      transition: background 0.2s; white-space: nowrap; flex-shrink: 0;
     }
+    .btn-play:hover { background: rgba(255,255,255,0.18); }
+    .btn-play.playing { background: rgba(200,150,60,0.25); border-color: rgba(200,150,60,0.50); }
+    .btn-play:disabled { opacity: 0.35; cursor: default; }
 
-    /* MOBILE */
+    .btn-pdf-link {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 20px; padding: 6px 12px; color: #fff; font-size: 0.80rem;
+      text-decoration: none; transition: background 0.2s; flex-shrink: 0;
+    }
+    .btn-pdf-link:hover { background: rgba(255,255,255,0.18); }
+
+    .nota, .loading { color: rgba(255,255,255,0.40); font-size: 0.90rem; padding: 20px 0; }
+
+    /* CTA ARCHIVIO STORICO */
+    .storico-cta {
+      margin-top: 40px; padding: 22px 24px;
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.18); border-radius: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+    }
+    .storico-cta-label {
+      font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255,255,255,0.50); margin-bottom: 6px;
+    }
+    .storico-cta-testo p { font-size: 0.92rem; color: rgba(255,255,255,0.75); line-height: 1.5; max-width: 480px; }
+    .storico-cta-btn {
+      display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+      background: rgba(200,150,60,0.18); border: 1px solid rgba(200,150,60,0.45);
+      border-radius: 10px; color: #fff; text-decoration: none;
+      padding: 11px 20px; font-size: 0.88rem; font-weight: 600;
+      transition: background 0.25s;
+    }
+    .storico-cta-btn:hover { background: rgba(200,150,60,0.32); }
+
     @media (max-width: 680px) {
       .bg { position: absolute; background-attachment: scroll; }
+      html, body { background: #1a0e04; overflow: auto; }
       header { padding: 0 16px; }
       nav { display: none; }
-      .nav-search { display: none; }
       .hamburger { display: flex; }
-      main { padding: 32px 16px 48px; }
-      .contatto-valore { font-size: 0.95rem; }
+      main { padding: 28px 16px 60px; }
+      .storico-cta { flex-direction: column; align-items: flex-start; }
     }
 
     .mob-menu {
       position: fixed; inset: 0; z-index: 90;
       background: rgba(8,5,1,0.97);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 2.4rem;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2.4rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
     }
     .mob-menu.open { opacity: 1; pointer-events: all; }
     .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
-
-    /* ==============================
-       MOBILE — ottimizzato
-    ============================== */
-    @media (max-width: 680px) {
-      .bg { position: absolute; background-attachment: scroll; }
-      html, body { overflow: auto; }
-      .page { height: auto; min-height: 100vh; }
-
-      /* Navbar */
-      header { padding: 0 18px; height: 56px; }
-      nav, .nav-search { display: none; }
-      .hamburger { display: flex; }
-
-      /* Main content: più respiro */
-      main { padding: 28px 18px 48px; }
-
-      /* Titoli pagina */
-      .page-header h1 { font-size: 1.9rem; }
-      .page-header .sottotitolo { font-size: 0.92rem; }
-
-      /* Back link */
-      .back-link { margin-bottom: 28px; }
-
-      /* Riquadri generici */
-      .articolo,
-      .progetto,
-      .info-card,
-      .contatto,
-      .radio-card,
-      .comunita-section,
-      .storia-section,
-      .macrogruppo { border-radius: 8px; }
-
-      /* Bottoni link a colonna intera */
-      .btn-row { flex-direction: column; }
-      .btn-link { justify-content: center; }
-
-      /* Griglia link 1 colonna */
-      .link-grid { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Tre card culto in colonna */
-      .tre-card { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Azioni culto in colonna */
-      .azioni { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Tabella predicazioni: nascondi colonna riassunto */
-      .pred-table th:nth-child(3),
-      .pred-table td:nth-child(3) { display: none; }
-
-      /* Contatti: testo email più piccolo */
-      .contatto-valore { font-size: 0.88rem; word-break: break-all; }
-
-      /* Storia: badge anni in riga */
-      .section-header { flex-wrap: wrap; gap: 8px; }
-
-      /* Area privata: tabella attività */
-      .attivita-table th:nth-child(2),
-      .attivita-table td:nth-child(2) { display: none; }
-
-      /* Saldo: numero più piccolo */
-      .saldo-valore { font-size: 2.2rem; }
-
-      /* Spese: layout compatto */
-      .spesa-row { flex-wrap: wrap; gap: 6px; }
-
-      /* Menu mobile */
-      .mob-menu a { font-size: 1.6rem; }
-    }
-
-    /* Padding player fisso */
-    body { padding-bottom: 62px !important; }
-
   </style>
 </head>
-
 <body>
 <div class="bg"></div>
-
 <div class="page">
 
-  <!-- HEADER -->
   <header>
     <a href="index.html" class="logo">chiesa evangelica Maranello</a>
     <nav>
       <a href="index.html">Home</a>
       <a href="chi-siamo.html">Chi Siamo</a>
-      <a href="cosa-crediamo.html">In Cosa Crediamo</a>
-      <a href="contatti.html" class="active">Contattaci</a>
-      <a href="area-privata.html">Area Privata</a>
+      <a href="culto.html" class="active">Il Culto</a>
+      <a href="comunita.html">Attività</a>
+      <a href="risorse.html">Risorse</a>
+      <a href="contatti.html">Contattaci</a>
     </nav>
-    <button class="nav-search" aria-label="Cerca">&#128269;</button>
     <button class="hamburger" onclick="document.getElementById('mob').classList.toggle('open')" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </header>
 
-  <!-- CONTENUTO -->
   <main>
-
-    <a href="index.html" class="back-link">← Home</a>
+    <a href="culto.html" class="back-link">← Il Culto</a>
 
     <div class="page-header">
-      <p class="label">Siamo qui per te</p>
-      <h1>Contattaci</h1>
-      <p class="sottotitolo">Scrivici o chiamaci per qualsiasi informazione — sulle riunioni, sulla fede, o semplicemente per conoscerci.</p>
+      <p class="label">🎙️ Archivio messaggi</p>
+      <h1>Messaggi della nostra chiesa</h1>
+      <p class="sottotitolo">
+        I messaggi predicati nella nostra comunità — organizzati per referente.
+        Ascolta o riascolta gli insegnamenti condivisi durante il culto.
+      </p>
     </div>
 
-    <hr class="divider">
+    <div id="archivio-container">
+      <p class="loading">⏳ Caricamento messaggi...</p>
+    </div>
 
-    <!-- WhatsApp -->
-    <a href="https://wa.me/393771977272" target="_blank" class="contatto">
-      <div class="contatto-icon">💬</div>
-      <div class="contatto-body">
-        <div class="contatto-label">WhatsApp</div>
-        <div class="contatto-valore">+39 377 197 7272</div>
-        <div class="contatto-desc">Scrivici un messaggio, ti risponderemo appena possibile</div>
+    <div class="storico-cta">
+      <div class="storico-cta-testo">
+        <div class="storico-cta-label">📦 Archivio storico</div>
+        <p>Cerchi i messaggi predicati negli anni passati dalla vecchia associazione?</p>
       </div>
-      <div class="contatto-arrow">→</div>
-    </a>
-
-    <!-- Email generale -->
-    <a href="mailto:chiesaevangelicamaranello@outlook.it" class="contatto">
-      <div class="contatto-icon">✉️</div>
-      <div class="contatto-body">
-        <div class="contatto-label">Email</div>
-        <div class="contatto-valore">chiesaevangelicamaranello@outlook.it</div>
-        <div class="contatto-desc">Per informazioni generali, domande sulla fede o per conoscerci</div>
-      </div>
-      <div class="contatto-arrow">→</div>
-    </a>
-
-    <!-- Facebook -->
-    <a href="https://www.facebook.com/share/19qbfk9JJK/" target="_blank" class="contatto">
-      <div class="contatto-icon">📘</div>
-      <div class="contatto-body">
-        <div class="contatto-label">Facebook</div>
-        <div class="contatto-valore">Chiesa Evangelica Maranello</div>
-        <div class="contatto-desc">Seguici per rimanere aggiornato sulle nostre attività</div>
-      </div>
-      <div class="contatto-arrow">→</div>
-    </a>
-
-    <!-- Segnalazioni / modulo -->
-    <a href="segnalazioni.html" class="contatto">
-      <div class="contatto-icon">📝</div>
-      <div class="contatto-body">
-        <div class="contatto-label">Segnalazioni</div>
-        <div class="contatto-valore">Oppure compila il modulo</div>
-        <div class="contatto-desc">Per qualsiasi info o segnalazione</div>
-      </div>
-      <div class="contatto-arrow">→</div>
-    </a>
-
-    <!-- Separatore comunicazioni ufficiali -->
-    <p class="sezione-label">Comunicazioni ufficiali</p>
-
-    <!-- Email direzione -->
-    <a href="mailto:direzione@evangelicimaranello.it" class="contatto">
-      <div class="contatto-icon">📧</div>
-      <div class="contatto-body">
-        <div class="contatto-label">Email — Direzione</div>
-        <div class="contatto-valore">direzione@evangelicimaranello.it</div>
-        <div class="contatto-desc">Per scrivere direttamente al direttivo della chiesa</div>
-      </div>
-      <div class="contatto-arrow">→</div>
-    </a>
-
-    <!-- Email ufficiale -->
-    <a href="mailto:direzione@pec.evangelicimaranello.it" class="contatto">
-      <div class="contatto-icon">📄</div>
-      <div class="contatto-body">
-        <div class="contatto-label">PEC — Direzione</div>
-        <div class="contatto-valore">direzione@pec.evangelicimaranello.it</div>
-        <div class="contatto-desc">Per comunicazioni formali e corrispondenza ufficiale</div>
-      </div>
-      <div class="contatto-arrow">→</div>
-    </a>
-
+      <a href="archivio-storico.html" class="storico-cta-btn">Accedi all'archivio storico →</a>
+    </div>
   </main>
-
 </div>
 
-<!-- MOBILE MENU -->
 <div class="mob-menu" id="mob">
   <a href="index.html"         onclick="document.getElementById('mob').classList.remove('open')">Home</a>
   <a href="chi-siamo.html"     onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
-  <a href="cosa-crediamo.html" onclick="document.getElementById('mob').classList.remove('open')">In Cosa Crediamo</a>
+  <a href="culto.html"         onclick="document.getElementById('mob').classList.remove('open')">Il Culto</a>
+  <a href="comunita.html"      onclick="document.getElementById('mob').classList.remove('open')">Attività</a>
+  <a href="risorse.html"       onclick="document.getElementById('mob').classList.remove('open')">Risorse</a>
   <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
-  <a href="area-privata.html"  onclick="document.getElementById('mob').classList.remove('open')">Area Privata</a>
 </div>
 
+<script>
+  let _playingBtn = null;
+  let _predDati = [];
 
+  function formatData(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-');
+    const mesi = ['','gennaio','febbraio','marzo','aprile','maggio','giugno',
+                  'luglio','agosto','settembre','ottobre','novembre','dicembre'];
+    return `${parseInt(d)} ${mesi[parseInt(m)]} ${y}`;
+  }
 
+  async function caricaArchivio() {
+    const c = document.getElementById('archivio-container');
+    try {
+      const res = await fetch('dati.json?t=' + Date.now());
+      const dati = await res.json();
+      const pred = (dati.predicazioni || []).slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+      _predDati = pred;
+
+      if (!pred.length) {
+        c.innerHTML = '<p class="loading">Nessun messaggio disponibile.</p>';
+        return;
+      }
+
+      // Raggruppa per referente/predicatore, mantenendo l'ordine di prima apparizione
+      // (che è già il più recente, essendo l'array ordinato per data decrescente)
+      const gruppi = {};
+      const ordine = [];
+      pred.forEach((p, i) => {
+        const nome = p.referente || p.predicatore || 'Senza referente';
+        if (!gruppi[nome]) { gruppi[nome] = []; ordine.push(nome); }
+        gruppi[nome].push({ ...p, _idx: i });
+      });
+
+      let html = '';
+      ordine.forEach((nome, pi) => {
+        const msgs = gruppi[nome];
+        html += `
+          <div class="predicatore-block">
+            <div class="predicatore-header" onclick="togglePred(this, ${pi})" id="pred-hdr-${pi}">
+              <div class="pred-nome-wrap">
+                <span class="pred-icona">👤</span>
+                <span class="pred-nome">${nome}</span>
+                <span class="pred-count">${msgs.length} messaggio${msgs.length !== 1 ? 'i' : ''}</span>
+              </div>
+              <span class="pred-arrow">▼</span>
+            </div>
+            <div class="predicatore-body" id="pred-body-${pi}">
+              ${msgs.map(m => {
+                const titolo = m.riassunto ? m.riassunto : 'Predicazione non ancora descritta';
+                const escTitolo = titolo.replace(/'/g, "\\'");
+                const escNome = nome.replace(/'/g, "\\'");
+                const hasMp3 = !!(m.mp3 && m.mp3.trim());
+                const escSrc = hasMp3 ? m.mp3.trim().replace(/'/g, "\\'") : '';
+                const pdfPath = m.pdf ? (m.pdf.includes('/') ? m.pdf : 'predicazioni/' + m.pdf) : null;
+                return `
+                  <div class="msg-row">
+                    <span class="msg-titolo">${titolo}<span class="msg-data">${formatData(m.data)}</span></span>
+                    <div class="msg-actions">
+                      ${pdfPath ? `<a href="${pdfPath}" target="_blank" class="btn-pdf-link">📄</a>` : ''}
+                      <button class="btn-play" id="btn-${m._idx}"
+                        ${hasMp3 ? `onclick="suona('${escSrc}', '${escTitolo}', '${escNome}', this)"` : 'disabled'}>
+                        ${hasMp3 ? '▶ Ascolta' : '— Non disponibile'}
+                      </button>
+                    </div>
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      });
+
+      c.innerHTML = html;
+    } catch(e) {
+      c.innerHTML = '<p class="loading">Impossibile caricare i messaggi.</p>';
+    }
+  }
+
+  function togglePred(header, idx) {
+    const body = document.getElementById('pred-body-' + idx);
+    header.classList.toggle('open');
+    body.classList.toggle('open');
+  }
+
+  function suona(src, titolo, predicatore, btn) {
+    if (_playingBtn === btn) {
+      if (window._player) window._player.toggle();
+      const inAscolto = btn.classList.contains('playing');
+      btn.classList.toggle('playing');
+      btn.textContent = inAscolto ? '▶ Ascolta' : '⏸ In ascolto';
+      return;
+    }
+    if (_playingBtn) {
+      _playingBtn.classList.remove('playing');
+      _playingBtn.textContent = '▶ Ascolta';
+    }
+    _playingBtn = btn;
+    btn.classList.add('playing');
+    btn.textContent = '⏸ In ascolto';
+
+    if (window._player) {
+      window._player.playUrl(src, titolo, predicatore, '', true);
+    }
+
+    const audio = document.getElementById('cemAudio');
+    if (audio) {
+      const onEnded = () => {
+        btn.classList.remove('playing');
+        btn.textContent = '▶ Ascolta';
+        _playingBtn = null;
+        audio.removeEventListener('ended', onEnded);
+      };
+      audio.addEventListener('ended', onEnded);
+    }
+  }
+
+  caricaArchivio();
+</script>
 
 <!-- MUSIC PLAYER -->
 <script>
@@ -852,5 +761,6 @@ async function caricaPlaylistEAvvia() {
 }
 
 </script>
+
 </body>
 </html>
