@@ -245,3 +245,7 @@ URL: https://s3.us.archive.org/predicazioni-vecchie/Ivaldo%20-%20La%20grazia%20d
 Status: 200
 Response: 
 COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\predicazioni\\altri\\Ivaldo - La grazia di Dio- lato B.wav' doesn't start with an ID3 tag
+
+URL: https://s3.us.archive.org/cem-predicazioni/26-07-26%20Cammino%20di%20Israele.mp3
+Status: 200
+Response: 
