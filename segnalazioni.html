@@ -263,7 +263,10 @@
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         tipo,
         nome: nome || '(non specificato)',
-        email: email || '(non specificata)',
+        // Deve sempre essere un indirizzo email valido: viene usato anche come
+        // Reply-To dal servizio Outlook collegato a EmailJS, che rifiuta valori
+        // non validi (es. "(non specificata)").
+        email: email || DESTINATARIO,
         messaggio
       });
       mostraAvviso('✅ Segnalazione inviata, grazie! Ti risponderemo se hai lasciato la tua email.');
@@ -271,8 +274,15 @@
       btn.textContent = '📨 Invia segnalazione';
     } catch (e) {
       console.error('EmailJS error:', e);
-      const dettaglio = (e && (e.text || e.message)) ? ` (${e.text || e.message})` : '';
-      mostraAvviso(`❌ Invio automatico non riuscito${dettaglio}. Usa "Invio manuale" qui sotto per essere sicuro che ci arrivi.`);
+      let dettaglio = '';
+      if (e) {
+        if (typeof e === 'string') dettaglio = e;
+        else if (e.text) dettaglio = e.text;
+        else if (e.message) dettaglio = e.message;
+        else if (e.status) dettaglio = 'codice ' + e.status;
+        else { try { dettaglio = JSON.stringify(e); } catch(_) { dettaglio = String(e); } }
+      }
+      mostraAvviso(`❌ Invio automatico non riuscito${dettaglio ? ' — ' + dettaglio : ''}. Usa "Invio manuale" qui sotto per essere sicuro che ci arrivi.`);
       btn.textContent = '📨 Invia segnalazione';
     } finally {
       btn.disabled = false;
