@@ -249,3 +249,27 @@ COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\predicazioni\\altr
 URL: https://s3.us.archive.org/cem-predicazioni/26-07-26%20Cammino%20di%20Israele.mp3
 Status: 200
 Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/187%20-%20a%20te.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/190%20-%20alleluia%20tutto%20nuovo%20fa%20il%20Signor.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/204%20-%20lamor%20del%20Padre%20io%20veggo.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/166%20-%20sei%20tu.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/174%20-%20il%20tuo%20nome%20innalzo%20o%20Dio.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/176%20-%20narrano%20i%20ciel.mp3
+Status: 200
+Response: 

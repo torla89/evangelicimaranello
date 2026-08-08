@@ -421,6 +421,70 @@
       flex-shrink: 0;
     }
 
+    /* Download app MusicPlayer */
+    .app-download-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .app-download-icon {
+      font-size: 2.1rem;
+      flex-shrink: 0;
+      width: 52px; height: 52px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 12px;
+    }
+    .app-download-info { flex: 1; min-width: 200px; }
+    .app-download-info h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: #fff;
+    }
+    .app-download-info p {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.62);
+    }
+    .app-download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      background: rgba(212,168,85,0.20);
+      border: 1px solid rgba(212,168,85,0.50);
+      border-radius: 10px;
+      color: #ffd88a;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .app-download-btn:hover {
+      background: rgba(212,168,85,0.32);
+      border-color: rgba(212,168,85,0.70);
+    }
+    .app-download-note {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.40);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 680px) {
+      .app-download-card { flex-direction: column; align-items: flex-start; text-align: left; }
+      .app-download-btn { width: 100%; justify-content: center; }
+    }
+
     /* Tabella attività */
     .attivita-table { width: 100%; border-collapse: collapse; }
     .attivita-table th {
@@ -676,6 +740,19 @@
           <span class="macrogruppo-toggle">▼</span>
         </div>
         <div class="macrogruppo-body">
+
+          <div class="app-download-card">
+            <div class="app-download-icon">🎵</div>
+            <div class="app-download-info">
+              <h3>MusicPlayer — l'app per ascoltare offline</h3>
+              <p>Applicazione portatile per Windows con tutti gli inni e i relativi testi. Non richiede installazione: scarica, estrai lo zip e apri MusicPlayer.exe. Funziona anche senza connessione internet.</p>
+            </div>
+            <a class="app-download-btn" href="https://archive.org/download/Cem-basi-inni/MusicLibraryApp.zip" download>⬇ Scarica per Windows</a>
+          </div>
+          <p class="app-download-note">
+            Alla prima apertura Windows potrebbe mostrare un avviso di sicurezza (SmartScreen), perché l'app non è firmata digitalmente: clicca su "Informazioni aggiuntive" → "Esegui comunque". Il file è sicuro.
+          </p>
+
           <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-bottom:16px;line-height:1.6;">
             Basi strumentali degli inni — solo musica, senza voce. Clicca ▶ per riprodurre nel player in basso.
           </p>
