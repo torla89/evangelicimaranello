@@ -1,0 +1,243 @@
+{
+  "saldo": 5429.9,
+  "aggiornato_il": "2026-08-04",
+  "storico_saldo": [
+    {
+      "data": "2026-04-21",
+      "saldo": 0
+    },
+    {
+      "data": "2026-05-18",
+      "saldo": 200
+    },
+    {
+      "data": "2026-05-20",
+      "saldo": 626.07
+    },
+    {
+      "data": "2026-05-22",
+      "saldo": 726.07
+    },
+    {
+      "data": "2026-05-23",
+      "saldo": 826.07
+    },
+    {
+      "data": "2026-05-24",
+      "saldo": 836.07
+    },
+    {
+      "data": "2026-06-02",
+      "saldo": 1036.07
+    },
+    {
+      "data": "2026-06-10",
+      "saldo": 1076.07
+    },
+    {
+      "data": "2026-06-14",
+      "saldo": 1051.58
+    },
+    {
+      "data": "2026-06-15",
+      "saldo": 1301.58
+    },
+    {
+      "data": "2026-06-25",
+      "saldo": 1519.1
+    },
+    {
+      "data": "2026-07-01",
+      "saldo": 1689.1
+    },
+    {
+      "data": "2026-07-05",
+      "saldo": 4889.1
+    },
+    {
+      "data": "2026-07-15",
+      "saldo": 4895.11
+    },
+    {
+      "data": "2026-07-20",
+      "saldo": 5000.11
+    },
+    {
+      "data": "2026-07-22",
+      "saldo": 5109.9
+    },
+    {
+      "data": "2026-08-02",
+      "saldo": 5129.9
+    },
+    {
+      "data": "2026-08-04",
+      "saldo": 5429.9
+    }
+  ],
+  "spese_fisse": [
+    {
+      "nome": "Truecode",
+      "importo": 217,
+      "tipo_rinnovo": "disattivato",
+      "scadenza": "2027-04-04",
+      "note": "le funzionalità pro saranno disattivate dal 04/27"
+    },
+    {
+      "nome": "Apple Developer",
+      "importo": 99,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2027-02-01",
+      "note": ""
+    },
+    {
+      "nome": "Dominio OgniTipoDiInsegnamento.it",
+      "importo": 12,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2028-03-09",
+      "note": ""
+    },
+    {
+      "nome": "Dominio evangelicimaranello.it",
+      "importo": 32.2,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "2027-04-11",
+      "note": "comprensivo di dominio, email, PEC"
+    },
+    {
+      "nome": "Gestione conto tot.",
+      "importo": 102.48,
+      "tipo_rinnovo": "automatico",
+      "scadenza": "14/06",
+      "note": "Addebito annuale, comprensivo di IVA"
+    },
+    {
+      "nome": "Moises Studio",
+      "importo": 24.49,
+      "tipo_rinnovo": "mensile",
+      "scadenza": "14/06",
+      "note": "applicazione per creare la base degli inni"
+    }
+  ],
+  "riunioni": [
+    {
+      "data": "2026-04-19",
+      "titolo": "Riunione di chiesa del 19 aprile 2026",
+      "testo": "1. FONDAZIONE DELL'ASSOCIAZIONE EVANGELICA MARANELLESE\nL'assemblea ha deliberato all'unanimità la costituzione dell'Associazione Evangelica Maranellese, associazione non riconosciuta e senza fini di lucro. La scelta di dotarsi di una forma associativa nasce dalla necessità di ottenere un codice fiscale che permetta di dare seguito concreto alle iniziative promosse dalla chiesa. Sono stati nominati i seguenti organi sociali:\n- Presidente: Enrico Torlai\n- Vicepresidente e Tesoriere: Daniele Torlai\n- Consigliere: Marco Torlai\n- Consigliere: Susanna Casari\n- Consigliere Onorario: Riccardo Torlai, riconosciuto come guida morale e riferimento spirituale per i membri fondatori dell'associazione.\n\n2. INIZIATIVE PROMOSSE DALLA CHIESA\nSono state formalizzate le attività in corso e pianificate promosse dall'associazione. È stata predisposta un'apposita sezione nell'area privata del sito dove è possibile consultare nel dettaglio ogni attività, la relativa descrizione e il responsabile incaricato.\n\n3. AFFITTO DI UNA SALETTA PER LE RIUNIONI\nÈ stato sollevato il tema della possibilità di affittare uno spazio dedicato per le riunioni domenicali. Non essendosi raggiunta l'unanimità nella discussione, si è convenuto di rimandare la decisione a un momento successivo, qualora si presentassero opportunità concrete e condizioni favorevoli."
+    }
+  ],
+  "predicazioni": [
+    {
+      "data": "2026-07-26",
+      "predicatore": "Daniele",
+      "referente": "Daniele",
+      "riassunto": "IL CAMMINO DI ISRAELE: un viaggio attraverso la storia di Mosè e del popolo d'Israele, dalla chiamata al roveto ardente fino all'ingresso nella terra promessa. Un racconto di promesse, paure, mormorazioni e conseguenze, che mostra come l'incredulità di fronte alle difficoltà possa costare care benedizioni già assegnate. Un insegnamento su fiducia e obbedienza, ancora sorprendentemente attuale oggi.",
+      "pdf": "predicazioni/26-07-26 Cammino di Israele.pdf",
+      "mp3": "https://archive.org/download/cem-predicazioni/26-07-26%20Cammino%20di%20Israele.mp3"
+    },
+    {
+      "data": "2026-07-19",
+      "predicatore": "Daniele",
+      "referente": "Daniele",
+      "riassunto": "RIFLESSIONI SULLA BIBBIA:  riflessioni sull’autorità della Bibbia, spiegando perché il canone di 66 libri è l'unico valido, perché non vengono accettati i libri deuterocanonici, come cambia il rapporto con Dio dall’Antico al Nuovo Patto e perché i miracoli hanno ruoli diversi nelle due epoche.",
+      "pdf": "https://archive.org/download/cem-predicazioni/19-07-26%20Riflessioni%20sulla%20Bibbia.pdf",
+      "mp3": "https://archive.org/download/cem-predicazioni/19-07-26%20Riflessioni%20sulla%20Bibbia.mp3"
+    },
+    {
+      "data": "2026-06-07",
+      "predicatore": "Ragazzi",
+      "referente": "Ragazzi",
+      "riassunto": "I RAGAZZI CI RACCONTANO LA STORIA DI DAVIDE E GOLIA: \ni ragazzi hanno letto il brano di Davide e Golia e, successivamente, abbiamo avuto un momento di confronto sugli insegnamenti che possiamo trarre da questo testo.",
+      "pdf": "",
+      "mp3": ""
+    },
+    {
+      "data": "2026-05-31",
+      "predicatore": "Daniele",
+      "referente": "Daniele",
+      "riassunto": "MA TU CI CREDI DAVVERO? è una riflessione sulla fede cristiana che mette in discussione cosa significhi credere davvero, non solo a parole ma nelle scelte concrete. Un invito a vivere coerentemente con ciò in cui si crede, fidandosi di Dio anche quando questo richiede sacrifici nella vita quotidiana.",
+      "pdf": "https://archive.org/download/cem-predicazioni/31-05-26%20ma%20tu%20ci%20credi%20davvero_daniele.pdf",
+      "mp3": "https://archive.org/download/cem-predicazioni/31-05-26%20ma%20tu%20ci%20credi%20davvero_daniele.mp3"
+    },
+    {
+      "data": "2026-05-24",
+      "predicatore": "Daniele",
+      "referente": "Daniele",
+      "riassunto": "CHIAMATI AD EDIFICARE, NON SOLO A PARTECIPARE: siamo chiamati a incoraggiarci ed edificarci a vicenda, dando il meglio di noi stessi.\nL’atteggiamento di ognuno influisce sugli altri: quando tutti collaborano, la crescita è più facile e armoniosa.\nPer questo è importante impegnarsi davvero e mettere Dio al primo posto nella vita di ogni giorno.",
+      "pdf": "https://archive.org/download/cem-predicazioni/24-05-26%20Chiamati%20a%20edificare%2C%20non%20solo%20a%20partecipare.pdf",
+      "mp3": ""
+    },
+    {
+      "data": "2026-05-17",
+      "predicatore": "Daniele",
+      "referente": "Daniele",
+      "riassunto": "LA CHIESA E LA SUA FUNZIONE NEL MONDO il testo propone una riflessione sulla Chiesa analizzandone tre aspetti fondamentali: chi è veramente la Chiesa (non un luogo, ma una comunità di credenti), quale sia la sua funzione nel mondo (essere luce e testimonianza) e quale sia il ruolo di ciascun membro (contribuire attivamente con i propri doni).",
+      "pdf": "https://archive.org/download/cem-predicazioni/17-05-26%20La%20chiesa%20e%20la%20sua%20funzione%20nel%20mondo_Daniele.pdf",
+      "mp3": ""
+    },
+    {
+      "data": "2026-05-10",
+      "predicatore": "Marco",
+      "referente": "Marco",
+      "riassunto": "RIFLESSIONI SULLA PREGHIERA:  a cosa serve la preghiera, come pregare correttamente, e quali errori evitare.",
+      "pdf": "https://archive.org/download/cem-predicazioni/10-05-25%20Riflessioni_La%20preghiera_Marco.pdf",
+      "mp3": ""
+    }
+  ],
+  "attivita": [
+    {
+      "nome": "Sito web OgniTipoDiInsegnamento.it",
+      "descrizione": "Creazione sito web dedicato al materiale di Ellero Balzani.",
+      "responsabile": "Daniele",
+      "stato": "completata"
+    },
+    {
+      "nome": "App OgniTipoDiInsegnamento",
+      "descrizione": "Creazione dell'app per tutti i maggiori sistemi operativi dedicata al materiale di Ellero Balzani.",
+      "responsabile": "Daniele",
+      "stato": "completata"
+    },
+    {
+      "nome": "Calendario 2027",
+      "descrizione": "Creazione di un calendario evangelico di chiesa da distribuire gratuitamente a novembre.",
+      "responsabile": "Marica",
+      "stato": "in_corso"
+    },
+    {
+      "nome": "Podcast Ellero",
+      "descrizione": "Miglioramento della qualità dei podcast di Ellero Balzani, divisione in segmenti da 15 minuti e pubblicazione su Spotify e sull'app/sito.",
+      "responsabile": "Enrico",
+      "stato": "completata"
+    },
+    {
+      "nome": "Pagina social OgniTipoDiInsegnamento",
+      "descrizione": "Creazione di una pagina Facebook per promuovere il materiale di Ellero Balzani.",
+      "responsabile": "Marica",
+      "stato": "completata"
+    },
+    {
+      "nome": "Pagina social Evangelici Maranello",
+      "descrizione": "Creazione di una pagina Facebook per promuovere le attività della chiesa di Maranello.",
+      "responsabile": "Marica",
+      "stato": "completata"
+    },
+    {
+      "nome": "Sito web evangelicimaranello.it",
+      "descrizione": "Creazione del sito web ufficiale della chiesa evangelica di Maranello.",
+      "responsabile": "Daniele",
+      "stato": "completata"
+    },
+    {
+      "nome": "Creazione musica cristiana",
+      "descrizione": "Creazione di playlist con musica cristiana a ritmo giovanile per avvicinare i ragazzi, con pubblicazione su sito e Spotify.",
+      "responsabile": "Enrico",
+      "stato": "in_corso"
+    },
+    {
+      "nome": "Musica per il culto domenicale",
+      "descrizione": "Creazione di basi musicali per i canti del culto domenicale.",
+      "responsabile": "Enrico",
+      "stato": "in_corso"
+    }
+  ]
+}
