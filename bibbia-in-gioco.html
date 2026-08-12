@@ -81,6 +81,28 @@
     opacity:.5;
     font-weight:500;
   }
+  .site-footer{
+    max-width:520px;
+    margin:var(--sp-6) auto 0;
+    padding-top:var(--sp-4);
+    border-top:1px solid rgba(245,240,229,.10);
+    text-align:center;
+  }
+  .site-footer a{
+    display:inline-block;
+    padding:6px 10px;
+    font-size:var(--fs-sm);
+    color:rgba(245,240,229,.55);
+    text-decoration:none;
+    border-radius:var(--r-full);
+    transition:color .15s var(--ease), background .15s var(--ease);
+  }
+  .site-footer a:hover,
+  .site-footer a:focus-visible{
+    color:var(--gold);
+    background:rgba(236,172,73,.10);
+  }
+
   .version-tag{
     position:fixed;
     bottom:6px;
@@ -411,6 +433,11 @@
   </div>
   <div id="app"></div>
 </div>
+
+<footer class="site-footer">
+  <a href="privacy-bibbia-in-gioco.html" target="_blank" rel="noopener">Informativa sulla privacy</a>
+</footer>
+
 <span class="version-tag">v2.3</span>
 
 <script>
