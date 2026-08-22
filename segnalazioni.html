@@ -174,7 +174,7 @@
     <div class="form-card">
       <div class="field">
         <label for="segTipo">Tipo di segnalazione</label>
-        <select id="segTipo">
+        <select id="segTipo" onchange="aggiornaCampoEmail()">
           <option value="Problema o errore">🐞 Problema o errore sul sito</option>
           <option value="Proposta o miglioramento">💡 Proposta o idea per migliorare</option>
           <option value="Richiesta canzoni">🎵 Richiesta nuove canzoni / genere musicale</option>
@@ -190,8 +190,8 @@
           <input type="text" id="segNome" placeholder="Il tuo nome">
         </div>
         <div class="field">
-          <label for="segEmail">Email <span class="facolt">(facoltativo, se vuoi una risposta)</span></label>
-          <input type="email" id="segEmail" placeholder="nome@esempio.it">
+          <label for="segEmail">Email <span class="facolt" id="segEmailFacolt">(facoltativo, se vuoi una risposta)</span></label>
+          <input type="text" id="segEmail" placeholder="nome@esempio.it">
         </div>
       </div>
 
@@ -237,6 +237,7 @@
   const EMAILJS_TEMPLATE_ID = "template_6pvireb";
 
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  document.addEventListener('DOMContentLoaded', aggiornaCampoEmail);
 
   function leggiCampi() {
     return {
@@ -253,12 +254,40 @@
     avviso.classList.add('show');
   }
 
+  // Per "Richiesta calendari" serve un recapito (email o telefono),
+  // altrimenti non sapremmo a chi inviarlo. Aggiorna l'etichetta di
+  // conseguenza quando cambia il tipo di segnalazione.
+  function aggiornaCampoEmail() {
+    const tipo = document.getElementById('segTipo').value;
+    const facolt = document.getElementById('segEmailFacolt');
+    const campo = document.getElementById('segEmail');
+    if (tipo === 'Richiesta calendari') {
+      facolt.textContent = '(obbligatorio — email o telefono, per potertelo inviare)';
+      facolt.style.color = '#ffc98a';
+      campo.placeholder = 'nome@esempio.it oppure numero di telefono';
+    } else {
+      facolt.textContent = '(facoltativo, se vuoi una risposta)';
+      facolt.style.color = '';
+      campo.placeholder = 'nome@esempio.it';
+    }
+  }
+
+  function recapitoMancante(tipo, email) {
+    return tipo === 'Richiesta calendari' && !email;
+  }
+
   async function inviaSegnalazione() {
     const { tipo, nome, email, messaggio } = leggiCampi();
 
     if (!messaggio) {
       mostraAvviso('⚠ Scrivi un messaggio prima di inviare.');
       document.getElementById('segMessaggio').focus();
+      return;
+    }
+
+    if (recapitoMancante(tipo, email)) {
+      mostraAvviso('⚠ Per la richiesta del calendario inserisci un recapito (email o telefono): senza non sappiamo a chi inviarlo.');
+      document.getElementById('segEmail').focus();
       return;
     }
 
@@ -298,6 +327,12 @@
 
   function inviaManuale() {
     const { tipo, nome, email, messaggio } = leggiCampi();
+
+    if (recapitoMancante(tipo, email)) {
+      mostraAvviso('⚠ Per la richiesta del calendario inserisci un recapito (email o telefono): senza non sappiamo a chi inviarlo.');
+      document.getElementById('segEmail').focus();
+      return;
+    }
 
     const subject = `[Sito CEM] ${tipo}`;
     let body = '';
