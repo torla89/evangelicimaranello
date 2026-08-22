@@ -73,8 +73,9 @@
     .field select { cursor: pointer; }
     .field select option { background: #241407; color: #fff; }
 
-    .field-row { display: flex; gap: 16px; }
-    .field-row .field { flex: 1; }
+    .field-row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+    .field-row .field { flex: 1; margin-bottom: 0; }
+    .field-row .field label { min-height: 2.5em; line-height: 1.25; }
 
     .btn-invia {
       display: inline-flex; align-items: center; gap: 8px;
@@ -262,7 +263,7 @@
     const facolt = document.getElementById('segEmailFacolt');
     const campo = document.getElementById('segEmail');
     if (tipo === 'Richiesta calendari') {
-      facolt.textContent = '(obbligatorio — email o telefono, per potertelo inviare)';
+      facolt.textContent = '(obbligatorio — email o telefono)';
       facolt.style.color = '#ffc98a';
       campo.placeholder = 'nome@esempio.it oppure numero di telefono';
     } else {
