@@ -178,6 +178,24 @@
     }
     .testo-body.loading, .testo-body.error { color: rgba(255,255,255,0.50); font-style: italic; }
 
+    /* ===== Box segnalazioni ===== */
+    .feedback-box {
+      display: flex; align-items: flex-start; gap: 16px; margin-top: 30px;
+      padding: 20px 22px; background: rgba(200,150,60,0.07);
+      border: 1px solid rgba(200,150,60,0.25); border-radius: 10px;
+    }
+    .feedback-box-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+    .feedback-box strong { display: block; font-size: 0.98rem; color: #fff; margin-bottom: 6px; }
+    .feedback-box p { font-size: 0.90rem; color: rgba(255,255,255,0.70); line-height: 1.65; margin-bottom: 14px; }
+    .btn-link-feedback {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(200,150,60,0.14); border: 1px solid rgba(200,150,60,0.40);
+      color: #e0b464; text-decoration: none; border-radius: 10px;
+      padding: 9px 16px; font-size: 0.86rem; font-weight: 600;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-link-feedback:hover { background: rgba(200,150,60,0.24); border-color: rgba(200,150,60,0.60); }
+
     @media (max-width: 680px) {
       .bg { position: absolute; background-attachment: scroll; }
       header { padding: 0 16px; }
@@ -234,6 +252,15 @@
       <div class="stato-caricamento">
         <div class="spinner"></div>
         Caricamento dei brani…
+      </div>
+    </div>
+
+    <div class="feedback-box">
+      <div class="feedback-box-icon">💬</div>
+      <div>
+        <strong>Dicci cosa ne pensi</strong>
+        <p>Facci sapere quali canzoni ti piacciono di più e per quali generi vorresti nuovi brani — la tua opinione ci aiuta a capire come continuare.</p>
+        <a href="segnalazioni.html" class="btn-link-feedback">📣 Vai alla pagina Segnalazioni</a>
       </div>
     </div>
   </main>
@@ -330,9 +357,14 @@ function raggruppaPerGenere(brani) {
   return gruppi;
 }
 
+// Elenco dei brani correntemente mostrati, raggruppati per genere — usato
+// per sapere qual è "il prossimo brano dello stesso genere" quando uno finisce.
+let GRUPPI_CORRENTI = {};
+
 function renderBrani(filenames) {
   const brani = filenames.map(parseBrano);
   const gruppi = raggruppaPerGenere(brani);
+  GRUPPI_CORRENTI = gruppi;
   const generi = Object.keys(gruppi).sort((a, b) => {
     const na = GENERE_NOME_VISUALIZZATO[a] || a;
     const nb = GENERE_NOME_VISUALIZZATO[b] || b;
@@ -361,21 +393,15 @@ function renderBrani(filenames) {
       </button>
       <div class="genere-body" id="genere-body-${gi}"><div class="brano-list">`;
 
-    gruppi[g].forEach(b => {
+    gruppi[g].forEach((b, bi) => {
       const mp3Url = ARCHIVE_BASE + encodeURIComponent(b.file);
-      const txtUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".txt"));
-      const coverUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".png"));
       const dataAttr = escHtml(mp3Url);
-      const titEsc = escHtml(b.titolo).replace(/'/g,"\\'");
-      const srcEsc = escHtml(mp3Url).replace(/'/g,"\\'");
-      const covEsc = escHtml(coverUrl).replace(/'/g,"\\'");
-      const fileEsc = escHtml(b.file).replace(/'/g,"\\'");
-      html += `<div class="brano" data-src="${dataAttr}">
-        <button class="brano-play" onclick="suonaBrano('${srcEsc}', '${titEsc}', '${covEsc}', this)" aria-label="Riproduci">▶</button>
-        <div class="brano-titolo" style="cursor:pointer;" onclick="suonaBrano('${srcEsc}', '${titEsc}', '${covEsc}', this)">${escHtml(b.titolo)}</div>
+      html += `<div class="brano" data-src="${dataAttr}" data-genere="${escHtml(g)}" data-indice="${bi}">
+        <button class="brano-play" aria-label="Riproduci">▶</button>
+        <div class="brano-titolo" style="cursor:pointer;">${escHtml(b.titolo)}</div>
         <div class="brano-azioni">
-          <button class="brano-btn" onclick="apriTesto('${escHtml(txtUrl).replace(/'/g,"\\'")}', '${titEsc}')">📄 <span class="brano-btn-label">Testo</span></button>
-          <button class="brano-btn" onclick="scaricaBrano('${srcEsc}', '${fileEsc}', this)" title="Scarica"><span aria-hidden="true" class="brano-dl-icon">⬇️</span> <span class="brano-btn-label">Scarica</span></button>
+          <button class="brano-btn brano-btn-testo">📄 <span class="brano-btn-label">Testo</span></button>
+          <button class="brano-btn brano-btn-scarica" title="Scarica"><span aria-hidden="true" class="brano-dl-icon">⬇️</span> <span class="brano-btn-label">Scarica</span></button>
         </div>
       </div>`;
     });
@@ -384,6 +410,7 @@ function renderBrani(filenames) {
   });
 
   cont.innerHTML = html;
+  collegaEventi();
 }
 
 function toggleGenere(idx) {
@@ -393,22 +420,71 @@ function toggleGenere(idx) {
   body.classList.toggle('open');
 }
 
+/* ── Collega i pulsanti di ogni riga (evita di dover incastrare url/titoli
+   dentro attributi onclick con escaping delicato) ── */
+function collegaEventi() {
+  document.querySelectorAll('.brano').forEach(row => {
+    const genere = row.getAttribute('data-genere');
+    const indice = parseInt(row.getAttribute('data-indice'), 10);
+
+    const playBtn = row.querySelector('.brano-play');
+    const titoloEl = row.querySelector('.brano-titolo');
+    const testoBtn = row.querySelector('.brano-btn-testo');
+    const scaricaBtn = row.querySelector('.brano-btn-scarica');
+
+    playBtn.onclick = () => suonaBrano(genere, indice);
+    titoloEl.onclick = () => suonaBrano(genere, indice);
+
+    testoBtn.onclick = () => {
+      const b = GRUPPI_CORRENTI[genere][indice];
+      const txtUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".txt"));
+      apriTesto(txtUrl, b.titolo);
+    };
+    scaricaBtn.onclick = () => {
+      const b = GRUPPI_CORRENTI[genere][indice];
+      const mp3Url = ARCHIVE_BASE + encodeURIComponent(b.file);
+      scaricaBrano(mp3Url, b.file, scaricaBtn);
+    };
+  });
+}
+
 /* ── Riproduzione: usa il player fisso in fondo alla pagina ──
-   coverUrl punta a un file .png con lo stesso nome del brano su archive.org:
-   se non esiste ancora, l'immagine del player fallisce in silenzio (onerror)
-   e semplicemente non mostra copertina, senza causare errori. */
-function suonaBrano(url, titolo, coverUrl, btnEl) {
-  if (window._player) {
-    window._player.playUrl(url, titolo, "Chiesa Evangelica Maranello", coverUrl, true);
-  }
+   Quando un brano finisce, passa automaticamente al successivo dello STESSO
+   genere (finché non arriva all'ultimo del gruppo, poi si ferma). La copertina
+   punta a un .png con lo stesso nome del brano su archive.org: se non esiste
+   ancora, l'immagine del player fallisce in silenzio e non mostra nulla. */
+function suonaBrano(genere, indice) {
+  const lista = GRUPPI_CORRENTI[genere];
+  if (!lista || !lista[indice]) return;
+  const b = lista[indice];
+  const mp3Url = ARCHIVE_BASE + encodeURIComponent(b.file);
+  const coverUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".png"));
+
   document.querySelectorAll('.brano.is-playing').forEach(el => {
     el.classList.remove('is-playing');
     const pb = el.querySelector('.brano-play'); if (pb) pb.textContent = '▶';
   });
-  const row = btnEl.closest('.brano');
-  row.classList.add('is-playing');
-  const pb = row.querySelector('.brano-play');
-  if (pb) pb.textContent = '⏸';
+  const row = document.querySelector(`.brano[data-genere="${cssAttrEscape(genere)}"][data-indice="${indice}"]`);
+  if (row) {
+    row.classList.add('is-playing');
+    const pb = row.querySelector('.brano-play');
+    if (pb) pb.textContent = '⏸';
+  }
+
+  // in coda: il prossimo brano dello stesso genere, se esiste
+  if (indice + 1 < lista.length) {
+    window._playerOnEnded = () => suonaBrano(genere, indice + 1);
+  } else {
+    window._playerOnEnded = null;
+  }
+
+  if (window._player) {
+    window._player.playUrl(mp3Url, b.titolo, "Chiesa Evangelica Maranello", coverUrl, true);
+  }
+}
+
+function cssAttrEscape(s) {
+  return (window.CSS && CSS.escape) ? CSS.escape(s) : s.replace(/["\\]/g, '\\$&');
 }
 
 // Se l'audio del player va in pausa (o finisce), togli l'evidenziazione
@@ -886,6 +962,12 @@ function initPlayer() {
     // Se siamo in modalità playlist normale, vai al prossimo
     if (!window._playerSingleMode) {
       window._player.next();
+    } else if (typeof window._playerOnEnded === 'function') {
+      // Coda personalizzata impostata da questa pagina (es. brano
+      // successivo dello stesso genere): la consumiamo una sola volta.
+      const fn = window._playerOnEnded;
+      window._playerOnEnded = null;
+      fn();
     } else {
       // Modalità singolo brano (es. messaggio) → pausa
       pause();
