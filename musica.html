@@ -451,14 +451,14 @@ function collegaEventi() {
 /* ── Riproduzione: usa il player fisso in fondo alla pagina ──
    Quando un brano finisce, passa automaticamente al successivo dello STESSO
    genere (finché non arriva all'ultimo del gruppo, poi si ferma). La copertina
-   punta a un .png con lo stesso nome del brano su archive.org: se non esiste
+   punta a un .jpg con lo stesso nome del brano su archive.org: se non esiste
    ancora, l'immagine del player fallisce in silenzio e non mostra nulla. */
 function suonaBrano(genere, indice) {
   const lista = GRUPPI_CORRENTI[genere];
   if (!lista || !lista[indice]) return;
   const b = lista[indice];
   const mp3Url = ARCHIVE_BASE + encodeURIComponent(b.file);
-  const coverUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".png"));
+  const coverUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".jpg"));
 
   document.querySelectorAll('.brano.is-playing').forEach(el => {
     el.classList.remove('is-playing');
