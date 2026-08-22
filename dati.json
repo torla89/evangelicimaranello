@@ -1,6 +1,6 @@
 {
-  "saldo": 5238.33,
-  "aggiornato_il": "2026-08-17",
+  "saldo": 5488.33,
+  "aggiornato_il": "2026-08-22",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -81,6 +81,10 @@
     {
       "data": "2026-08-17",
       "saldo": 5238.33
+    },
+    {
+      "data": "2026-08-22",
+      "saldo": 5488.33
     }
   ],
   "spese_fisse": [

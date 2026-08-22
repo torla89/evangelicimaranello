@@ -72,6 +72,18 @@
     .badge-blue  { background: rgba(100,180,255,0.12); border: 1px solid rgba(100,180,255,0.30); color: #8ecfff; }
     .badge-gold  { background: rgba(255,200,80,0.12);  border: 1px solid rgba(255,200,80,0.28);  color: #ffd060; }
 
+    .badge-live { display: inline-flex; align-items: center; gap: 6px; }
+    .badge-dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: #8ecfff; box-shadow: 0 0 0 0 rgba(142,207,255,0.65);
+      animation: badge-pulse 1.4s ease-out infinite;
+    }
+    @keyframes badge-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(142,207,255,0.55); }
+      70%  { box-shadow: 0 0 0 6px rgba(142,207,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(142,207,255,0); }
+    }
+
     .progetto p { font-size: 0.96rem; line-height: 1.80; color: rgba(255,255,255,0.82); margin-bottom: 10px; }
     .progetto p:last-of-type { margin-bottom: 0; }
     .progetto p em { font-style: italic; color: rgba(255,255,255,0.90); }
@@ -260,7 +272,7 @@
         <div class="progetto-icon">📅</div>
         <div>
           <div class="progetto-tag">Pubblicazione evangelica</div>
-          <h2>Calendario evangelico 2027 <span class="badge badge-blue">In preparazione</span></h2>
+          <h2>Calendario evangelico 2027 <span class="badge badge-blue badge-live"><span class="badge-dot"></span>In stampa</span></h2>
         </div>
       </div>
 
@@ -284,7 +296,7 @@
         <div class="progetto-icon">🎵</div>
         <div>
           <div class="progetto-tag">Musica e giovani</div>
-          <h2>Canzoni cristiane per i giovani <span class="badge badge-gold">In arrivo</span></h2>
+          <h2>Canzoni cristiane per i giovani <span class="badge badge-green">Disponibile ora</span></h2>
         </div>
       </div>
 
@@ -292,11 +304,11 @@
         Crediamo che la musica sia uno dei linguaggi più potenti per avvicinarsi a Dio. Stiamo preparando una selezione di canzoni cristiane con un ritmo contemporaneo, pensate per i ragazzi e supervisionate dalla chiesa di Maranello — canzoni con testi cristiani in stili diversi — trap, pop, metal, dance, brani per bambini e altro ancora — pensate per tutti i ragazzi che vogliano lodare Dio con i ritmi della loro età, senza dover rinunciare alla musica che amano.
       </p>
       <p>
-        Le canzoni saranno presto disponibili <strong>sul sito e su Spotify</strong>. Segui la nostra pagina Facebook per rimanere aggiornato non appena saranno online.
+        Le prime canzoni sono <strong>già disponibili sul sito</strong>: ascoltale qui sotto.
       </p>
 
       <div class="btn-row">
-        <a href="https://www.facebook.com/share/19qbfk9JJK/" target="_blank" class="btn-link">📘 Seguici su Facebook</a>
+        <a href="musica.html" class="btn-link">🎵 Ascolta le canzoni</a>
       </div>
     </div>
 
