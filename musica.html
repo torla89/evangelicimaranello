@@ -448,17 +448,41 @@ function collegaEventi() {
   });
 }
 
+/* ── Copertina: prova più estensioni ──
+   La copertina dovrebbe avere lo stesso nome del brano su archive.org, ma non
+   sappiamo a priori con quale estensione è stata caricata (jpg, jpeg, png...),
+   quindi le proviamo in ordine e usiamo la prima che carica davvero. Se nessuna
+   esiste ancora, semplicemente non mostriamo nulla. */
+const ESTENSIONI_COPERTINA = ['.jpg', '.jpeg', '.png'];
+
+function provaCaricamentoImmagine(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
+async function trovaCopertina(fileMp3) {
+  const base = fileMp3.replace(/\.mp3$/i, '');
+  for (const ext of ESTENSIONI_COPERTINA) {
+    const url = ARCHIVE_BASE + encodeURIComponent(base + ext);
+    if (await provaCaricamentoImmagine(url)) return url;
+  }
+  return null;
+}
+
 /* ── Riproduzione: usa il player fisso in fondo alla pagina ──
    Quando un brano finisce, passa automaticamente al successivo dello STESSO
    genere (finché non arriva all'ultimo del gruppo, poi si ferma). La copertina
-   punta a un .jpg con lo stesso nome del brano su archive.org: se non esiste
-   ancora, l'immagine del player fallisce in silenzio e non mostra nulla. */
+   viene cercata in background (senza bloccare l'avvio della riproduzione) e
+   applicata al player solo se il brano richiesto è ancora quello in corso. */
 function suonaBrano(genere, indice) {
   const lista = GRUPPI_CORRENTI[genere];
   if (!lista || !lista[indice]) return;
   const b = lista[indice];
   const mp3Url = ARCHIVE_BASE + encodeURIComponent(b.file);
-  const coverUrl = ARCHIVE_BASE + encodeURIComponent(b.file.replace(/\.mp3$/i, ".jpg"));
 
   document.querySelectorAll('.brano.is-playing').forEach(el => {
     el.classList.remove('is-playing');
@@ -479,8 +503,16 @@ function suonaBrano(genere, indice) {
   }
 
   if (window._player) {
-    window._player.playUrl(mp3Url, b.titolo, "Chiesa Evangelica Maranello", coverUrl, true);
+    window._player.playUrl(mp3Url, b.titolo, "Chiesa Evangelica Maranello", null, true);
   }
+
+  trovaCopertina(b.file).then(url => {
+    if (!url) return;
+    const audio = document.getElementById('cemAudio');
+    if (!audio || audio.src !== mp3Url) return; // nel frattempo è cambiato brano
+    const cover = document.getElementById('cplCover');
+    if (cover) { cover.src = url; cover.style.display = 'block'; }
+  });
 }
 
 function cssAttrEscape(s) {
