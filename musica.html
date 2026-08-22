@@ -369,12 +369,13 @@ function renderBrani(filenames) {
       const titEsc = escHtml(b.titolo).replace(/'/g,"\\'");
       const srcEsc = escHtml(mp3Url).replace(/'/g,"\\'");
       const covEsc = escHtml(coverUrl).replace(/'/g,"\\'");
+      const fileEsc = escHtml(b.file).replace(/'/g,"\\'");
       html += `<div class="brano" data-src="${dataAttr}">
         <button class="brano-play" onclick="suonaBrano('${srcEsc}', '${titEsc}', '${covEsc}', this)" aria-label="Riproduci">▶</button>
         <div class="brano-titolo" style="cursor:pointer;" onclick="suonaBrano('${srcEsc}', '${titEsc}', '${covEsc}', this)">${escHtml(b.titolo)}</div>
         <div class="brano-azioni">
           <button class="brano-btn" onclick="apriTesto('${escHtml(txtUrl).replace(/'/g,"\\'")}', '${titEsc}')">📄 <span class="brano-btn-label">Testo</span></button>
-          <a class="brano-btn" href="${dataAttr}" download title="Scarica"><span aria-hidden="true">⬇️</span> <span class="brano-btn-label">Scarica</span></a>
+          <button class="brano-btn" onclick="scaricaBrano('${srcEsc}', '${fileEsc}', this)" title="Scarica"><span aria-hidden="true" class="brano-dl-icon">⬇️</span> <span class="brano-btn-label">Scarica</span></button>
         </div>
       </div>`;
     });
@@ -452,6 +453,37 @@ function apriTesto(url, titolo) {
 }
 function chiudiTesto() {
   document.getElementById('testoOverlay').classList.remove('open');
+}
+
+/* ── Download diretto (senza lasciare la pagina) ──
+   Scarica il file come blob via fetch e lo salva con un link temporaneo:
+   così l'attributo "download" viene sempre rispettato (anche per file
+   ospitati su archive.org) e non si naviga mai via dalla pagina.
+   Se per qualche motivo il fetch fallisce (es. blocco di rete),
+   si apre una scheda nuova come ripiego, senza toccare questa pagina. */
+async function scaricaBrano(url, filename, btnEl) {
+  const label = btnEl.querySelector('.brano-btn-label');
+  const testoOriginale = label ? label.textContent : null;
+  if (label) label.textContent = '...';
+  btnEl.style.pointerEvents = 'none';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('download fallito');
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+  } catch (e) {
+    window.open(url, '_blank');
+  } finally {
+    if (label) label.textContent = testoOriginale;
+    btnEl.style.pointerEvents = '';
+  }
 }
 
 /* ── Caricamento elenco brani da archive.org ── */
