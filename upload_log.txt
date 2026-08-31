@@ -281,3 +281,15 @@ Response:
 URL: https://s3.us.archive.org/Cem-basi-inni/192%20-%20sei%20tu%20la%20mia%20vita.mp3
 Status: 200
 Response: 
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Pop%20-%20Fonte%20Chiara.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Pop%20-%20Fonte%20Chiara_cover.jpg
+COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-Musica-Player/Fonte%20Chiara.mp3
+Status: 200
+Response: 
+COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Fonte%20Chiara_cover.jpg
+COVER Status: 200
