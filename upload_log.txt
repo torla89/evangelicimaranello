@@ -293,3 +293,64 @@ Status: 200
 Response: 
 COVER URL: https://s3.us.archive.org/Cem-Musica-Player/Fonte%20Chiara_cover.jpg
 COVER Status: 200
+
+URL: https://s3.us.archive.org/Cem-basi-inni/123%20-%20per%20quel%20sangue.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/164%20-%20Mi%20fai%20riposare.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/177%20-%20Come%20le%20aquile.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/178%20-%20Per%20adorarti.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/179%20-%20Tu%20sei%20la%20mia%20vita.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/181%20-%20tu%20sei%20re.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/182%20-%20tu%20hai%20dipinto%20i%20cieli.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/186%20-%20La%20tua%20destra.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/189%20-%20Ges%C3%B9%20ha%20preso%20la%20vita%20mia.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/193%20-%20Sono%20qui.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/194%20-%20splendi%20su%20di%20noi.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/196%20-%20Sar%C3%B2%20con%20te.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/197%20-%20cammino%20con%20lui.mp3
+Status: 200
+Response: 
+COVER ERROR: 'C:\\Users\\torla\\OneDrive\\Documenti\\Desktop\\pronte da caricare\\197 - cammino con lui.mp3' doesn't start with an ID3 tag
+
+URL: https://s3.us.archive.org/Cem-basi-inni/198%20-%20ti%20amo%20Ges%C3%B9.mp3
+Status: 200
+Response: 
+
+URL: https://s3.us.archive.org/Cem-basi-inni/199%20-%20non%20temere.mp3
+Status: 200
+Response: 
