@@ -5,23 +5,123 @@ gestore_sito.py — App desktop per gestire dati.json e pubblicare su GitHub.
 Usa pywebview per mostrare gestore.html come finestra nativa.
 
 Setup (una volta sola):
-    pip install pywebview
+    pip install pywebview requests mutagen
 
 Avvio:
     python gestore_sito.py
-    oppure doppio click su "Apri Gestore Sito.bat"
+    oppure doppio click su "Apri Gestore Sito.bat" / "Gestore Sito.exe"
 """
 
 import webview
-import json, os, shutil, subprocess, threading, queue
+import json, os, shutil, subprocess, threading, queue, sys
 from datetime import datetime
 
-# ── PERCORSI ──────────────────────────────────────────────────
-SITE_DIR   = r"C:\Users\torla\OneDrive\Documenti\Chiesa\sito web evangelicimaranello"
+# ── CONFIGURAZIONE REPOSITORY ─────────────────────────────────
+REPO_URL  = "https://github.com/torla89/evangelicimaranello.git"
+GIT_INSTALLER_URL = "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe"
+# ──────────────────────────────────────────────────────────────
+
+
+def _msg(titolo, testo):
+    """Mostra un messaggio nativo Windows."""
+    try:
+        import ctypes
+        ctypes.windll.user32.MessageBoxW(0, testo, titolo, 0x40)
+    except Exception:
+        print(f"{titolo}: {testo}")
+
+
+def _chiedi(titolo, testo):
+    """Chiede conferma Sì/No. Ritorna True se Sì."""
+    try:
+        import ctypes
+        r = ctypes.windll.user32.MessageBoxW(0, testo, titolo, 0x24)  # Yes/No + question
+        return r == 6
+    except Exception:
+        return True
+
+
+def git_disponibile() -> bool:
+    try:
+        r = subprocess.run("git --version", capture_output=True, shell=True, timeout=15)
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
+def installa_git() -> bool:
+    """Scarica e installa Git for Windows in modo silenzioso."""
+    try:
+        import urllib.request, tempfile
+        _msg("Gestore Sito", "Git non è installato.\n\nVerrà scaricato e installato automaticamente.\nPotrebbe richiedere qualche minuto.")
+        tmp = os.path.join(tempfile.gettempdir(), "GitInstaller.exe")
+        urllib.request.urlretrieve(GIT_INSTALLER_URL, tmp)
+        # Installazione silenziosa
+        r = subprocess.run(
+            f'"{tmp}" /VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS',
+            shell=True, timeout=900
+        )
+        try:
+            os.remove(tmp)
+        except Exception:
+            pass
+        # Aggiorna il PATH della sessione corrente
+        for p in (r"C:\Program Files\Git\cmd", r"C:\Program Files (x86)\Git\cmd"):
+            if os.path.isdir(p):
+                os.environ["PATH"] = p + os.pathsep + os.environ.get("PATH", "")
+        return git_disponibile()
+    except Exception as e:
+        _msg("Errore installazione Git", f"Non è stato possibile installare Git automaticamente.\n\n{e}\n\nScaricalo manualmente da:\nhttps://git-scm.com/download/win")
+        return False
+
+
+def _base_dir() -> str:
+    """Cartella dove si trova l'eseguibile/script."""
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def prepara_cartella_sito() -> str:
+    """
+    Determina la cartella del sito. Se lo script è già dentro il repo la usa,
+    altrimenti clona il repository in una sottocartella.
+    """
+    base = _base_dir()
+
+    # Caso 1: siamo già dentro il repo (c'è gestore.html accanto)
+    if os.path.exists(os.path.join(base, "gestore.html")):
+        return base
+
+    # Caso 2: c'è già una sottocartella clonata
+    sub = os.path.join(base, "evangelicimaranello")
+    if os.path.exists(os.path.join(sub, "gestore.html")):
+        return sub
+
+    # Caso 3: bisogna clonare
+    if not _chiedi("Gestore Sito",
+                   "Il sito non è ancora presente su questo computer.\n\n"
+                   "Vuoi scaricarlo ora da GitHub?"):
+        sys.exit(0)
+
+    r = subprocess.run(f'git clone "{REPO_URL}" "{sub}"',
+                       shell=True, capture_output=True, text=True, timeout=600)
+    if r.returncode != 0 or not os.path.exists(os.path.join(sub, "gestore.html")):
+        _msg("Errore", f"Clone del repository fallito.\n\n{(r.stderr or '')[:400]}")
+        sys.exit(1)
+    _msg("Gestore Sito", "Sito scaricato correttamente!")
+    return sub
+
+
+# ── SETUP INIZIALE ────────────────────────────────────────────
+if not git_disponibile():
+    if not installa_git():
+        sys.exit(1)
+
+SITE_DIR   = prepara_cartella_sito()
 JSON_FILE  = os.path.join(SITE_DIR, "dati.json")
 BACKUP_DIR = os.path.join(SITE_DIR, "backup")
 HTML_FILE  = os.path.join(SITE_DIR, "gestore.html")
-PRED_VECCHIE_FILE = os.path.join(SITE_DIR, "predicazioni_vecchie.json")
 # ──────────────────────────────────────────────────────────────
 
 
@@ -185,7 +285,7 @@ class PythonBridge:
 
     def _upload_thread(self, filepath: str, collezione: str,
                         access_key: str, secret_key: str, tipo: str):
-        import re, time, requests
+        import re, time, io
         from urllib.parse import quote
         try:
             with open(filepath, 'rb') as f:
@@ -195,115 +295,60 @@ class PythonBridge:
             filename_encoded = quote(filename, safe='')
             url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
 
-            self._upload_stato = {"status": "uploading", "pct": 10, "speed": "Connessione...", "message": ""}
+            # Upload con tracking progresso
+            import requests
+            uploaded = [0]
+            start_time = [time.time()]
+            chunk_size = 256 * 1024  # 256KB chunks
+
+            class ProgressReader(io.RawIOBase):
+                def __init__(self, data):
+                    self._data = data
+                    self._pos = 0
+                def read(self, n=-1):
+                    chunk = self._data[self._pos:self._pos+n] if n > 0 else self._data[self._pos:]
+                    self._pos += len(chunk)
+                    uploaded[0] = self._pos
+                    elapsed = time.time() - start_time[0]
+                    pct = int(self._pos / total * 100)
+                    if elapsed > 0:
+                        speed_bps = self._pos / elapsed
+                        if speed_bps > 1024*1024:
+                            speed_str = f"{speed_bps/1024/1024:.1f} MB/s"
+                        else:
+                            speed_str = f"{speed_bps/1024:.0f} KB/s"
+                    else:
+                        speed_str = ""
+                    self._outer._upload_stato = {
+                        "status": "uploading", "pct": pct, "speed": speed_str, "message": ""
+                    }
+                    return chunk
+                def readable(self): return True
+
+            reader = ProgressReader(data)
+            reader._outer = self
 
             headers = {
                 'Authorization': f'LOW {access_key}:{secret_key}',
                 'x-archive-auto-make-bucket': '1',
                 'x-archive-meta-mediatype': 'audio',
                 'Content-Type': 'audio/mpeg',
+                'Content-Length': str(total),
             }
-
-            # Upload senza streaming, con tentativi automatici in caso di timeout/
-            # connessione interrotta (i file grandi su reti lente vanno spesso in timeout).
-            speed_str = ""
-            r = None
-            last_err = None
-            MAX_TENTATIVI = 4
-            for tentativo in range(1, MAX_TENTATIVI + 1):
-                try:
-                    label = "Upload in corso..." if tentativo == 1 else f"Nuovo tentativo {tentativo}/{MAX_TENTATIVI}..."
-                    self._upload_stato = {"status": "uploading", "pct": 20, "speed": label, "message": ""}
-                    start_time = time.time()
-                    # Nessun timeout: con file grandi su reti lente l'upload può richiedere
-                    # molto tempo, meglio aspettare che la richiesta si completi (o fallisca
-                    # per connessione persa, gestito sotto) piuttosto che interromperla.
-                    r = requests.put(url, data=data, headers=headers, timeout=None,
-                                    verify=True, stream=False)
-                    elapsed = time.time() - start_time
-                    if elapsed > 0:
-                        speed_bps = total / elapsed
-                        speed_str = f"{speed_bps/1024/1024:.1f} MB/s" if speed_bps > 1024*1024 else f"{speed_bps/1024:.0f} KB/s"
-                    break
-                except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                    last_err = e
-                    try:
-                        with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as f:
-                            f.write(f"\nTentativo {tentativo}/{MAX_TENTATIVI} fallito per {filename}: {e}\n")
-                    except: pass
-                    if tentativo < MAX_TENTATIVI:
-                        attesa = tentativo * 8
-                        self._upload_stato = {"status": "uploading", "pct": 15,
-                                               "speed": f"Connessione interrotta, nuovo tentativo tra {attesa}s...",
-                                               "message": ""}
-                        time.sleep(attesa)
-
-            if r is None:
-                raise last_err or Exception("Upload fallito dopo più tentativi")
-
-            # Log risposta su file
-            try:
-                with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as f:
-                    f.write(f"\nURL: {url}\nStatus: {r.status_code}\nResponse: {r.text[:300]}\n")
-            except: pass
+            r = requests.put(url, data=reader, headers=headers, timeout=600)
 
             if r.status_code in (200, 201):
-                # Estrai e carica copertina se presente nei tag ID3
-                cover_url = ""
-                try:
-                    from mutagen.id3 import ID3
-                    tags = ID3(filepath)
-                    # Cerca qualsiasi tag APIC (es. APIC:, APIC:Cover, ecc.)
-                    apic_tag = None
-                    for k, v in tags.items():
-                        if k.startswith('APIC'):
-                            apic_tag = v
-                            break
-                    if apic_tag:
-                        ext = 'jpg' if 'jpeg' in apic_tag.mime else 'png'
-                        cover_filename = os.path.splitext(filename)[0] + '_cover.' + ext
-                        cover_encoded = quote(cover_filename, safe='')
-                        cover_url_s3 = f"https://s3.us.archive.org/{collezione}/{cover_encoded}"
-                        cover_headers = {
-                            'Authorization': f'LOW {access_key}:{secret_key}',
-                            'x-archive-auto-make-bucket': '1',
-                            'Content-Type': f'image/{ext}',
-                        }
-                        rc = requests.put(cover_url_s3, data=apic_tag.data,
-                                        headers=cover_headers, timeout=60, verify=True, stream=False)
-                        try:
-                            with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as lf:
-                                lf.write(f"COVER URL: {cover_url_s3}\nCOVER Status: {rc.status_code}\n")
-                        except: pass
-                        if rc.status_code in (200, 201):
-                            cover_url = f"https://archive.org/download/{collezione}/{cover_encoded}"
-                except Exception as ex:
-                    try:
-                        with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as lf:
-                            lf.write(f"COVER ERROR: {ex}\n")
-                    except: pass
-
                 file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
                 if tipo == 'basi':
                     title = filename.replace('.mp3','').replace('.MP3','').strip()
                     self._aggiungi_a_playlist_basi(file_url, title)
-                elif tipo in ('predicazione_nuova', 'predicazione_vecchia'):
-                    # Le predicazioni (nuove e vecchie) sono gestite lato client:
-                    # qui carichiamo solo il file e restituiamo l'URL, senza toccare playlist.json.
-                    pass
                 else:
                     title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
-                    self._aggiungi_a_playlist_musica(file_url, title, cover_url)
-                self._upload_stato = {"status": "done", "pct": 100, "speed": speed_str, "message": "", "url": file_url}
+                    self._aggiungi_a_playlist_musica(file_url, title)
+                self._upload_stato = {"status": "done", "pct": 100, "speed": "", "message": ""}
             else:
-                self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": f"HTTP {r.status_code}: {r.text[:150]}"}
+                self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": f"HTTP {r.status_code}"}
         except Exception as e:
-            # Scrivi errore su file per debug
-            try:
-                with open(os.path.join(SITE_DIR, 'upload_log.txt'), 'a', encoding='utf-8') as f:
-                    import traceback
-                    f.write(f"\n=== ERRORE ===\n{traceback.format_exc()}\n")
-            except: pass
             self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": str(e)}
 
     def seleziona_file_mp3(self) -> list:
@@ -440,25 +485,19 @@ class PythonBridge:
         except Exception as e:
             return str(e)
 
-    def _aggiungi_a_playlist_musica(self, url: str, titolo: str, cover: str = ''):
+    def _aggiungi_a_playlist_musica(self, url: str, titolo: str):
         import json
         path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         playlist = []
         if os.path.exists(path):
-            try:
-                with open(path, encoding='utf-8') as f:
-                    playlist = json.load(f)
-            except: playlist = []
-        # Aggiorna se esiste già, altrimenti aggiungi
-        existing = next((p for p in playlist if p['src'] == url), None)
-        if existing:
-            if cover: existing['cover'] = cover
-        else:
-            playlist.append({"src": url, "title": titolo,
-                            "artist": "Chiesa Evangelica Maranello", "cover": cover})
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(playlist, f, ensure_ascii=False, indent=2)
+            with open(path, encoding='utf-8') as f:
+                playlist = json.load(f)
+        # Evita duplicati
+        if not any(p['src'] == url for p in playlist):
+            playlist.append({"src": url, "title": titolo, "artist": "Chiesa Evangelica Maranello", "cover": ""})
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
 
     def _aggiungi_a_playlist_basi(self, url: str, titolo: str):
         import json, re, shutil
@@ -526,50 +565,15 @@ class PythonBridge:
         except Exception as e:
             return "[]"
 
-    def _elimina_da_archive(self, url: str, access_key: str, secret_key: str) -> str:
-        """Elimina un file da Archive.org via S3 DELETE."""
-        try:
-            import requests
-            # Converte URL download in URL S3
-            # https://archive.org/download/COLLEZIONE/FILE → https://s3.us.archive.org/COLLEZIONE/FILE
-            s3_url = url.replace('https://archive.org/download/', 'https://s3.us.archive.org/')
-            headers = {'Authorization': f'LOW {access_key}:{secret_key}'}
-            r = requests.delete(s3_url, headers=headers, timeout=30)
-            if r.status_code in (200, 204):
-                return "ok"
-            return f"HTTP {r.status_code}: {r.text[:100]}"
-        except Exception as e:
-            return str(e)
-
-    def elimina_musica_url(self, idx: int, access_key: str = '', secret_key: str = '') -> str:
-        """Rimuove un brano dal playlist.json e lo elimina da Archive.org."""
+    def elimina_musica_url(self, idx: int) -> str:
+        """Rimuove un brano dalla playlist musica-player/playlist.json per indice."""
         try:
             import json
             playlist_path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
             with open(playlist_path, encoding='utf-8') as f:
                 playlist = json.load(f)
             if 0 <= idx < len(playlist):
-                item = playlist.pop(idx)
-                # Elimina da Archive.org se le chiavi sono disponibili
-                if access_key and item.get('src'):
-                    self._elimina_da_archive(item['src'], access_key, secret_key)
-            with open(playlist_path, 'w', encoding='utf-8') as f:
-                json.dump(playlist, f, ensure_ascii=False, indent=2)
-            return "ok"
-        except Exception as e:
-            return str(e)
-
-    def elimina_base_url(self, idx: int, access_key: str = '', secret_key: str = '') -> str:
-        """Rimuove una base dal playlist.json e la elimina da Archive.org."""
-        try:
-            import json
-            playlist_path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
-            with open(playlist_path, encoding='utf-8') as f:
-                playlist = json.load(f)
-            if 0 <= idx < len(playlist):
-                item = playlist.pop(idx)
-                if access_key and item.get('src'):
-                    self._elimina_da_archive(item['src'], access_key, secret_key)
+                playlist.pop(idx)
             with open(playlist_path, 'w', encoding='utf-8') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
             return "ok"
@@ -595,46 +599,36 @@ class PythonBridge:
         except Exception as e:
             return "[]"
 
+    def elimina_base_url(self, idx: int) -> str:
+        """Rimuove una base da basi-inni/playlist.json per indice."""
+        try:
+            import json
+            playlist_path = os.path.join(SITE_DIR, "basi-inni", "playlist.json")
+            with open(playlist_path, encoding='utf-8') as f:
+                playlist = json.load(f)
+            if 0 <= idx < len(playlist):
+                playlist.pop(idx)
+            with open(playlist_path, 'w', encoding='utf-8') as f:
+                json.dump(playlist, f, ensure_ascii=False, indent=2)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
     def aggiungi_predicazione_vecchia(self, predicatore: str, titolo: str, mp3_url: str) -> str:
         """Aggiunge un messaggio a predicazioni_vecchie.json raggruppato per predicatore."""
         try:
             import json
+            path = os.path.join(SITE_DIR, "predicazioni_vecchie.json")
             data = {}
-            if os.path.exists(PRED_VECCHIE_FILE):
-                with open(PRED_VECCHIE_FILE, encoding='utf-8') as f:
+            if os.path.exists(path):
+                with open(path, encoding='utf-8') as f:
                     data = json.load(f)
             if predicatore not in data:
                 data[predicatore] = []
             data[predicatore].append({"titolo": titolo, "src": mp3_url})
             # Riordina predicatori alfabeticamente
             data = dict(sorted(data.items()))
-            with open(PRED_VECCHIE_FILE, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            return "ok"
-        except Exception as e:
-            return str(e)
-
-    def leggi_predicazioni_vecchie(self) -> str:
-        """Restituisce il contenuto di predicazioni_vecchie.json (raggruppato per predicatore)."""
-        try:
-            if os.path.exists(PRED_VECCHIE_FILE):
-                with open(PRED_VECCHIE_FILE, encoding='utf-8') as f:
-                    return f.read()
-            return "{}"
-        except Exception as e:
-            return "{}"
-
-    def salva_predicazioni_vecchie(self, json_str: str) -> str:
-        """Sovrascrive predicazioni_vecchie.json con backup, come per dati.json."""
-        try:
-            import json
-            data = json.loads(json_str)
-            os.makedirs(BACKUP_DIR, exist_ok=True)
-            if os.path.exists(PRED_VECCHIE_FILE):
-                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-                dst = os.path.join(BACKUP_DIR, f"predicazioni_vecchie_backup_{ts}.json")
-                shutil.copy2(PRED_VECCHIE_FILE, dst)
-            with open(PRED_VECCHIE_FILE, 'w', encoding='utf-8') as f:
+            with open(path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:
@@ -653,6 +647,48 @@ class PythonBridge:
             return "ok"
         except Exception as e:
             return str(e)
+
+    def sincronizza_da_github(self) -> str:
+        """
+        Scarica le ultime modifiche da GitHub prima di caricare i dati.
+        Ritorna JSON con esito: {"ok": true/false, "message": "..."}
+        """
+        import json as _json
+        try:
+            # Controlla se ci sono modifiche locali non committate
+            status = subprocess.run(
+                "git status --porcelain", cwd=SITE_DIR,
+                capture_output=True, text=True, shell=True, timeout=30
+            )
+            modifiche_locali = bool(status.stdout.strip())
+
+            if modifiche_locali:
+                # Stash temporaneo per non perdere modifiche
+                subprocess.run("git stash", cwd=SITE_DIR,
+                              capture_output=True, text=True, shell=True, timeout=30)
+
+            # Pull
+            r = subprocess.run(
+                "git pull --rebase", cwd=SITE_DIR,
+                capture_output=True, text=True, shell=True, timeout=60,
+                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+            )
+
+            if modifiche_locali:
+                # Ripristina le modifiche locali
+                subprocess.run("git stash pop", cwd=SITE_DIR,
+                              capture_output=True, text=True, shell=True, timeout=30)
+
+            out = (r.stdout or "").strip() + (" " + r.stderr.strip() if r.stderr.strip() else "")
+            if r.returncode == 0:
+                if "up to date" in out.lower() or "aggiornato" in out.lower():
+                    return _json.dumps({"ok": True, "message": "Già aggiornato"})
+                return _json.dumps({"ok": True, "message": "Sincronizzato con GitHub"})
+            return _json.dumps({"ok": False, "message": out[:200] or "Errore git pull"})
+        except subprocess.TimeoutExpired:
+            return _json.dumps({"ok": False, "message": "Timeout — connessione lenta o assente"})
+        except Exception as e:
+            return _json.dumps({"ok": False, "message": str(e)[:200]})
 
     def carica_auto(self) -> str:
         try:
@@ -768,6 +804,13 @@ def main():
 
     def on_loaded():
         try:
+            # 1. Sincronizza da GitHub
+            window.evaluate_js("setSyncStatus('loading', 'Sincronizzazione...')")
+            esito = bridge.sincronizza_da_github()
+            esito_esc = esito.replace("\\", "\\\\").replace("`", "\\`")
+            window.evaluate_js(f"applicaSyncEsito(`{esito_esc}`)")
+
+            # 2. Carica dati.json aggiornato
             if os.path.exists(JSON_FILE):
                 with open(JSON_FILE, encoding="utf-8") as f:
                     content = f.read()
@@ -780,20 +823,8 @@ def main():
         except Exception as e:
             window.evaluate_js(f"setStatus('warn', 'Errore: {e}')")
 
-        try:
-            if os.path.exists(PRED_VECCHIE_FILE):
-                with open(PRED_VECCHIE_FILE, encoding="utf-8") as f:
-                    vecchie_content = f.read()
-            else:
-                vecchie_content = "{}"
-            vecchie_escaped = vecchie_content.replace("\\", "\\\\").replace("`", "\\`")
-            window.evaluate_js(f"caricaVecchie(`{vecchie_escaped}`)")
-        except Exception as e:
-            window.evaluate_js(f"setStatus('warn', 'Errore predicazioni vecchie: {e}')")
-
     webview.start(on_loaded, debug=False)
 
 
 if __name__ == "__main__":
     main()
-
