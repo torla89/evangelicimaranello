@@ -1,1 +1,4 @@
 .s3keys
+build/
+dist/
+*.spec
