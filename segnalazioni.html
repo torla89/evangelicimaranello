@@ -181,6 +181,7 @@
           <option value="Proposta o miglioramento">💡 Proposta o idea per migliorare</option>
           <option value="Richiesta canzoni">🎵 Richiesta nuove canzoni / genere musicale</option>
           <option value="Richiesta calendari">📅 Richiesta calendari</option>
+          <option value="Richiesta libri">📚 Richiesta libri dalla libreria</option>
           <option value="Info">ℹ️ Info</option>
           <option value="Altro">✉️ Altro</option>
         </select>
@@ -238,8 +239,17 @@
   // Template dedicato su EmailJS con variabili: {{tipo}} {{nome}} {{email}} {{messaggio}}
   const EMAILJS_TEMPLATE_ID = "template_6pvireb";
 
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  // I listener vengono registrati prima di toccare emailjs: se la libreria
+  // esterna non si carica (rete lenta, CDN bloccato) il resto della pagina
+  // deve continuare a funzionare.
   document.addEventListener('DOMContentLoaded', aggiornaCampoEmail);
+  document.addEventListener('DOMContentLoaded', precompilaDaUrl);
+
+  try {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  } catch (e) {
+    console.error('EmailJS non disponibile:', e);
+  }
 
   function leggiCampi() {
     return {
@@ -256,14 +266,16 @@
     avviso.classList.add('show');
   }
 
-  // Per "Richiesta calendari" serve un recapito (email o telefono),
-  // altrimenti non sapremmo a chi inviarlo. Aggiorna l'etichetta di
-  // conseguenza quando cambia il tipo di segnalazione.
+  // Per "Richiesta calendari" e "Richiesta libri" serve un recapito
+  // (email o telefono), altrimenti non sapremmo a chi consegnarli.
+  // Aggiorna l'etichetta di conseguenza quando cambia il tipo di segnalazione.
+  const TIPI_CON_RECAPITO = ['Richiesta calendari', 'Richiesta libri'];
+
   function aggiornaCampoEmail() {
     const tipo = document.getElementById('segTipo').value;
     const facolt = document.getElementById('segEmailFacolt');
     const campo = document.getElementById('segEmail');
-    if (tipo === 'Richiesta calendari') {
+    if (TIPI_CON_RECAPITO.includes(tipo)) {
       facolt.textContent = '(obbligatorio — email o telefono)';
       facolt.style.color = '#ffc98a';
       campo.placeholder = 'nome@esempio.it oppure numero di telefono';
@@ -275,7 +287,28 @@
   }
 
   function recapitoMancante(tipo, email) {
-    return tipo === 'Richiesta calendari' && !email;
+    return TIPI_CON_RECAPITO.includes(tipo) && !email;
+  }
+
+  // Arrivo dalla pagina Libreria: segnalazioni.html?tipo=Richiesta+libri&libro=...&autore=...
+  function precompilaDaUrl() {
+    const p = new URLSearchParams(window.location.search);
+    const tipo = p.get('tipo');
+    if (tipo) {
+      const sel = document.getElementById('segTipo');
+      const esiste = Array.from(sel.options).some(o => o.value === tipo);
+      if (esiste) { sel.value = tipo; aggiornaCampoEmail(); }
+    }
+    const libro = p.get('libro');
+    if (libro) {
+      const autore = p.get('autore');
+      const msg = document.getElementById('segMessaggio');
+      if (!msg.value.trim()) {
+        msg.value = `Buongiorno,\nvorrei richiedere il libro «${libro}»${autore ? ' di ' + autore : ''}.\n\n`;
+      }
+      document.getElementById('segNome').focus();
+      document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   async function inviaSegnalazione() {

@@ -78,28 +78,65 @@
     }
     .libro:hover { border-color: rgba(255,255,255,0.38); }
 
-    /* Copertina girevole */
-    .flip-wrap { perspective: 1300px; cursor: pointer; position: relative; }
-    .flip {
-      position: relative; width: 100%; aspect-ratio: 0.685;
-      transform-style: preserve-3d;
-      transition: transform 0.75s cubic-bezier(0.4, 0.15, 0.2, 1);
-    }
-    .flip.flipped { transform: rotateY(180deg); }
-    .flip img {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: contain; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    /* Copertina nella scheda */
+    .cover-wrap { cursor: zoom-in; position: relative; }
+    .cover-wrap img {
+      display: block; width: 100%; aspect-ratio: 0.685; object-fit: contain;
       border-radius: 4px; filter: drop-shadow(0 10px 22px rgba(0,0,0,0.55));
       background: rgba(255,255,255,0.03);
+      transition: transform 0.3s ease;
     }
-    .flip img.retro { transform: rotateY(180deg); }
+    .cover-wrap:hover img { transform: translateY(-3px) scale(1.02); }
 
-    .flip-hint {
+    .cover-hint {
       display: flex; align-items: center; justify-content: center; gap: 6px;
       margin-top: 10px; font-size: 0.72rem; color: rgba(255,255,255,0.42);
       letter-spacing: 0.04em; user-select: none;
     }
-    .flip-wrap:hover .flip-hint { color: rgba(255,255,255,0.75); }
+    .cover-wrap:hover + .cover-hint { color: rgba(255,255,255,0.75); }
+
+    /* ── LIGHTBOX: ingrandimento + giro copertina ── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 1200;
+      background: rgba(4,2,0,0.92); backdrop-filter: blur(8px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 28px 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.28s;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+
+    .lb-titolo {
+      font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.88);
+      text-align: center; max-width: 90vw;
+    }
+    .lb-titolo span { display: block; font-weight: 400; font-size: 0.85rem; color: rgba(255,255,255,0.50); margin-top: 2px; }
+
+    .lb-stage { perspective: 1800px; cursor: pointer; }
+    .lb-flip {
+      position: relative; height: min(68vh, 760px); aspect-ratio: 0.685;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.4, 0.15, 0.2, 1);
+    }
+    .lb-flip.flipped { transform: rotateY(180deg); }
+    .lb-flip img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+      -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      border-radius: 5px; filter: drop-shadow(0 18px 40px rgba(0,0,0,0.75));
+    }
+    .lb-flip img.retro { transform: rotateY(180deg); }
+
+    .lb-hint {
+      font-size: 0.82rem; color: rgba(255,255,255,0.58); letter-spacing: 0.04em;
+      display: flex; align-items: center; gap: 7px; user-select: none;
+    }
+    .lb-close {
+      position: absolute; top: 16px; right: 18px;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
+      color: #fff; font-size: 1.1rem; cursor: pointer; line-height: 1;
+      transition: background 0.2s;
+    }
+    .lb-close:hover { background: rgba(255,255,255,0.20); }
 
     /* Info */
     .libro-info { min-width: 0; }
@@ -151,6 +188,8 @@
     .btn-link:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.45); }
     .btn-wa { border-color: rgba(80,200,120,0.34); }
     .btn-wa:hover { background: rgba(80,200,120,0.16); border-color: rgba(80,200,120,0.55); }
+    .btn-form { background: rgba(255,200,80,0.13); border-color: rgba(255,200,80,0.42); }
+    .btn-form:hover { background: rgba(255,200,80,0.24); border-color: rgba(255,200,80,0.70); }
 
     /* Stato caricamento / vuoto */
     .stato-box {
@@ -179,9 +218,11 @@
       .page-header h1 { font-size: 1.9rem; }
       .back-link { margin-bottom: 26px; }
       .libro { grid-template-columns: 1fr; gap: 18px; padding: 18px; border-radius: 10px; }
-      .flip-wrap { max-width: 210px; margin: 0 auto; }
+      .cover-wrap { max-width: 210px; margin: 0 auto; }
       .btn-row { flex-direction: column; }
       .btn-link { justify-content: center; }
+      .lb-flip { height: min(62vh, 560px); }
+      .lb-hint { font-size: 0.76rem; text-align: center; }
     }
 
     .mob-menu {
@@ -258,10 +299,24 @@
   <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
 </div>
 
+<!-- ══ LIGHTBOX COPERTINA ══ -->
+<div class="lightbox" id="lightbox" onclick="chiudiLightbox()">
+  <button class="lb-close" onclick="chiudiLightbox(event)" aria-label="Chiudi">✕</button>
+  <div class="lb-titolo" id="lbTitolo"></div>
+  <div class="lb-stage" onclick="event.stopPropagation(); giraLightbox();" title="Clicca per girare il libro">
+    <div class="lb-flip" id="lbFlip">
+      <img id="lbFronte" src="" alt="">
+      <img id="lbRetro" class="retro" src="" alt="">
+    </div>
+  </div>
+  <div class="lb-hint" id="lbHint"></div>
+</div>
+
 <!-- ══ CATALOGO LIBRERIA ══ -->
 <script>
   const WHATSAPP = '393394514698';
   const EMAIL    = 'libreria@evangelicimaranello.it';
+  let   LIBRI    = [];
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -301,15 +356,11 @@
     return `
     <div class="libro">
       <div>
-        <div class="flip-wrap" onclick="giraLibro(this)" title="Clicca per girare il libro">
-          <div class="flip" id="flip-${i}">
-            <img src="${esc(l.copertina)}" alt="Copertina di ${titolo}" loading="lazy"
-                 onerror="this.style.opacity=0.15">
-            <img class="retro" data-src="${esc(l.retro)}" alt="Retro di ${titolo}"
-                 onerror="this.style.opacity=0.15">
-          </div>
-          <div class="flip-hint">🔄 <span>Clicca per girarlo</span></div>
+        <div class="cover-wrap" onclick="apriLightbox(${i})" title="Clicca per ingrandire">
+          <img src="${esc(l.copertina)}" alt="Copertina di ${titolo}" loading="lazy"
+               onerror="this.style.opacity=0.15">
         </div>
+        <div class="cover-hint">🔍 <span>Clicca per ingrandire</span></div>
       </div>
 
       <div class="libro-info">
@@ -328,20 +379,61 @@
         ${l.note ? `<div class="autore-bio">${esc(l.note)}</div>` : ''}
 
         <div class="btn-row">
+          <a class="btn-link btn-form"
+             href="segnalazioni.html?tipo=${encodeURIComponent('Richiesta libri')}&libro=${encodeURIComponent(l.titolo || '')}&autore=${encodeURIComponent(l.autore || '')}">📝 Richiedilo dal sito</a>
           <a class="btn-link btn-wa" target="_blank" rel="noopener"
-             href="https://wa.me/${WHATSAPP}?text=${msg}">💬 Richiedilo su WhatsApp</a>
-          <a class="btn-link" href="mailto:${EMAIL}?subject=${oggetto}&body=${corpo}">✉️ Richiedilo via email</a>
+             href="https://wa.me/${WHATSAPP}?text=${msg}">💬 WhatsApp</a>
+          <a class="btn-link" href="mailto:${EMAIL}?subject=${oggetto}&body=${corpo}">✉️ Email</a>
         </div>
       </div>
     </div>`;
   }
 
-  function giraLibro(wrap) {
-    const flip = wrap.querySelector('.flip');
-    const retro = flip.querySelector('img.retro');
-    if (retro && !retro.src && retro.dataset.src) retro.src = retro.dataset.src;
-    flip.classList.toggle('flipped');
+  /* ── LIGHTBOX: primo clic ingrandisce, i clic successivi girano il libro ── */
+  function apriLightbox(i) {
+    const l = LIBRI[i];
+    if (!l) return;
+    const lb     = document.getElementById('lightbox');
+    const flip   = document.getElementById('lbFlip');
+    const fronte = document.getElementById('lbFronte');
+    const retro  = document.getElementById('lbRetro');
+
+    flip.classList.remove('flipped');
+    fronte.src   = l.copertina || '';
+    fronte.alt   = 'Copertina di ' + (l.titolo || '');
+    retro.src    = l.retro || '';
+    retro.alt    = 'Retro di ' + (l.titolo || '');
+    retro.style.display = l.retro ? '' : 'none';
+
+    document.getElementById('lbTitolo').innerHTML =
+      esc(l.titolo || '') + (l.autore ? `<span>${esc(l.autore)}</span>` : '');
+    document.getElementById('lbHint').innerHTML = l.retro
+      ? '🔄 <span>Clicca sull\'immagine per vedere il retro</span>'
+      : '🔍 <span>Premi ESC o clicca fuori per chiudere</span>';
+
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
+
+  function giraLightbox() {
+    const flip = document.getElementById('lbFlip');
+    const retro = document.getElementById('lbRetro');
+    if (!retro.src || retro.style.display === 'none') return;
+    flip.classList.toggle('flipped');
+    document.getElementById('lbHint').innerHTML = flip.classList.contains('flipped')
+      ? '🔄 <span>Clicca di nuovo per tornare alla copertina</span>'
+      : '🔄 <span>Clicca sull\'immagine per vedere il retro</span>';
+  }
+
+  function chiudiLightbox(e) {
+    if (e) e.stopPropagation();
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') chiudiLightbox();
+  });
 
   function apriDesc(i, btn) {
     const d = document.getElementById('desc-' + i);
@@ -357,6 +449,7 @@
       if (!res.ok) throw new Error('fetch');
       const dati = await res.json();
       const libri = Array.isArray(dati.libreria) ? dati.libreria : [];
+      LIBRI = libri;
       if (!libri.length) {
         c.innerHTML = `<div class="stato-box"><span class="emoji">📭</span>
           Il catalogo è in allestimento: stiamo raccogliendo i primi libri.<br>
