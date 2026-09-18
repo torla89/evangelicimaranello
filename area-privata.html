@@ -521,6 +521,78 @@
     .stato-in_attesa   { background: rgba(255,180,0,0.12);  border: 1px solid rgba(255,180,0,0.28);  color: #ffd060; }
     .stato-annullata   { background: rgba(255,80,80,0.10);  border: 1px solid rgba(255,80,80,0.25);  color: #ff9090; }
 
+    /* Costi attività */
+    .attivita-riepilogo {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 18px;
+      background: rgba(212,168,85,0.08);
+      border: 1px solid rgba(212,168,85,0.28);
+      border-radius: 10px;
+    }
+    .attivita-riepilogo-label {
+      font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .attivita-riepilogo-valore {
+      font-family: 'Lora', serif; font-size: 1.45rem; font-weight: 700; color: #e8c07a;
+    }
+    .attivita-costo { white-space: nowrap; font-weight: 700; color: #e8c07a; }
+    .attivita-costo-zero { color: rgba(255,255,255,0.30); font-weight: 400; }
+    .btn-spese {
+      display: inline-block; margin-top: 6px;
+      background: rgba(212,168,85,0.16); border: 1px solid rgba(212,168,85,0.42);
+      color: #e8c07a; border-radius: 7px; padding: 4px 10px;
+      font-size: 0.74rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-spese:hover { background: rgba(212,168,85,0.30); border-color: rgba(212,168,85,0.70); }
+
+    /* Modal dettaglio spese */
+    .spese-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(5,3,1,0.82); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .spese-overlay.open { opacity: 1; pointer-events: all; }
+    .spese-box {
+      background: #1f1206; border: 1px solid rgba(255,255,255,0.20); border-radius: 12px;
+      max-width: 560px; width: 100%; max-height: 78vh; display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .spese-box-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.12); flex-shrink: 0;
+    }
+    .spese-box-header h3 { font-size: 1.02rem; font-weight: 700; }
+    .spese-close {
+      background: none; border: none; color: rgba(255,255,255,0.55); font-size: 1.2rem;
+      cursor: pointer; line-height: 1; padding: 4px; font-family: inherit;
+    }
+    .spese-close:hover { color: #fff; }
+    .spese-body { padding: 14px 22px 22px; overflow-y: auto; }
+    .spese-riga {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+      padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .spese-riga:last-of-type { border-bottom: none; }
+    .spese-riga-voce { font-size: 0.90rem; color: rgba(255,255,255,0.85); }
+    .spese-riga-importo { font-size: 0.90rem; font-weight: 700; color: #fff; white-space: nowrap; }
+    .spese-totale {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(212,168,85,0.35);
+    }
+    .spese-totale-label {
+      font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .spese-totale-valore {
+      font-family: 'Lora', serif; font-size: 1.25rem; font-weight: 700; color: #e8c07a;
+    }
+    .spese-vuoto { color: rgba(255,255,255,0.40); font-size: 0.88rem; font-style: italic; }
+
     /* MOBILE */
     @media (max-width: 680px) {
       .bg { position: absolute; background-attachment: scroll; }
@@ -603,6 +675,14 @@
       /* Area privata: tabella attività */
       .attivita-table th:nth-child(2),
       .attivita-table td:nth-child(2) { display: none; }
+      .attivita-table { table-layout: auto; }
+      .attivita-table th, .attivita-table td { font-size: 0.84rem; padding-right: 4px; }
+      .attivita-nome, .attivita-desc { overflow-wrap: anywhere; word-break: break-word; }
+      .attivita-table th:last-child,
+      .attivita-table td:last-child { padding-right: 0; text-align: right; }
+      .btn-spese { padding: 4px 8px; font-size: 0.70rem; }
+      .attivita-riepilogo-valore { font-size: 1.2rem; }
+      .spese-overlay { padding: 14px; }
 
       /* Saldo: numero più piccolo */
       .saldo-valore { font-size: 2.2rem; }
@@ -768,6 +848,17 @@
   </div>
 
 </div><!-- /.page -->
+
+<!-- MODAL DETTAGLIO SPESE ATTIVITÀ -->
+<div class="spese-overlay" id="speseOverlay" onclick="if(event.target===this) chiudiSpeseAttivita()">
+  <div class="spese-box">
+    <div class="spese-box-header">
+      <h3 id="speseAttTitolo">Dettaglio spese</h3>
+      <button class="spese-close" onclick="chiudiSpeseAttivita()" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="spese-body" id="speseAttBody"></div>
+  </div>
+</div>
 
 <!-- MOBILE MENU -->
 <div class="mob-menu" id="mob">
@@ -1333,7 +1424,26 @@
     document.getElementById("riunioni-container").innerHTML = html;
   }
 
+  // Cache delle attività per il popup "Dettagli spese"
+  let ATTIVITA_CACHE = [];
+
+  function escHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c =>
+      ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  }
+
+  function totaleSpese(a) {
+    if (!a || !Array.isArray(a.spese)) return 0;
+    return a.spese.reduce((tot, s) => tot + (parseFloat(s.importo) || 0), 0);
+  }
+
+  function formatEuro(n) {
+    return "€ " + (parseFloat(n) || 0).toLocaleString("it-IT",
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   function renderAttivita(attivita) {
+    ATTIVITA_CACHE = Array.isArray(attivita) ? attivita : [];
     if (!attivita || attivita.length === 0) {
       document.getElementById("attivita-container").innerHTML =
         '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;">Nessuna attività inserita.</p>';
@@ -1345,31 +1455,84 @@
       in_attesa:  "In attesa",
       annullata:  "Annullata"
     };
+
+    const totaleGenerale = attivita.reduce((tot, a) => tot + totaleSpese(a), 0);
+
     let html = `
+      <div class="attivita-riepilogo">
+        <span class="attivita-riepilogo-label">Totale investito nelle attività</span>
+        <span class="attivita-riepilogo-valore">${formatEuro(totaleGenerale)}</span>
+      </div>
       <table class="attivita-table">
         <thead>
           <tr>
             <th>Attività</th>
             <th>Responsabile</th>
             <th>Stato</th>
+            <th>Costo</th>
           </tr>
         </thead>
         <tbody>`;
-    attivita.forEach(a => {
+    attivita.forEach((a, i) => {
       const stato = a.stato || "in_attesa";
+      const tot   = totaleSpese(a);
+      const nVoci = Array.isArray(a.spese) ? a.spese.length : 0;
       html += `
         <tr>
           <td>
-            <div class="attivita-nome">${a.nome}</div>
-            ${a.descrizione ? `<div class="attivita-desc">${a.descrizione}</div>` : ""}
+            <div class="attivita-nome">${escHtml(a.nome)}</div>
+            ${a.descrizione ? `<div class="attivita-desc">${escHtml(a.descrizione)}</div>` : ""}
           </td>
-          <td>${a.responsabile || "—"}</td>
+          <td>${escHtml(a.responsabile || "—")}</td>
           <td><span class="badge-stato stato-${stato}">${labelStato[stato] || stato}</span></td>
+          <td>
+            <div class="attivita-costo${tot ? "" : " attivita-costo-zero"}">${formatEuro(tot)}</div>
+            ${nVoci
+              ? `<button class="btn-spese" onclick="apriSpeseAttivita(${i})">📄 Dettagli</button>`
+              : ""}
+          </td>
         </tr>`;
     });
     html += `</tbody></table>`;
     document.getElementById("attivita-container").innerHTML = html;
   }
+
+  /* ── Popup dettaglio spese per attività ── */
+  function apriSpeseAttivita(idx) {
+    const a = ATTIVITA_CACHE[idx];
+    if (!a) return;
+    document.getElementById("speseAttTitolo").textContent = a.nome || "Dettaglio spese";
+    const body  = document.getElementById("speseAttBody");
+    const spese = Array.isArray(a.spese) ? a.spese : [];
+
+    if (!spese.length) {
+      body.innerHTML = '<p class="spese-vuoto">Nessuna spesa registrata per questa attività.</p>';
+    } else {
+      let html = "";
+      spese.forEach(s => {
+        html += `
+          <div class="spese-riga">
+            <span class="spese-riga-voce">${escHtml(s.voce || "—")}</span>
+            <span class="spese-riga-importo">${formatEuro(s.importo)}</span>
+          </div>`;
+      });
+      html += `
+        <div class="spese-totale">
+          <span class="spese-totale-label">Totale</span>
+          <span class="spese-totale-valore">${formatEuro(totaleSpese(a))}</span>
+        </div>`;
+      body.innerHTML = html;
+    }
+    document.getElementById("speseOverlay").classList.add("open");
+  }
+
+  function chiudiSpeseAttivita() {
+    document.getElementById("speseOverlay").classList.remove("open");
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") chiudiSpeseAttivita();
+  });
 
   function formatData(iso) {
     if (!iso) return "";

@@ -209,6 +209,36 @@
     }
     .modal h3 { font-family: 'Lora', serif; font-size: 1.2rem; margin-bottom: 20px; }
 
+    /* ── EDITOR SPESE ATTIVITÀ ── */
+    .spesa-row {
+      display: grid; grid-template-columns: 1fr 120px auto;
+      gap: 8px; align-items: center; margin-bottom: 8px;
+    }
+    .spesa-row input {
+      width: 100%; background: rgba(0,0,0,0.30);
+      border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--white); font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.90rem; padding: 9px 12px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .spesa-row input:focus { border-color: var(--gold); }
+    .spesa-row input::placeholder { color: rgba(240,236,228,0.25); }
+    .spese-empty {
+      font-size: 0.85rem; color: var(--muted); font-style: italic;
+      padding: 8px 0 10px;
+    }
+    .spese-tot-box {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(201,147,58,0.35);
+    }
+    .spese-tot-label {
+      font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    }
+    .spese-tot-val { font-family: 'Lora', serif; font-size: 1.15rem; font-weight: 700; color: var(--gold-lt); }
+    @media (max-width: 600px) {
+      .spesa-row { grid-template-columns: 1fr 100px auto; }
+    }
+
     /* ── SAVE BAR ── */
     .save-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
@@ -539,6 +569,15 @@
         </select>
       </div>
     </div>
+    <div class="field">
+      <label>Spese sostenute (€)</label>
+      <div id="attSpeseList"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="addSpesaRow()">＋ Aggiungi voce di spesa</button>
+      <div class="spese-tot-box">
+        <span class="spese-tot-label">Totale attività</span>
+        <span class="spese-tot-val" id="attSpeseTotale">€ 0,00</span>
+      </div>
+    </div>
     <div class="btn-row-end">
       <button class="btn btn-ghost" onclick="closeModal('attivita')">Annulla</button>
       <button class="btn btn-primary" onclick="salvaAtt()">💾 Salva</button>
@@ -558,6 +597,8 @@
       if (!dati.riunioni)       dati.riunioni       = [];
       if (!dati.predicazioni)   dati.predicazioni   = [];
       if (!dati.attivita)       dati.attivita       = [];
+      // Compatibilità: attività create prima dell'introduzione delle spese
+      dati.attivita.forEach(a => { if (!Array.isArray(a.spese)) a.spese = []; });
       renderAll();
       document.getElementById('mainApp').style.display = 'block';
       document.getElementById('loadCard').style.display = 'none';
@@ -841,22 +882,86 @@
   }
 
   /* ── ATTIVITÀ ── */
+  function escAttr(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function euro(n) {
+    return '€ ' + (parseFloat(n) || 0).toLocaleString('it-IT',
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function totSpese(a) {
+    if (!a || !Array.isArray(a.spese)) return 0;
+    return a.spese.reduce((t, s) => t + (parseFloat(s.importo) || 0), 0);
+  }
+
   function renderAttivita() {
     const c = document.getElementById('attivitaList');
     if (!dati.attivita.length) { c.innerHTML = emptyState('Nessuna attività inserita'); return; }
-    c.innerHTML = dati.attivita.map((a, i) => `
+    const totGen = dati.attivita.reduce((t, a) => t + totSpese(a), 0);
+    c.innerHTML =
+      `<div class="spese-tot-box" style="margin:0 0 14px;padding:12px 16px;border:1px solid rgba(201,147,58,0.30);border-radius:10px;background:rgba(201,147,58,0.07);">
+         <span class="spese-tot-label">Totale investito nelle attività</span>
+         <span class="spese-tot-val">${euro(totGen)}</span>
+       </div>` +
+      dati.attivita.map((a, i) => `
       <div class="list-item">
         <div class="list-item-info">
-          <div class="list-item-title" style="display:flex;align-items:center;gap:8px;">
-            ${a.nome} <span class="badge badge-${a.stato}">${labelStato(a.stato)}</span>
+          <div class="list-item-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            ${escAttr(a.nome)} <span class="badge badge-${a.stato}">${labelStato(a.stato)}</span>
+            <span style="font-size:0.80rem;color:var(--gold-lt);font-weight:700;">${euro(totSpese(a))}</span>
           </div>
-          <div class="list-item-sub">${a.responsabile} · ${a.descrizione ? a.descrizione.substring(0,80) + '…' : ''}</div>
+          <div class="list-item-sub">${escAttr(a.responsabile)} · ${a.descrizione ? escAttr(a.descrizione.substring(0,80)) + '…' : ''}</div>
         </div>
         <div class="list-item-actions">
           <button class="btn btn-ghost btn-sm" onclick="editAtt(${i})">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteItem('attivita',${i})">🗑</button>
         </div>
       </div>`).join('');
+  }
+
+  /* ── Editor voci di spesa dentro il modal attività ── */
+  let attSpese = [];
+
+  function renderSpeseRows() {
+    const c = document.getElementById('attSpeseList');
+    if (!attSpese.length) {
+      c.innerHTML = '<div class="spese-empty">Nessuna voce di spesa inserita.</div>';
+    } else {
+      c.innerHTML = attSpese.map((s, i) => `
+        <div class="spesa-row">
+          <input type="text" value="${escAttr(s.voce || '')}" placeholder="es. Stampa calendari"
+                 oninput="updateSpesa(${i},'voce',this.value)">
+          <input type="number" step="0.01" min="0" value="${s.importo ?? ''}" placeholder="0.00"
+                 oninput="updateSpesa(${i},'importo',this.value)">
+          <button type="button" class="btn btn-danger btn-sm" onclick="removeSpesaRow(${i})">🗑</button>
+        </div>`).join('');
+    }
+    document.getElementById('attSpeseTotale').textContent =
+      euro(attSpese.reduce((t, s) => t + (parseFloat(s.importo) || 0), 0));
+  }
+
+  function updateSpesa(i, campo, val) {
+    if (!attSpese[i]) return;
+    attSpese[i][campo] = val;
+    if (campo === 'importo') {
+      document.getElementById('attSpeseTotale').textContent =
+        euro(attSpese.reduce((t, s) => t + (parseFloat(s.importo) || 0), 0));
+    }
+  }
+
+  function addSpesaRow() {
+    attSpese.push({ voce: '', importo: '' });
+    renderSpeseRows();
+    const inputs = document.querySelectorAll('#attSpeseList .spesa-row input[type="text"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }
+
+  function removeSpesaRow(i) {
+    attSpese.splice(i, 1);
+    renderSpeseRows();
   }
 
   function openAttModal(idx = -1) {
@@ -867,14 +972,19 @@
       document.getElementById('attDesc').value  = a.descrizione || '';
       document.getElementById('attResp').value  = a.responsabile || '';
       document.getElementById('attStato').value = a.stato || 'in_corso';
+      attSpese = Array.isArray(a.spese)
+        ? a.spese.map(s => ({ voce: s.voce || '', importo: s.importo ?? '' }))
+        : [];
       document.getElementById('modalAttTitle').textContent = 'Modifica attività';
     } else {
       document.getElementById('attNome').value  = '';
       document.getElementById('attDesc').value  = '';
       document.getElementById('attResp').value  = '';
       document.getElementById('attStato').value = 'in_corso';
+      attSpese = [];
       document.getElementById('modalAttTitle').textContent = 'Nuova attività';
     }
+    renderSpeseRows();
     document.getElementById('modal-attivita').classList.add('open');
   }
   function editAtt(i) { openAttModal(i); }
@@ -882,11 +992,19 @@
   function salvaAtt() {
     const nome = document.getElementById('attNome').value.trim();
     if (!nome) { toast('⚠ Inserisci il nome dell\'attività'); return; }
+    // Scarta le righe vuote e normalizza gli importi
+    const spese = attSpese
+      .filter(s => (s.voce || '').trim() !== '' || (parseFloat(s.importo) || 0) !== 0)
+      .map(s => ({
+        voce:    (s.voce || '').trim(),
+        importo: Math.round((parseFloat(String(s.importo).replace(',', '.')) || 0) * 100) / 100
+      }));
     const obj = {
       nome,
       descrizione:  document.getElementById('attDesc').value.trim(),
       responsabile: document.getElementById('attResp').value.trim(),
-      stato:        document.getElementById('attStato').value
+      stato:        document.getElementById('attStato').value,
+      spese
     };
     const idx = parseInt(document.getElementById('attEditIdx').value);
     if (idx >= 0) dati.attivita[idx] = obj;

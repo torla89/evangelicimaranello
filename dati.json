@@ -241,55 +241,64 @@
       "nome": "Sito web OgniTipoDiInsegnamento.it",
       "descrizione": "Creazione sito web dedicato al materiale di Ellero Balzani.",
       "responsabile": "Daniele",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "App OgniTipoDiInsegnamento",
       "descrizione": "Creazione dell'app per tutti i maggiori sistemi operativi dedicata al materiale di Ellero Balzani.",
       "responsabile": "Daniele",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "Calendario 2027",
       "descrizione": "Creazione di un calendario evangelico di chiesa da distribuire gratuitamente a novembre.",
       "responsabile": "Marica",
-      "stato": "in_corso"
+      "stato": "in_corso",
+      "spese": []
     },
     {
       "nome": "Podcast Ellero",
       "descrizione": "Miglioramento della qualità dei podcast di Ellero Balzani, divisione in segmenti da 15 minuti e pubblicazione su Spotify e sull'app/sito.",
       "responsabile": "Enrico",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "Pagina social OgniTipoDiInsegnamento",
       "descrizione": "Creazione di una pagina Facebook per promuovere il materiale di Ellero Balzani.",
       "responsabile": "Marica",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "Pagina social Evangelici Maranello",
       "descrizione": "Creazione di una pagina Facebook per promuovere le attività della chiesa di Maranello.",
       "responsabile": "Marica",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "Sito web evangelicimaranello.it",
       "descrizione": "Creazione del sito web ufficiale della chiesa evangelica di Maranello.",
       "responsabile": "Daniele",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "Creazione musica cristiana",
       "descrizione": "Creazione di playlist con musica cristiana a ritmo giovanile per avvicinare i ragazzi, con pubblicazione su sito e Spotify.",
       "responsabile": "Enrico",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     },
     {
       "nome": "Musica per il culto domenicale",
       "descrizione": "Creazione di basi musicali per i canti del culto domenicale.",
       "responsabile": "Enrico",
-      "stato": "completata"
+      "stato": "completata",
+      "spese": []
     }
   ]
 }
