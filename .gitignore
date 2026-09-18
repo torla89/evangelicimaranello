@@ -2,3 +2,5 @@
 build/
 dist/
 *.spec
+backup/
+build_tmp/
