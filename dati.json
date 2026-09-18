@@ -242,21 +242,80 @@
       "descrizione": "Creazione sito web dedicato al materiale di Ellero Balzani.",
       "responsabile": "Daniele",
       "stato": "completata",
-      "spese": []
+      "spese": [
+        {
+          "voce": "Dominio Ognitipodiinsegnamento.it",
+          "importo": 12
+        }
+      ]
     },
     {
       "nome": "App OgniTipoDiInsegnamento",
       "descrizione": "Creazione dell'app per tutti i maggiori sistemi operativi dedicata al materiale di Ellero Balzani.",
       "responsabile": "Daniele",
       "stato": "completata",
-      "spese": []
+      "spese": [
+        {
+          "voce": "Abbonamento Apple Developer",
+          "importo": 99
+        }
+      ]
     },
     {
       "nome": "Calendario 2027",
       "descrizione": "Creazione di un calendario evangelico di chiesa da distribuire gratuitamente a novembre.",
       "responsabile": "Marica",
       "stato": "in_corso",
-      "spese": []
+      "spese": [
+        {
+          "voce": "Rilegatrice + spirale",
+          "importo": 164.71
+        },
+        {
+          "voce": "Carta glossy 300 fogli",
+          "importo": 34.87
+        },
+        {
+          "voce": "Cartucce XP-900",
+          "importo": 35.7
+        },
+        {
+          "voce": "Cartucce XP-900",
+          "importo": 18.08
+        },
+        {
+          "voce": "Carte cartoncino + glossy (150 + 300)",
+          "importo": 44.41
+        },
+        {
+          "voce": "Cartucce HP",
+          "importo": 25
+        },
+        {
+          "voce": "Carta glossy 100 fogli",
+          "importo": 13.55
+        },
+        {
+          "voce": "Perforatrice per chiodo",
+          "importo": 16.45
+        },
+        {
+          "voce": "Carta cartoncino 50 fogli",
+          "importo": 5.79
+        },
+        {
+          "voce": "Carta cartoncino 100 fogli",
+          "importo": 11.58
+        },
+        {
+          "voce": "Scatole da imballo calendario",
+          "importo": 13.19
+        },
+        {
+          "voce": "Ganci per spirale",
+          "importo": 19.9
+        }
+      ]
     },
     {
       "nome": "Podcast Ellero",
@@ -270,7 +329,12 @@
       "descrizione": "Creazione di una pagina Facebook per promuovere il materiale di Ellero Balzani.",
       "responsabile": "Marica",
       "stato": "completata",
-      "spese": []
+      "spese": [
+        {
+          "voce": "Pubblicizzare pagina",
+          "importo": 50
+        }
+      ]
     },
     {
       "nome": "Pagina social Evangelici Maranello",
@@ -284,7 +348,12 @@
       "descrizione": "Creazione del sito web ufficiale della chiesa evangelica di Maranello.",
       "responsabile": "Daniele",
       "stato": "completata",
-      "spese": []
+      "spese": [
+        {
+          "voce": "Dominio + email + PEC",
+          "importo": 32.2
+        }
+      ]
     },
     {
       "nome": "Creazione musica cristiana",
@@ -298,7 +367,43 @@
       "descrizione": "Creazione di basi musicali per i canti del culto domenicale.",
       "responsabile": "Enrico",
       "stato": "completata",
+      "spese": [
+        {
+          "voce": "Moises AI Giugno",
+          "importo": 24.49
+        },
+        {
+          "voce": "Moises AI Luglio",
+          "importo": 34.99
+        },
+        {
+          "voce": "Moises AI Agosto",
+          "importo": 34.99
+        },
+        {
+          "voce": "Moises AI Settembre",
+          "importo": 34.99
+        }
+      ]
+    },
+    {
+      "nome": "Libreria",
+      "descrizione": "Gestione libreria, approvvigionamento libri, allestimento locale ecc...",
+      "responsabile": "Susanna",
+      "stato": "in_corso",
       "spese": []
+    },
+    {
+      "nome": "Locale",
+      "descrizione": "Gestione locale, affitto, allestimento locale per riunioni domenicali, innari ecc..",
+      "responsabile": "",
+      "stato": "in_corso",
+      "spese": [
+        {
+          "voce": "Sedie (20)",
+          "importo": 249.79
+        }
+      ]
     }
   ]
 }
