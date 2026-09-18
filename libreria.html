@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attività e Progetti – Chiesa Evangelica Maranello</title>
+  <title>Libreria cristiana gratuita – Chiesa Evangelica Maranello</title>
+  <meta name="description" content="Libri cristiani offerti gratuitamente dalla Chiesa Evangelica di Maranello: nessun costo, nessuna offerta richiesta. Sfoglia il catalogo e richiedi il tuo libro.">
 
   <link rel="icon" type="image/png" href="logo.png">
   <style>
@@ -20,18 +21,15 @@
 
     .page { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
+    /* HEADER */
     header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 0 52px; height: 62px; flex-shrink: 0;
       background-color: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
     }
     .logo { display: flex; align-items: center; font-size: 1.05em; font-weight: 500; text-decoration: none; color: #fff; }
-    .logo-img {
-      height: 3.2em;
-      width: auto;
-      margin-right: 9px;
-    }
-    nav { display: flex; align-items: center; gap: 26px; }
+    .logo-img { height: 3.2em; width: auto; margin-right: 9px; }
+    nav { display: flex; align-items: center; gap: 24px; }
     nav a { color: #fff; text-decoration: none; font-size: 0.93em; font-weight: 500; opacity: 0.85; transition: opacity 0.2s; }
     nav a.active { opacity: 1; border-bottom: 1.5px solid #fff; padding-bottom: 2px; }
     nav a:hover { opacity: 1; }
@@ -39,7 +37,8 @@
     .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
     .hamburger span { display: block; width: 22px; height: 2px; background: #fff; }
 
-    main { flex: 1; max-width: 820px; width: 100%; margin: 0 auto; padding: 52px 24px 64px; }
+    /* MAIN */
+    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 52px 24px 64px; }
 
     .back-link {
       display: inline-flex; align-items: center; gap: 6px; margin-bottom: 40px;
@@ -47,74 +46,140 @@
     }
     .back-link:hover { color: #fff; }
 
-    .page-header { margin-bottom: 40px; }
+    .page-header { margin-bottom: 30px; }
     .page-header .label { font-size: 0.75rem; letter-spacing: 0.30em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
     .page-header h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 700; line-height: 1.15; margin-bottom: 10px; }
     .page-header .sottotitolo { font-size: 0.97rem; color: rgba(255,255,255,0.68); line-height: 1.6; }
 
-    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 0 0 36px; }
-
-    /* Card progetto */
-    .progetto {
-      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
-      border: 1px solid rgba(255,255,255,0.22); border-radius: 10px;
-      padding: 28px 26px; margin-bottom: 20px;
+    /* BANNER GRATUITO */
+    .gratis-box {
+      background: rgba(80,200,120,0.08);
+      border: 1px solid rgba(80,200,120,0.28);
+      border-radius: 10px; padding: 16px 20px; margin-bottom: 34px;
+      font-size: 0.92rem; line-height: 1.7; color: rgba(255,255,255,0.80);
     }
-    .progetto-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
-    .progetto-icon { font-size: 1.9rem; flex-shrink: 0; margin-top: 3px; }
-    .progetto-tag { font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.40); margin-bottom: 5px; }
-    .progetto h2 { font-size: 1.18rem; font-weight: 700; line-height: 1.2; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .gratis-box strong { color: #6ddb90; }
+
+    /* SEZIONE */
+    .sezione-titolo {
+      font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
+      color: rgba(255,255,255,0.40); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sezione-titolo::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.10); }
+
+    /* ── SCHEDA LIBRO ── */
+    .libro {
+      display: grid; grid-template-columns: 210px 1fr; gap: 26px;
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.22); border-radius: 12px;
+      padding: 22px; margin-bottom: 16px;
+      transition: border-color 0.25s;
+    }
+    .libro:hover { border-color: rgba(255,255,255,0.38); }
+
+    /* Copertina girevole */
+    .flip-wrap { perspective: 1300px; cursor: pointer; position: relative; }
+    .flip {
+      position: relative; width: 100%; aspect-ratio: 0.685;
+      transform-style: preserve-3d;
+      transition: transform 0.75s cubic-bezier(0.4, 0.15, 0.2, 1);
+    }
+    .flip.flipped { transform: rotateY(180deg); }
+    .flip img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      border-radius: 4px; filter: drop-shadow(0 10px 22px rgba(0,0,0,0.55));
+      background: rgba(255,255,255,0.03);
+    }
+    .flip img.retro { transform: rotateY(180deg); }
+
+    .flip-hint {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-top: 10px; font-size: 0.72rem; color: rgba(255,255,255,0.42);
+      letter-spacing: 0.04em; user-select: none;
+    }
+    .flip-wrap:hover .flip-hint { color: rgba(255,255,255,0.75); }
+
+    /* Info */
+    .libro-info { min-width: 0; }
+    .libro-titolo { font-size: 1.32rem; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+    .libro-autore { font-size: 0.95rem; color: rgba(255,255,255,0.72); margin-bottom: 12px; }
+
+    .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .chip {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.70rem; letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.72);
+    }
 
     .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 0.67rem; font-weight: 600; letter-spacing: 0.05em;
+      display: inline-block; padding: 3px 11px; border-radius: 20px;
+      font-size: 0.70rem; font-weight: 700; letter-spacing: 0.05em;
     }
-    .badge-green { background: rgba(80,200,120,0.12); border: 1px solid rgba(80,200,120,0.30); color: #6ddb90; }
-    .badge-blue  { background: rgba(100,180,255,0.12); border: 1px solid rgba(100,180,255,0.30); color: #8ecfff; }
-    .badge-gold  { background: rgba(255,200,80,0.12);  border: 1px solid rgba(255,200,80,0.28);  color: #ffd060; }
+    .badge-ok    { background: rgba(80,200,120,0.14); border: 1px solid rgba(80,200,120,0.34); color: #6ddb90; }
+    .badge-last  { background: rgba(255,200,80,0.13);  border: 1px solid rgba(255,200,80,0.32);  color: #ffd060; }
+    .badge-out   { background: rgba(230,110,110,0.13); border: 1px solid rgba(230,110,110,0.32); color: #ef9a9a; }
 
-    .badge-live { display: inline-flex; align-items: center; gap: 6px; }
-    .badge-dot {
-      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-      background: #8ecfff; box-shadow: 0 0 0 0 rgba(142,207,255,0.65);
-      animation: badge-pulse 1.4s ease-out infinite;
+    .libro-desc {
+      font-size: 0.92rem; line-height: 1.75; color: rgba(255,255,255,0.78);
+      margin-bottom: 12px;
     }
-    @keyframes badge-pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(142,207,255,0.55); }
-      70%  { box-shadow: 0 0 0 6px rgba(142,207,255,0); }
-      100% { box-shadow: 0 0 0 0 rgba(142,207,255,0); }
+    .libro-desc.collapsed {
+      display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .leggi-tutto {
+      background: none; border: none; color: rgba(255,255,255,0.55);
+      font-size: 0.80rem; cursor: pointer; padding: 0; margin-bottom: 14px;
+      text-decoration: underline; font-family: inherit;
+    }
+    .leggi-tutto:hover { color: #fff; }
+
+    .autore-bio {
+      font-size: 0.82rem; line-height: 1.7; color: rgba(255,255,255,0.52);
+      border-left: 2px solid rgba(255,255,255,0.16); padding-left: 12px; margin-bottom: 16px;
     }
 
-    .progetto p { font-size: 0.96rem; line-height: 1.80; color: rgba(255,255,255,0.82); margin-bottom: 10px; }
-    .progetto p:last-of-type { margin-bottom: 0; }
-    .progetto p em { font-style: italic; color: rgba(255,255,255,0.90); }
-    .progetto p strong { font-weight: 600; color: #fff; }
-
-    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
     .btn-link {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
-      border: 1px solid rgba(255,255,255,0.30); border-radius: 10px;
-      color: #fff; text-decoration: none; padding: 10px 18px;
-      font-size: 0.88rem; font-weight: 600; letter-spacing: 0.02em;
-      transition: background 0.25s, border-color 0.25s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 8px; padding: 9px 16px; text-decoration: none; color: #fff;
+      font-size: 0.85rem; font-weight: 600; transition: background 0.2s, border-color 0.2s;
     }
-    .btn-link:hover { background: rgba(0,0,0,0.40); border-color: rgba(255,255,255,0.55); }
+    .btn-link:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.45); }
+    .btn-wa { border-color: rgba(80,200,120,0.34); }
+    .btn-wa:hover { background: rgba(80,200,120,0.16); border-color: rgba(80,200,120,0.55); }
 
-    .nota-prenotazione {
-      margin-top: 18px; padding: 14px 18px;
-      background: rgba(255,200,80,0.06); border: 1px solid rgba(255,200,80,0.22);
-      border-radius: 8px; font-size: 0.88rem; color: rgba(255,255,255,0.70); line-height: 1.65;
+    /* Stato caricamento / vuoto */
+    .stato-box {
+      text-align: center; padding: 44px 20px;
+      color: rgba(255,255,255,0.45); font-size: 0.93rem;
     }
-    .nota-prenotazione a { color: #ffd060; text-decoration: underline; }
+    .stato-box .emoji { font-size: 2rem; display: block; margin-bottom: 10px; }
 
+    /* Nota finale */
+    .nota-finale {
+      margin-top: 30px;
+      background: rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.18);
+      border-left: 3px solid rgba(255,200,80,0.55);
+      border-radius: 10px; padding: 18px 20px;
+      font-size: 0.90rem; line-height: 1.75; color: rgba(255,255,255,0.75);
+    }
+    .nota-finale a { color: #ffd060; }
+
+    /* MOBILE */
     @media (max-width: 680px) {
       .bg { position: absolute; background-attachment: scroll; }
-      header { padding: 0 16px; }
-      nav { display: none; }
-      .nav-search { display: none; }
+      header { padding: 0 18px; height: 56px; }
+      nav, .nav-search { display: none; }
       .hamburger { display: flex; }
-      main { padding: 32px 16px 48px; }
+      main { padding: 28px 18px 48px; }
+      .page-header h1 { font-size: 1.9rem; }
+      .back-link { margin-bottom: 26px; }
+      .libro { grid-template-columns: 1fr; gap: 18px; padding: 18px; border-radius: 10px; }
+      .flip-wrap { max-width: 210px; margin: 0 auto; }
       .btn-row { flex-direction: column; }
       .btn-link { justify-content: center; }
     }
@@ -126,81 +191,9 @@
       gap: 2.4rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
     }
     .mob-menu.open { opacity: 1; pointer-events: all; }
-    .mob-menu a { font-size: 1.8rem; color: #fff; text-decoration: none; }
+    .mob-menu a { font-size: 1.7rem; color: #fff; text-decoration: none; }
 
-    /* ==============================
-       MOBILE — ottimizzato
-    ============================== */
-    @media (max-width: 680px) {
-      .bg { position: absolute; background-attachment: scroll; }
-      html, body { overflow: auto; }
-      .page { height: auto; min-height: 100vh; }
-
-      /* Navbar */
-      header { padding: 0 18px; height: 56px; }
-      nav, .nav-search { display: none; }
-      .hamburger { display: flex; }
-
-      /* Main content: più respiro */
-      main { padding: 28px 18px 48px; }
-
-      /* Titoli pagina */
-      .page-header h1 { font-size: 1.9rem; }
-      .page-header .sottotitolo { font-size: 0.92rem; }
-
-      /* Back link */
-      .back-link { margin-bottom: 28px; }
-
-      /* Riquadri generici */
-      .articolo,
-      .progetto,
-      .info-card,
-      .contatto,
-      .radio-card,
-      .comunita-section,
-      .storia-section,
-      .macrogruppo { border-radius: 8px; }
-
-      /* Bottoni link a colonna intera */
-      .btn-row { flex-direction: column; }
-      .btn-link { justify-content: center; }
-
-      /* Griglia link 1 colonna */
-      .link-grid { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Tre card culto in colonna */
-      .tre-card { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Azioni culto in colonna */
-      .azioni { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Tabella predicazioni: nascondi colonna riassunto */
-      .pred-table th:nth-child(3),
-      .pred-table td:nth-child(3) { display: none; }
-
-      /* Contatti: testo email più piccolo */
-      .contatto-valore { font-size: 0.88rem; word-break: break-all; }
-
-      /* Storia: badge anni in riga */
-      .section-header { flex-wrap: wrap; gap: 8px; }
-
-      /* Area privata: tabella attività */
-      .attivita-table th:nth-child(2),
-      .attivita-table td:nth-child(2) { display: none; }
-
-      /* Saldo: numero più piccolo */
-      .saldo-valore { font-size: 2.2rem; }
-
-      /* Spese: layout compatto */
-      .spesa-row { flex-wrap: wrap; gap: 6px; }
-
-      /* Menu mobile */
-      .mob-menu a { font-size: 1.6rem; }
-    }
-
-    /* Padding player fisso */
     body { padding-bottom: 62px !important; }
-
   </style>
 </head>
 <body>
@@ -212,9 +205,9 @@
     <nav>
       <a href="index.html">Home</a>
       <a href="chi-siamo.html">Chi Siamo</a>
-      <a href="cosa-crediamo.html">In Cosa Crediamo</a>
       <a href="culto.html">Il Culto</a>
       <a href="comunita.html" class="active">Attività</a>
+      <a href="risorse.html">Risorse</a>
       <a href="contatti.html">Contattaci</a>
     </nav>
     <button class="nav-search" aria-label="Cerca">&#128269;</button>
@@ -224,154 +217,166 @@
   </header>
 
   <main>
-    <a href="index.html" class="back-link">← Home</a>
+    <a href="comunita.html" class="back-link">← Attività</a>
 
     <div class="page-header">
-      <p class="label">🤲 Missione e servizio</p>
-      <h1>Attività e Progetti della Comunità</h1>
-      <p class="sottotitolo">Le iniziative che la Chiesa Evangelica di Maranello porta avanti con gioia e spirito di servizio — tutto gratuitamente, per chiunque voglia avvicinarsi alla Parola di Dio.</p>
+      <p class="label">📚 Libreria</p>
+      <h1>Libreria cristiana gratuita</h1>
+      <p class="sottotitolo">I libri che abbiamo a disposizione, offerti a chiunque li desideri. Clicca sulla copertina per vedere il retro del libro.</p>
     </div>
 
-    <hr class="divider">
-
-    <!-- PROGETTO 1: ELLERO BALZANI -->
-    <div class="progetto">
-      <div class="progetto-header">
-        <div class="progetto-icon">📖</div>
-        <div>
-          <div class="progetto-tag">Insegnamento biblico</div>
-          <h2>Il materiale di Ellero Balzani <span class="badge badge-green">Disponibile ora</span></h2>
-        </div>
-      </div>
-
-      <p>
-        Ellero Balzani ha predicato e insegnato per anni con passione e dedizione, costruendo nel tempo un archivio prezioso di insegnamenti evangelici. La sua cura per la formazione dei giovani e la sua fedeltà alla Parola di Dio hanno lasciato un segno profondo nella comunità e in tutti coloro che hanno avuto la grazia di ascoltarlo.
-      </p>
-      <p>
-        Oggi tutto questo materiale è disponibile <strong>gratuitamente su tutti i dispositivi</strong>, affinché il suo insegnamento possa continuare a raggiungere chiunque voglia approfondire la Parola di Dio — ovunque si trovi, in qualsiasi momento.
-      </p>
-      <p>
-        Stiamo inoltre lavorando alla revisione e alla pubblicazione dei podcast su Spotify, per rendere gli insegnamenti ancora più accessibili. <em>A breve disponibili — segui la nostra pagina Facebook per essere tra i primi a saperlo.</em>
-      </p>
-
-      <div class="btn-row">
-        <a href="https://www.ognitipodiinsegnamento.it" target="_blank" class="btn-link">🌐 Visita il sito</a>
-        <a href="https://www.ognitipodiinsegnamento.it/#download" target="_blank" class="btn-link">📱 Scarica l'app</a>
-        <a href="https://open.spotify.com/show/7fPC8f6ivOjpRcMezYN6Fp?si=N3QOyVT1TI6VqEqx0yYNIg" target="_blank" class="btn-link">
-          <svg style="width:16px;height:16px;fill:#1DB954;flex-shrink:0;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-          </svg>
-          Ascolta su Spotify
-        </a>
-        <a href="https://www.facebook.com/profile.php?id=61584977437002" target="_blank" class="btn-link">📘 Seguici su Facebook</a>
-      </div>
+    <div class="gratis-box">
+      <strong>Tutti i libri sono completamente gratuiti.</strong> Non chiediamo offerte, donazioni,
+      iscrizioni o contributi di alcun tipo: se un libro ti interessa, scrivici e te lo regaliamo.
+      L'unico desiderio è che questi testi possano essere letti.
     </div>
 
-    <!-- PROGETTO 2: CALENDARIO -->
-    <div class="progetto">
-      <div class="progetto-header">
-        <div class="progetto-icon">📅</div>
-        <div>
-          <div class="progetto-tag">Pubblicazione evangelica</div>
-          <h2>Calendario evangelico 2027 <span class="badge badge-blue badge-live"><span class="badge-dot"></span>In stampa</span></h2>
-        </div>
-      </div>
+    <div class="sezione-titolo">📖 Libri disponibili</div>
 
-      <p>
-        La chiesa sta preparando un calendario con riferimenti biblici commentati direttamente dai membri della comunità. Ogni mese un versetto, una riflessione concreta su come Dio guida le nostre vite — storie vere, esempi del quotidiano, parole che edificano chi legge.
-      </p>
-      <p>
-        Il calendario sarà <strong>distribuito gratuitamente a partire da novembre</strong>. Nessun costo, nessuna richiesta di offerte. Vogliamo semplicemente che arrivi a quante più persone possibile.
-      </p>
-
-      <div class="nota-prenotazione">
-        <strong style="color:#ffd060;">Vuoi riceverne una copia?</strong> Scrivici a
-        <a href="mailto:chiesaevangelicamaranello@outlook.it">chiesaevangelicamaranello@outlook.it</a>
-        oppure prenotala dalla pagina <a href="segnalazioni.html">Segnalazioni</a>, scegliendo
-        "Richiesta calendari" dal menu. È completamente gratuito e senza alcun impegno.
-      </div>
+    <div id="libriList">
+      <div class="stato-box"><span class="emoji">📚</span>Caricamento del catalogo…</div>
     </div>
 
-    <!-- PROGETTO 3: MUSICA -->
-    <div class="progetto">
-      <div class="progetto-header">
-        <div class="progetto-icon">🎵</div>
-        <div>
-          <div class="progetto-tag">Musica e giovani</div>
-          <h2>Canzoni cristiane per i giovani <span class="badge badge-green">Disponibile ora</span></h2>
-        </div>
-      </div>
-
-      <p>
-        Crediamo che la musica sia uno dei linguaggi più potenti per avvicinarsi a Dio. Stiamo preparando una selezione di canzoni cristiane con un ritmo contemporaneo, pensate per i ragazzi e supervisionate dalla chiesa di Maranello — canzoni con testi cristiani in stili diversi — trap, pop, metal, dance, brani per bambini e altro ancora — pensate per tutti i ragazzi che vogliano lodare Dio con i ritmi della loro età, senza dover rinunciare alla musica che amano.
-      </p>
-      <p>
-        Le prime canzoni sono <strong>già disponibili sul sito</strong>: ascoltale qui sotto.
-      </p>
-
-      <div class="btn-row">
-        <a href="musica.html" class="btn-link">🎵 Ascolta le canzoni</a>
-      </div>
-    </div>
-
-    <!-- PROGETTO 4: BIBLIOTECA CRISTIANA -->
-    <div class="progetto">
-      <div class="progetto-header">
-        <div class="progetto-icon">📚</div>
-        <div>
-          <div class="progetto-tag">Cultura e condivisione</div>
-          <h2>Biblioteca e libreria cristiana gratuita <span class="badge badge-blue badge-live"><span class="badge-dot"></span>In allestimento</span></h2>
-        </div>
-      </div>
-
-      <p>
-        Vogliamo creare uno spazio dove chiunque possa accedere liberamente a libri cristiani,
-        Bibbie, studi biblici e materiale di approfondimento spirituale — senza costi, senza
-        iscrizioni, senza donazioni richieste. Solo la Parola di Dio e strumenti per conoscerla meglio.
-      </p>
-      <p>
-        L'idea è semplice: una piccola biblioteca aperta a tutti, dove prendere in prestito
-        o ricevere materiale cristiano gratuitamente. Un luogo di incontro, lettura e
-        crescita spirituale accessibile a chiunque — credente o semplicemente curioso.
-      </p>
-      <p>
-        Stiamo cercando una saletta a Maranello dove poter dare vita a questo progetto.
-        Se conosci uno spazio disponibile o vuoi contribuire donando libri cristiani,
-        ogni aiuto è prezioso e benvenuto.
-      </p>
-      <p>
-        Segui la nostra pagina Facebook per rimanere aggiornato
-        su tutti gli sviluppi relativi a questo progetto.
-      </p>
-
-      <div class="nota-prenotazione">
-        <strong style="color:#ffd060;">Nel frattempo</strong> — se sei interessato o vuoi
-        richiedere materiale cristiano, scrivici a
-        <a href="mailto:chiesaevangelicamaranello@outlook.it">chiesaevangelicamaranello@outlook.it</a>.
-        È completamente gratuito e senza alcun impegno.
-      </div>
-
-      <div class="btn-row">
-        <a href="libreria.html" class="btn-link">📚 Vai alla libreria</a>
-        <a href="contatti.html" class="btn-link">✉️ Contattaci</a>
-        <a href="https://www.facebook.com/share/19qbfk9JJK/" target="_blank" class="btn-link">📘 Seguici su Facebook</a>
-      </div>
+    <div class="nota-finale">
+      <strong style="color:#ffd060;">Vuoi donare dei libri?</strong> Se hai libri cristiani che non
+      usi più e vuoi che trovino un nuovo lettore, puoi donarli alla nostra libreria: li metteremo
+      a disposizione gratuitamente come tutti gli altri. Scrivici a
+      <a href="mailto:libreria@evangelicimaranello.it">libreria@evangelicimaranello.it</a>
+      oppure al <a href="https://wa.me/393394514698" target="_blank" rel="noopener">339 451 4698</a>.
     </div>
 
   </main>
 </div>
 
+<!-- MOBILE MENU -->
 <div class="mob-menu" id="mob">
   <a href="index.html"         onclick="document.getElementById('mob').classList.remove('open')">Home</a>
   <a href="chi-siamo.html"     onclick="document.getElementById('mob').classList.remove('open')">Chi Siamo</a>
-  <a href="cosa-crediamo.html" onclick="document.getElementById('mob').classList.remove('open')">In Cosa Crediamo</a>
   <a href="culto.html"         onclick="document.getElementById('mob').classList.remove('open')">Il Culto</a>
   <a href="comunita.html"      onclick="document.getElementById('mob').classList.remove('open')">Attività</a>
+  <a href="risorse.html"       onclick="document.getElementById('mob').classList.remove('open')">Risorse</a>
   <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
 </div>
 
+<!-- ══ CATALOGO LIBRERIA ══ -->
+<script>
+  const WHATSAPP = '393394514698';
+  const EMAIL    = 'libreria@evangelicimaranello.it';
 
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 
+  function disponibilita(copie) {
+    const n = parseInt(copie);
+    if (isNaN(n) || n <= 0) return { cls: 'badge-out',  txt: 'Momentaneamente esaurito', ok: false };
+    if (n === 1)            return { cls: 'badge-last', txt: 'Ultima copia',              ok: true  };
+    return                         { cls: 'badge-ok',   txt: 'Disponibile',               ok: true  };
+  }
+
+  function schedaLibro(l, i) {
+    const disp   = disponibilita(l.copie);
+    const titolo = esc(l.titolo || 'Senza titolo');
+    const msg    = encodeURIComponent(
+      `Ciao! Ho visto sul sito della Chiesa Evangelica di Maranello il libro "${l.titolo}" e vorrei riceverlo. Grazie!`
+    );
+    const oggetto = encodeURIComponent('Richiesta libro: ' + (l.titolo || ''));
+    const corpo   = encodeURIComponent(
+      `Buongiorno,\nho visto sul sito il libro "${l.titolo}"${l.autore ? ' di ' + l.autore : ''} e vorrei riceverlo.\n\nNome e cognome:\nComune:\n\nGrazie!`
+    );
+
+    const chips = [];
+    if (l.genere)  chips.push(esc(l.genere));
+    if (l.editore) chips.push('Ed. ' + esc(l.editore));
+    if (l.anno)    chips.push(esc(l.anno));
+    if (l.pagine && parseInt(l.pagine) > 0) chips.push(parseInt(l.pagine) + ' pagine');
+    if (l.lingua)  chips.push(esc(l.lingua));
+    if (l.isbn)    chips.push('ISBN ' + esc(l.isbn));
+
+    const desc = esc(l.descrizione || '');
+    const lunga = desc.length > 420;
+
+    return `
+    <div class="libro">
+      <div>
+        <div class="flip-wrap" onclick="giraLibro(this)" title="Clicca per girare il libro">
+          <div class="flip" id="flip-${i}">
+            <img src="${esc(l.copertina)}" alt="Copertina di ${titolo}" loading="lazy"
+                 onerror="this.style.opacity=0.15">
+            <img class="retro" data-src="${esc(l.retro)}" alt="Retro di ${titolo}"
+                 onerror="this.style.opacity=0.15">
+          </div>
+          <div class="flip-hint">🔄 <span>Clicca per girarlo</span></div>
+        </div>
+      </div>
+
+      <div class="libro-info">
+        <div class="libro-titolo">${titolo}</div>
+        <div class="libro-autore">${esc(l.autore || '')}</div>
+
+        <div class="meta-row">
+          <span class="badge ${disp.cls}">${disp.txt}</span>
+          ${chips.map(c => `<span class="chip">${c}</span>`).join('')}
+        </div>
+
+        <div class="libro-desc${lunga ? ' collapsed' : ''}" id="desc-${i}">${desc}</div>
+        ${lunga ? `<button class="leggi-tutto" onclick="apriDesc(${i}, this)">Leggi tutto</button>` : ''}
+
+        ${l.autore_bio ? `<div class="autore-bio">${esc(l.autore_bio)}</div>` : ''}
+        ${l.note ? `<div class="autore-bio">${esc(l.note)}</div>` : ''}
+
+        <div class="btn-row">
+          <a class="btn-link btn-wa" target="_blank" rel="noopener"
+             href="https://wa.me/${WHATSAPP}?text=${msg}">💬 Richiedilo su WhatsApp</a>
+          <a class="btn-link" href="mailto:${EMAIL}?subject=${oggetto}&body=${corpo}">✉️ Richiedilo via email</a>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function giraLibro(wrap) {
+    const flip = wrap.querySelector('.flip');
+    const retro = flip.querySelector('img.retro');
+    if (retro && !retro.src && retro.dataset.src) retro.src = retro.dataset.src;
+    flip.classList.toggle('flipped');
+  }
+
+  function apriDesc(i, btn) {
+    const d = document.getElementById('desc-' + i);
+    const aperto = !d.classList.contains('collapsed');
+    d.classList.toggle('collapsed');
+    btn.textContent = aperto ? 'Leggi tutto' : 'Mostra meno';
+  }
+
+  async function caricaLibreria() {
+    const c = document.getElementById('libriList');
+    try {
+      const res = await fetch('dati.json?t=' + Date.now());
+      if (!res.ok) throw new Error('fetch');
+      const dati = await res.json();
+      const libri = Array.isArray(dati.libreria) ? dati.libreria : [];
+      if (!libri.length) {
+        c.innerHTML = `<div class="stato-box"><span class="emoji">📭</span>
+          Il catalogo è in allestimento: stiamo raccogliendo i primi libri.<br>
+          Scrivici a <a href="mailto:${EMAIL}" style="color:rgba(255,255,255,0.75)">${EMAIL}</a> per sapere cosa abbiamo a disposizione.</div>`;
+        return;
+      }
+      c.innerHTML = libri.map(schedaLibro).join('');
+    } catch (e) {
+      c.innerHTML = `<div class="stato-box"><span class="emoji">⚠️</span>
+        Non è stato possibile caricare il catalogo.<br>Riprova fra poco o scrivici a
+        <a href="mailto:${EMAIL}" style="color:rgba(255,255,255,0.75)">${EMAIL}</a>.</div>`;
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', caricaLibreria);
+  } else {
+    caricaLibreria();
+  }
+</script>
 
 <!-- MUSIC PLAYER -->
 <script>
@@ -794,5 +799,6 @@ async function caricaPlaylistEAvvia() {
 }
 
 </script>
+
 </body>
 </html>

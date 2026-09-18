@@ -405,5 +405,55 @@
         }
       ]
     }
+  ],
+  "libreria": [
+    {
+      "titolo": "Sii forte",
+      "autore": "David Cook",
+      "autore_bio": "Predicatore e docente di scuola biblica di lingua inglese; i capitoli del libro nascono dai sermoni rivolti ai suoi studenti.",
+      "editore": "Soli Deo Gloria",
+      "anno": "",
+      "pagine": 218,
+      "genere": "Sermoni e meditazioni",
+      "lingua": "Italiano",
+      "isbn": "",
+      "descrizione": "Ogni capitolo di questo libro è un sermone che David Cook teneva ai suoi studenti. Sono messaggi diretti, importanti per tutti i credenti: mentre li leggiamo non dobbiamo dimenticare che l'autore vive in un ambiente cristiano diverso dal nostro, ma ci rendiamo subito conto del loro valore e della loro centralità per il nostro cammino con il Signore. La speranza è che tutti noi, che in un modo o nell'altro abbiamo iniziato più o meno forti la nostra vita cristiana, possiamo rimanere saldi nel Signore e servirlo attivamente per la sua gloria e per l'edificazione della sua chiesa.",
+      "copertina": "https://archive.org/download/Copertine-libri/Sii_forte_copertina.png",
+      "retro": "https://archive.org/download/Copertine-libri/Sii_forte_retro.png",
+      "copie": 1,
+      "note": ""
+    },
+    {
+      "titolo": "Si vive solo una volta",
+      "autore": "William MacDonald",
+      "autore_bio": "William MacDonald (1917-2007), insegnante biblico statunitense tra i più letti in ambito evangelico, autore del «Commentario biblico del discepolo» e di numerosi testi di evangelizzazione e vita cristiana.",
+      "editore": "Soli Deo Gloria",
+      "anno": "",
+      "pagine": 0,
+      "genere": "Evangelizzazione",
+      "lingua": "Italiano",
+      "isbn": "",
+      "descrizione": "Patrizio era appena giunto a New York ed è intento a visitare la città, quando un criminale armato di pistola gli intimò: «O la borsa o la vita!». Patrizio replicò: «Prenda la mia vita, i soldi volevo conservarmeli per quando sarò vecchio!». Ognuno di noi deve prendere determinate decisioni nella propria vita; da queste decisioni spesso dipende il nostro domani. In questo libro William MacDonald dimostra che ognuno di noi ha a disposizione una sola vita su questa terra: siamo perciò chiamati a prendere ora una decisione che determinerà il nostro futuro, anche dopo la morte.",
+      "copertina": "https://archive.org/download/Copertine-libri/Si_vive_solo_una_volta_copertina.png",
+      "retro": "https://archive.org/download/Copertine-libri/Si_vive_solo_una_volta_retro.png",
+      "copie": 1,
+      "note": ""
+    },
+    {
+      "titolo": "Gesù nostro destino",
+      "autore": "Wilhelm Busch",
+      "autore_bio": "Wilhelm Busch (1897-1966), pastore tedesco, per oltre trent'anni responsabile del lavoro giovanile della Weigle-Haus di Essen. Membro della Chiesa Confessante, fu più volte arrestato durante il nazismo per non aver smesso di predicare il Vangelo.",
+      "editore": "Soli Deo Gloria",
+      "anno": "1966",
+      "pagine": 0,
+      "genere": "Evangelizzazione",
+      "lingua": "Italiano",
+      "isbn": "",
+      "descrizione": "«Gesù - nostro destino» era il tema generale scelto dal pastore Wilhelm Busch per tutto il suo lavoro di evangelizzazione. Con grande gioia lavorava fra i giovani di Essen, ma come appassionato predicatore del Vangelo era anche spesso in viaggio: migliaia di persone accorrevano per ascoltarlo. Egli era convinto che la buona novella di Gesù Cristo fosse il messaggio più straordinario di tutti i tempi. Volete ascoltare anche voi questo messaggio? Lo potete: sedetevi in spirito fra il suo uditorio e non tarderete a scoprire che «Gesù - nostro destino» è veramente il tema più importante per il mondo e per la vostra vita. Raccolta dei suoi messaggi radiofonici, pubblicata dopo la sua morte, è considerata l'opera evangelistica di lingua tedesca più diffusa al mondo, con milioni di copie e traduzioni nelle principali lingue.",
+      "copertina": "https://archive.org/download/Copertine-libri/Gesu_nostro_destino_copertina.png",
+      "retro": "https://archive.org/download/Copertine-libri/Gesu_nostro_destino_retro.png",
+      "copie": 1,
+      "note": ""
+    }
   ]
 }

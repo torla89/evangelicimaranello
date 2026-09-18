@@ -283,15 +283,62 @@ class PythonBridge:
         import json
         return json.dumps(getattr(self, '_upload_stato', {"status": "idle", "pct": 0}))
 
+    # ── IMMAGINI (copertine libreria) ─────────────────────────
+    def _ottimizza_immagine(self, filepath: str):
+        """
+        Ridimensiona e comprime una copertina per il web.
+        Ritorna (bytes, nome_file, content_type). Se Pillow non è installato
+        restituisce il file originale senza modifiche.
+        """
+        import mimetypes
+        base = os.path.splitext(os.path.basename(filepath))[0]
+        try:
+            from PIL import Image
+            import io as _io
+            img = Image.open(filepath)
+            has_alpha = img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info)
+            img = img.convert('RGBA' if has_alpha else 'RGB')
+            img.thumbnail((1000, 1000), Image.LANCZOS)
+            buf = _io.BytesIO()
+            img.save(buf, format='WEBP', quality=85, method=6)
+            return buf.getvalue(), base + '.webp', 'image/webp'
+        except Exception:
+            with open(filepath, 'rb') as f:
+                data = f.read()
+            nome = os.path.basename(filepath)
+            ctype = mimetypes.guess_type(nome)[0] or 'application/octet-stream'
+            return data, nome, ctype
+
+    def seleziona_file_immagine(self) -> list:
+        """Dialogo nativo per selezionare immagini (copertine libri)."""
+        try:
+            import webview
+            result = self._window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                allow_multiple=False,
+                file_types=('Immagini (*.png;*.jpg;*.jpeg;*.webp)', 'Tutti i file (*.*)')
+            )
+            if result:
+                return list(result)
+            return []
+        except Exception:
+            return []
+
     def _upload_thread(self, filepath: str, collezione: str,
                         access_key: str, secret_key: str, tipo: str):
         import re, time, io
         from urllib.parse import quote
         try:
-            with open(filepath, 'rb') as f:
-                data = f.read()
+            if tipo == 'immagine':
+                data, filename, content_type = self._ottimizza_immagine(filepath)
+                mediatype = 'image'
+            else:
+                with open(filepath, 'rb') as f:
+                    data = f.read()
+                filename = os.path.basename(filepath)
+                content_type = 'audio/mpeg'
+                mediatype = 'audio'
             total = len(data)
-            filename = os.path.basename(filepath)
             filename_encoded = quote(filename, safe='')
             url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
 
@@ -331,21 +378,24 @@ class PythonBridge:
             headers = {
                 'Authorization': f'LOW {access_key}:{secret_key}',
                 'x-archive-auto-make-bucket': '1',
-                'x-archive-meta-mediatype': 'audio',
-                'Content-Type': 'audio/mpeg',
+                'x-archive-meta-mediatype': mediatype,
+                'Content-Type': content_type,
                 'Content-Length': str(total),
             }
             r = requests.put(url, data=reader, headers=headers, timeout=600)
 
             if r.status_code in (200, 201):
                 file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
-                if tipo == 'basi':
+                if tipo == 'immagine':
+                    pass  # nessuna playlist da aggiornare: l'URL torna all'interfaccia
+                elif tipo == 'basi':
                     title = filename.replace('.mp3','').replace('.MP3','').strip()
                     self._aggiungi_a_playlist_basi(file_url, title)
                 else:
                     title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
                     self._aggiungi_a_playlist_musica(file_url, title)
-                self._upload_stato = {"status": "done", "pct": 100, "speed": "", "message": ""}
+                self._upload_stato = {"status": "done", "pct": 100, "speed": "",
+                                      "message": "", "url": file_url}
             else:
                 self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": f"HTTP {r.status_code}"}
         except Exception as e:

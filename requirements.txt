@@ -2,3 +2,4 @@ pywebview
 requests
 mutagen
 pyinstaller
+Pillow

@@ -312,6 +312,7 @@
       <button class="tab" onclick="switchTab('attivita',this)">🎯 Attività</button>
       <button class="tab" onclick="switchTab('musica',this)">🎵 Musica Player</button>
       <button class="tab" onclick="switchTab('basi',this)">🎹 Basi Inni</button>
+      <button class="tab" onclick="switchTab('libreria',this)">📚 Libreria</button>
     </div>
 
     <!-- ══ SALDO ══ -->
@@ -408,6 +409,23 @@
       </div>
 
       <div id="basiUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
+    </div>
+
+    <!-- ══ LIBRERIA ══ -->
+    <div class="panel" id="panel-libreria">
+      <div class="section-label">📚 Libri della libreria gratuita</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+        I libri inseriti qui compaiono nella pagina <strong style="color:var(--white)">libreria.html</strong> del sito.
+        Le copertine (fronte e retro) vengono caricate su <strong style="color:var(--white)">Archive.org</strong> —
+        collezione <strong style="color:var(--white)">Copertine-libri</strong> — e rimpicciolite automaticamente per
+        non appesantire il sito.
+      </p>
+
+      <div id="libreriaList"></div>
+
+      <div class="btn-row-start" style="margin-top:4px;">
+        <button class="btn btn-ghost" onclick="openLibroModal()">＋ Aggiungi libro</button>
+      </div>
     </div>
 
   </div><!-- /#mainApp -->
@@ -585,6 +603,85 @@
   </div>
 </div>
 
+<!-- ══ MODAL LIBRO ══ -->
+<div class="modal-bg" id="modal-libro">
+  <div class="modal" style="max-width:620px;">
+    <h3 id="modalLibroTitle">Nuovo libro</h3>
+    <input type="hidden" id="libroEditIdx" value="-1">
+
+    <div class="field"><label>Titolo</label><input type="text" id="libroTitolo" placeholder="es. Gesù nostro destino"></div>
+
+    <div class="field-row">
+      <div class="field"><label>Autore</label><input type="text" id="libroAutore" placeholder="es. Wilhelm Busch"></div>
+      <div class="field"><label>Editore</label><input type="text" id="libroEditore" placeholder="es. Soli Deo Gloria"></div>
+    </div>
+
+    <div class="field-row-3">
+      <div class="field"><label>Anno</label><input type="text" id="libroAnno" placeholder="es. 1966"></div>
+      <div class="field"><label>Pagine</label><input type="number" id="libroPagine" placeholder="es. 218" min="0"></div>
+      <div class="field"><label>Copie possedute</label><input type="number" id="libroCopie" placeholder="es. 5" min="0"></div>
+    </div>
+
+    <div class="field-row-3">
+      <div class="field">
+        <label>Genere</label>
+        <input type="text" id="libroGenere" list="generiLibri" placeholder="es. Evangelizzazione">
+        <datalist id="generiLibri">
+          <option value="Evangelizzazione"></option>
+          <option value="Studio biblico"></option>
+          <option value="Sermoni e meditazioni"></option>
+          <option value="Vita cristiana"></option>
+          <option value="Biografia e testimonianza"></option>
+          <option value="Famiglia e relazioni"></option>
+          <option value="Ragazzi e bambini"></option>
+          <option value="Commentario"></option>
+          <option value="Bibbia"></option>
+          <option value="Apologetica"></option>
+        </datalist>
+      </div>
+      <div class="field"><label>Lingua</label><input type="text" id="libroLingua" placeholder="Italiano"></div>
+      <div class="field"><label>ISBN (opz.)</label><input type="text" id="libroIsbn" placeholder=""></div>
+    </div>
+
+    <div class="field">
+      <label>Descrizione / riassunto</label>
+      <textarea id="libroDescrizione" rows="5" placeholder="Di cosa parla il libro (puoi copiare il testo di quarta di copertina)…"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Sull'autore (opzionale)</label>
+      <textarea id="libroAutoreBio" rows="2" placeholder="Due righe su chi è l'autore…"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Copertina — fronte</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="libroCopertina" placeholder="https://archive.org/download/Copertine-libri/…" style="flex:1;">
+        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;"
+               onclick="caricaImmagineArchive('libroCopertina')">🖼 Carica</label>
+      </div>
+      <div id="previewCopertina" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="field">
+      <label>Copertina — retro</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="libroRetro" placeholder="https://archive.org/download/Copertine-libri/…" style="flex:1;">
+        <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;"
+               onclick="caricaImmagineArchive('libroRetro')">🖼 Carica</label>
+      </div>
+      <div id="previewRetro" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="field"><label>Note interne (opzionale)</label><input type="text" id="libroNote" placeholder="es. dono di…, da ristampare…"></div>
+
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('libro')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaLibro()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
 <script>
   let dati = null;
   let dirty = false;
@@ -597,6 +694,7 @@
       if (!dati.riunioni)       dati.riunioni       = [];
       if (!dati.predicazioni)   dati.predicazioni   = [];
       if (!dati.attivita)       dati.attivita       = [];
+      if (!dati.libreria)       dati.libreria       = [];
       // Compatibilità: attività create prima dell'introduzione delle spese
       dati.attivita.forEach(a => { if (!Array.isArray(a.spese)) a.spese = []; });
       renderAll();
@@ -629,6 +727,7 @@
     renderRiunioni();
     renderPredicazioni();
     renderAttivita();
+    renderLibreria();
   }
 
   /* ── SALDO ── */
@@ -1019,6 +1118,163 @@
     renderAll(); markDirty(); toast('🗑 Eliminato');
   }
 
+  // ── LIBRERIA ───────────────────────────────────────────────
+  const LIBRERIA_COLLEZIONE = 'Copertine-libri';
+
+  function dispLibro(copie) {
+    const n = parseInt(copie);
+    if (isNaN(n) || n <= 0) return '<span class="badge badge-annullata">Esaurito</span>';
+    if (n === 1)            return '<span class="badge badge-in_attesa">Ultima copia</span>';
+    return `<span class="badge badge-completata">${n} copie</span>`;
+  }
+
+  function renderLibreria() {
+    const c = document.getElementById('libreriaList');
+    if (!c) return;
+    if (!dati.libreria || !dati.libreria.length) {
+      c.innerHTML = emptyState('Nessun libro inserito'); return;
+    }
+    c.innerHTML = dati.libreria.map((l, i) => {
+      const meta = [l.autore, l.editore, l.anno, (parseInt(l.pagine) > 0 ? l.pagine + ' pagine' : ''), l.genere]
+        .filter(Boolean).join(' · ');
+      const cover = l.copertina
+        ? `<img src="${escAttr(l.copertina)}" alt="" style="width:42px;height:60px;object-fit:contain;border-radius:4px;background:rgba(255,255,255,0.05);flex-shrink:0;" onerror="this.style.display='none'">`
+        : '';
+      return `
+      <div class="list-item">
+        <div style="display:flex;gap:12px;flex:1;min-width:0;">
+          ${cover}
+          <div class="list-item-info">
+            <div class="list-item-title">📖 ${l.titolo || '(senza titolo)'} ${dispLibro(l.copie)}</div>
+            <div class="list-item-sub">${meta || '—'}</div>
+          </div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-ghost btn-sm" onclick="editLibro(${i})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('libreria',${i})">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function previewImmagine(campoId) {
+    const box = document.getElementById(campoId === 'libroCopertina' ? 'previewCopertina' : 'previewRetro');
+    const url = document.getElementById(campoId).value.trim();
+    box.innerHTML = url
+      ? `<img src="${escAttr(url)}" alt="" style="max-height:110px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.04);" onerror="this.style.display='none'">`
+      : '';
+  }
+
+  function openLibroModal(idx = -1) {
+    document.getElementById('libroEditIdx').value = idx;
+    document.getElementById('modalLibroTitle').textContent = idx >= 0 ? 'Modifica libro' : 'Nuovo libro';
+    const l = idx >= 0 ? dati.libreria[idx] : {};
+    document.getElementById('libroTitolo').value      = l.titolo      || '';
+    document.getElementById('libroAutore').value      = l.autore      || '';
+    document.getElementById('libroEditore').value     = l.editore     || '';
+    document.getElementById('libroAnno').value        = l.anno        || '';
+    document.getElementById('libroPagine').value      = l.pagine      || '';
+    document.getElementById('libroCopie').value       = (l.copie !== undefined ? l.copie : 1);
+    document.getElementById('libroGenere').value      = l.genere      || '';
+    document.getElementById('libroLingua').value      = l.lingua      || 'Italiano';
+    document.getElementById('libroIsbn').value        = l.isbn        || '';
+    document.getElementById('libroDescrizione').value = l.descrizione || '';
+    document.getElementById('libroAutoreBio').value   = l.autore_bio  || '';
+    document.getElementById('libroCopertina').value   = l.copertina   || '';
+    document.getElementById('libroRetro').value       = l.retro       || '';
+    document.getElementById('libroNote').value        = l.note        || '';
+    previewImmagine('libroCopertina');
+    previewImmagine('libroRetro');
+    openModal('libro');
+  }
+
+  function editLibro(i) { openLibroModal(i); }
+
+  function salvaLibro() {
+    const titolo = document.getElementById('libroTitolo').value.trim();
+    if (!titolo) { toast('⚠ Inserisci almeno il titolo'); return; }
+    const libro = {
+      titolo:      titolo,
+      autore:      document.getElementById('libroAutore').value.trim(),
+      autore_bio:  document.getElementById('libroAutoreBio').value.trim(),
+      editore:     document.getElementById('libroEditore').value.trim(),
+      anno:        document.getElementById('libroAnno').value.trim(),
+      pagine:      parseInt(document.getElementById('libroPagine').value) || 0,
+      genere:      document.getElementById('libroGenere').value.trim(),
+      lingua:      document.getElementById('libroLingua').value.trim(),
+      isbn:        document.getElementById('libroIsbn').value.trim(),
+      descrizione: document.getElementById('libroDescrizione').value.trim(),
+      copertina:   document.getElementById('libroCopertina').value.trim(),
+      retro:       document.getElementById('libroRetro').value.trim(),
+      copie:       parseInt(document.getElementById('libroCopie').value) || 0,
+      note:        document.getElementById('libroNote').value.trim()
+    };
+    const idx = parseInt(document.getElementById('libroEditIdx').value);
+    if (idx >= 0) dati.libreria[idx] = libro;
+    else dati.libreria.push(libro);
+    closeModal('libro'); renderLibreria(); markDirty();
+    toast(idx >= 0 ? '✅ Libro aggiornato' : '✅ Libro aggiunto');
+  }
+
+  /* Carica un'immagine su Archive.org e scrive l'URL nel campo indicato */
+  async function caricaImmagineArchive(campoId) {
+    if (typeof window.pywebview === 'undefined') { toast('❌ Disponibile solo nell\'app desktop'); return; }
+    const keys = await getS3Keys();
+    if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return; }
+
+    let paths;
+    try {
+      paths = await window.pywebview.api.seleziona_file_immagine();
+    } catch(e) {
+      toast('⚠ Ricompila il Gestore (build_exe.bat) per caricare le immagini');
+      alert('Questa versione del Gestore non sa ancora caricare immagini.\n\n' +
+            'Lancia build_exe.bat per aggiornare "Gestore Sito.exe", oppure incolla a mano ' +
+            'l\'URL della copertina già caricata su Archive.org.');
+      return;
+    }
+    if (!paths || !paths.length) return;
+    const path = paths[0];
+    const nome = path.split('\\').pop().split('/').pop();
+
+    document.getElementById('uploadLog').textContent = '';
+    document.getElementById('uploadBar').style.width = '0%';
+    document.getElementById('uploadPct').textContent = '0%';
+    document.getElementById('uploadSpeed').textContent = '';
+    document.getElementById('uploadCloseBtn').style.display = 'none';
+    document.getElementById('uploadInfo').textContent = 'Copertina: ' + nome;
+    document.getElementById('uploadOverlay').classList.add('open');
+    uploadLog('📡 Ottimizzazione e caricamento: ' + nome);
+
+    await window.pywebview.api.avvia_upload(path, LIBRERIA_COLLEZIONE, keys.access, keys.secret, 'immagine');
+
+    let done = false, url = '';
+    while (!done) {
+      await new Promise(r => setTimeout(r, 400));
+      try {
+        const s = JSON.parse(await window.pywebview.api.stato_upload());
+        document.getElementById('uploadBar').style.width = s.pct + '%';
+        document.getElementById('uploadPct').textContent = s.pct + '%';
+        if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
+        if (s.status === 'done') {
+          url = s.url || '';
+          uploadLog('✅ Caricata!');
+          if (url) uploadLog(url);
+          uploadLog('\n⏳ Archive.org può impiegare qualche minuto prima di mostrare l\'immagine.');
+          done = true;
+        } else if (s.status === 'error') {
+          uploadLog('❌ Errore: ' + s.message); done = true;
+        }
+      } catch(e) { uploadLog('❌ Errore polling: ' + e); done = true; }
+    }
+    document.getElementById('uploadCloseBtn').style.display = 'inline-block';
+
+    if (url) {
+      document.getElementById(campoId).value = url;
+      previewImmagine(campoId);
+      toast('✅ Immagine caricata');
+    }
+  }
+
   // ── MUSICA PLAYER ──────────────────────────────────────────
   async function caricaMusica(input) {
     const files = Array.from(input.files);
@@ -1252,6 +1508,7 @@
     document.getElementById('panel-' + name).classList.add('active');
     if (name === 'musica') renderMusica();
     if (name === 'basi') renderBasi();
+    if (name === 'libreria') renderLibreria();
   }
 
   /* ── SALVA/PUBBLICA tramite bridge Python ── */
