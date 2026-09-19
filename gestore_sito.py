@@ -168,7 +168,7 @@ class PythonBridge:
                     break
             playlist.append({"src": f"musica-player/{encoded}", "title": base,
                               "artist": "Chiesa Evangelica Maranello", "cover": cover})
-        with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
+        with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8", newline='\n') as fp:
             json.dump(playlist, fp, ensure_ascii=False, indent=2)
 
     def salva_musica(self, filename: str, base64_data: str) -> str:
@@ -262,7 +262,7 @@ class PythonBridge:
             return (int(m.group(1)) if m else 9999, f)
         files = sorted(files, key=sort_key)
         playlist = [{"src": f"basi-inni/{quote(f, safe='')}", "title": os.path.splitext(f)[0], "cover": ""} for f in files]
-        with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8") as fp:
+        with open(os.path.join(dest_dir, "playlist.json"), "w", encoding="utf-8", newline='\n') as fp:
             json.dump(playlist, fp, ensure_ascii=False, indent=2)
 
     # ──────────────────────────────────────────────────────────
@@ -462,7 +462,7 @@ class PythonBridge:
         try:
             import json
             path = os.path.join(SITE_DIR, ".s3keys")
-            with open(path, 'w') as f:
+            with open(path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump({"access": access, "secret": secret}, f)
             return "ok"
         except Exception as e:
@@ -546,7 +546,7 @@ class PythonBridge:
         # Evita duplicati
         if not any(p['src'] == url for p in playlist):
             playlist.append({"src": url, "title": titolo, "artist": "Chiesa Evangelica Maranello", "cover": ""})
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
 
     def _aggiungi_a_playlist_basi(self, url: str, titolo: str):
@@ -583,7 +583,7 @@ class PythonBridge:
                     m = re.match(r'^(\d+)', fname)
                 return int(m.group(1)) if m else 9999
             playlist.sort(key=sort_key)
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
 
     def aggiungi_musica_url(self, url: str, titolo: str, cover: str = '') -> str:
@@ -597,7 +597,7 @@ class PythonBridge:
                 with open(playlist_path, encoding='utf-8') as f:
                     playlist = json.load(f)
             playlist.append({"src": url, "title": titolo, "artist": "Chiesa Evangelica Maranello", "cover": cover})
-            with open(playlist_path, 'w', encoding='utf-8') as f:
+            with open(playlist_path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:
@@ -624,7 +624,7 @@ class PythonBridge:
                 playlist = json.load(f)
             if 0 <= idx < len(playlist):
                 playlist.pop(idx)
-            with open(playlist_path, 'w', encoding='utf-8') as f:
+            with open(playlist_path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:
@@ -658,7 +658,7 @@ class PythonBridge:
                 playlist = json.load(f)
             if 0 <= idx < len(playlist):
                 playlist.pop(idx)
-            with open(playlist_path, 'w', encoding='utf-8') as f:
+            with open(playlist_path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:
@@ -678,7 +678,7 @@ class PythonBridge:
             data[predicatore].append({"titolo": titolo, "src": mp3_url})
             # Riordina predicatori alfabeticamente
             data = dict(sorted(data.items()))
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:
@@ -757,7 +757,7 @@ class PythonBridge:
                 ts = datetime.now().strftime("%Y%m%d_%H%M%S")
                 dst = os.path.join(BACKUP_DIR, f"dati_backup_{ts}.json")
                 shutil.copy2(JSON_FILE, dst)
-            with open(JSON_FILE, "w", encoding="utf-8") as f:
+            with open(JSON_FILE, "w", encoding="utf-8", newline='\n') as f:
                 json.dump(dati, f, ensure_ascii=False, indent=2)
             return "ok"
         except Exception as e:

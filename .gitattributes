@@ -1,0 +1,22 @@
+# Tutti i file di testo vengono salvati nel deposito con il fine riga "LF",
+# quello che usa il sito. Senza questa regola Windows tende a riscriverli
+# con "CRLF" e git li vede tutti come modificati, anche se il contenuto e'
+# identico: e' quello che bloccava la sincronizzazione.
+* text=auto eol=lf
+
+# File che non sono testo: git li lascia stare.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.mp3  binary
+*.mp4  binary
+*.wav  binary
+*.zip  binary
+*.exe  binary
+*.ttf  binary
+*.woff  binary
+*.woff2 binary

@@ -4,3 +4,4 @@ dist/
 *.spec
 backup/
 build_tmp/
+__pycache__/

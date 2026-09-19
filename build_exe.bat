@@ -30,7 +30,7 @@ if not defined PYCMD (
     if not exist "%PY_INSTALLER_PATH%" (
         echo Download di Python non riuscito ^(nessuna connessione a Internet?^).
         echo Installa Python da https://www.python.org/downloads/ e riprova.
-        pause
+        if not defined BUILD_CATENA pause
         exit /b 1
     )
     echo Installazione di Python in corso ^(puo' richiedere un minuto^)...
@@ -41,7 +41,7 @@ if not defined PYCMD (
     ) else (
         echo L'installazione automatica di Python non e' riuscita.
         echo Installa Python da https://www.python.org/downloads/ e riprova.
-        pause
+        if not defined BUILD_CATENA pause
         exit /b 1
     )
 )
@@ -52,7 +52,7 @@ echo Installazione dipendenze...
 "%PYCMD%" -m pip install -r requirements.txt
 if errorlevel 1 (
     echo Errore durante l'installazione delle dipendenze.
-    pause
+    if not defined BUILD_CATENA pause
     exit /b 1
 )
 
@@ -62,7 +62,7 @@ echo Creazione dell'eseguibile...
 "%PYCMD%" -m PyInstaller --onefile --windowed --name "Gestore Sito" --icon "%~dp0icona gestione.ico" --distpath .. --workpath build_tmp --specpath build_tmp gestore_sito.py
 if errorlevel 1 (
     echo Errore durante la creazione dell'eseguibile.
-    pause
+    if not defined BUILD_CATENA pause
     exit /b 1
 )
 
@@ -71,4 +71,4 @@ if exist "build_tmp" rmdir /s /q "build_tmp"
 echo.
 echo === Completato ===
 echo "Gestore Sito.exe" si trova nella cartella "Gestore sito" ^(un livello sopra questa^).
-pause
+if not defined BUILD_CATENA pause
