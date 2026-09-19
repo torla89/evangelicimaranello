@@ -352,6 +352,13 @@ class PythonBridge:
                 def __init__(self, data):
                     self._data = data
                     self._pos = 0
+                # Questi due servono a far sapere a requests quanto e' lungo
+                # il file. Senza, lo manda "a pezzi" (chunked) e Archive.org
+                # rifiuta gli invii di cui non conosce la lunghezza: HTTP 411.
+                def __len__(self):
+                    return len(self._data)
+                def tell(self):
+                    return self._pos
                 def read(self, n=-1):
                     chunk = self._data[self._pos:self._pos+n] if n > 0 else self._data[self._pos:]
                     self._pos += len(chunk)
