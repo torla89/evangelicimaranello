@@ -191,6 +191,46 @@
     .btn-form { background: rgba(255,200,80,0.13); border-color: rgba(255,200,80,0.42); }
     .btn-form:hover { background: rgba(255,200,80,0.24); border-color: rgba(255,200,80,0.70); }
 
+
+    /* ── BARRA FILTRI ── */
+    .filtri {
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.18); border-radius: 12px;
+      padding: 16px 18px; margin-bottom: 22px;
+    }
+    .filtri-riga { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .filtro-campo { display: flex; flex-direction: column; gap: 5px; flex: 1 1 180px; min-width: 0; }
+    .filtro-campo label {
+      font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+    }
+    .filtri select, .filtri input[type="search"] {
+      width: 100%; font-family: inherit; font-size: 0.87rem; color: #fff;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px; padding: 9px 11px; appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.5) 50%),
+                        linear-gradient(135deg, rgba(255,255,255,0.5) 50%, transparent 50%);
+      background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+      background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+    }
+    .filtri input[type="search"] { background-image: none; appearance: auto; }
+    .filtri select:focus, .filtri input:focus { outline: none; border-color: rgba(255,255,255,0.55); }
+    .filtri option { background: #24160a; color: #fff; }
+
+    .filtri-sotto {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      margin-top: 13px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.10);
+    }
+    .conteggio { font-size: 0.82rem; color: rgba(255,255,255,0.58); }
+    .conteggio strong { color: #fff; font-weight: 700; }
+    .btn-azzera {
+      background: none; border: 1px solid rgba(255,255,255,0.22); border-radius: 20px;
+      color: rgba(255,255,255,0.72); font-family: inherit; font-size: 0.76rem;
+      padding: 5px 13px; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .btn-azzera:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn-azzera[hidden] { display: none; }
+
     /* Stato caricamento / vuoto */
     .stato-box {
       text-align: center; padding: 44px 20px;
@@ -217,6 +257,7 @@
       main { padding: 28px 18px 48px; }
       .page-header h1 { font-size: 1.9rem; }
       .back-link { margin-bottom: 26px; }
+      .filtro-campo { flex: 1 1 100%; }
       .libro { grid-template-columns: 1fr; gap: 18px; padding: 18px; border-radius: 10px; }
       .cover-wrap { max-width: 210px; margin: 0 auto; }
       .btn-row { flex-direction: column; }
@@ -270,6 +311,31 @@
       <strong>Tutti i libri sono completamente gratuiti.</strong> Non chiediamo offerte, donazioni,
       iscrizioni o contributi di alcun tipo: se un libro ti interessa, scrivici e te lo regaliamo.
       L'unico desiderio è che questi testi possano essere letti.
+    </div>
+
+    <div class="filtri" id="filtri" hidden>
+      <div class="filtri-riga">
+        <div class="filtro-campo">
+          <label for="fAutore">Autore</label>
+          <select id="fAutore" onchange="applicaFiltri()"></select>
+        </div>
+        <div class="filtro-campo">
+          <label for="fGenere">Genere</label>
+          <select id="fGenere" onchange="applicaFiltri()"></select>
+        </div>
+        <div class="filtro-campo">
+          <label for="fEditore">Editore</label>
+          <select id="fEditore" onchange="applicaFiltri()"></select>
+        </div>
+        <div class="filtro-campo">
+          <label for="fCerca">Cerca nel titolo</label>
+          <input type="search" id="fCerca" placeholder="Titolo o parola chiave…" oninput="applicaFiltri()">
+        </div>
+      </div>
+      <div class="filtri-sotto">
+        <span class="conteggio" id="conteggio"></span>
+        <button class="btn-azzera" id="btnAzzera" onclick="azzeraFiltri()" hidden>Azzera i filtri</button>
+      </div>
     </div>
 
     <div class="sezione-titolo">📖 Libri disponibili</div>
@@ -442,6 +508,67 @@
     btn.textContent = aperto ? 'Leggi tutto' : 'Mostra meno';
   }
 
+  /* ── FILTRI: autore, genere, editore ── */
+  function riempiSelect(id, etichetta, valori) {
+    const sel = document.getElementById(id);
+    const scelto = sel.value;
+    sel.innerHTML = `<option value="">${etichetta}</option>` +
+      valori.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    if (valori.indexOf(scelto) !== -1) sel.value = scelto;
+  }
+
+  function elenco(campo) {
+    const visti = {};
+    LIBRI.forEach(l => {
+      const v = (l[campo] || '').trim();
+      if (v) visti[v] = true;
+    });
+    return Object.keys(visti).sort((a, b) => a.localeCompare(b, 'it'));
+  }
+
+  function costruisciFiltri() {
+    riempiSelect('fAutore',  'Tutti gli autori',  elenco('autore'));
+    riempiSelect('fGenere',  'Tutti i generi',    elenco('genere'));
+    riempiSelect('fEditore', 'Tutti gli editori', elenco('editore'));
+  }
+
+  function applicaFiltri() {
+    const a = document.getElementById('fAutore').value;
+    const g = document.getElementById('fGenere').value;
+    const e = document.getElementById('fEditore').value;
+    const q = document.getElementById('fCerca').value.trim().toLowerCase();
+
+    const risultati = LIBRI.filter(l =>
+      (!a || (l.autore  || '').trim() === a) &&
+      (!g || (l.genere  || '').trim() === g) &&
+      (!e || (l.editore || '').trim() === e) &&
+      (!q || ((l.titolo || '') + ' ' + (l.autore || '') + ' ' + (l.descrizione || ''))
+               .toLowerCase().indexOf(q) !== -1)
+    );
+
+    const attivi = !!(a || g || e || q);
+    document.getElementById('btnAzzera').hidden = !attivi;
+    document.getElementById('conteggio').innerHTML = attivi
+      ? `<strong>${risultati.length}</strong> ${risultati.length === 1 ? 'libro trovato' : 'libri trovati'} su ${LIBRI.length}`
+      : `<strong>${LIBRI.length}</strong> libri in catalogo`;
+
+    const c = document.getElementById('libriList');
+    c.innerHTML = risultati.length
+      ? risultati.map(l => schedaLibro(l, l._i)).join('')
+      : `<div class="stato-box"><span class="emoji">🔎</span>
+           Nessun libro corrisponde a questa ricerca.<br>
+           <button class="btn-azzera" style="margin-top:14px" onclick="azzeraFiltri()">Azzera i filtri</button>
+         </div>`;
+  }
+
+  function azzeraFiltri() {
+    document.getElementById('fAutore').value  = '';
+    document.getElementById('fGenere').value  = '';
+    document.getElementById('fEditore').value = '';
+    document.getElementById('fCerca').value   = '';
+    applicaFiltri();
+  }
+
   async function caricaLibreria() {
     const c = document.getElementById('libriList');
     try {
@@ -456,7 +583,10 @@
           Scrivici a <a href="mailto:${EMAIL}" style="color:rgba(255,255,255,0.75)">${EMAIL}</a> per sapere cosa abbiamo a disposizione.</div>`;
         return;
       }
-      c.innerHTML = libri.map(schedaLibro).join('');
+      LIBRI.forEach((l, i) => { l._i = i; });
+      costruisciFiltri();
+      document.getElementById('filtri').hidden = false;
+      applicaFiltri();
     } catch (e) {
       c.innerHTML = `<div class="stato-box"><span class="emoji">⚠️</span>
         Non è stato possibile caricare il catalogo.<br>Riprova fra poco o scrivici a
