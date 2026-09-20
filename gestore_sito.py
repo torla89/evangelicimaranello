@@ -284,6 +284,46 @@ class PythonBridge:
         return json.dumps(getattr(self, '_upload_stato', {"status": "idle", "pct": 0}))
 
     # ── IMMAGINI (copertine libreria) ─────────────────────────
+    def salva_copertina(self, filepath: str, titolo: str, faccia: str) -> str:
+        """
+        Mette una copertina nella cartella "libreria" del sito e restituisce
+        il percorso da scrivere in dati.json (es. "libreria/sii-forte-fronte.webp").
+
+        Le copertine stanno dentro al sito e non piu' su Archive.org: cosi' la
+        pagina non dipende da un servizio esterno, si carica piu' in fretta e
+        le immagini viaggiano con il repository.
+        """
+        import json, re, unicodedata
+        try:
+            from PIL import Image
+        except ImportError:
+            return json.dumps({"ok": False, "errore":
+                "Manca la libreria Pillow: lancia build_exe.bat per installarla."})
+        try:
+            base = titolo.strip() or os.path.splitext(os.path.basename(filepath))[0]
+            # gli apostrofi diventano trattini, altrimenti "Cos'e" si saldera' in "Cose"
+            base = re.sub(r"['\u2019\u02bc`]", "-", base)
+            nome = unicodedata.normalize("NFKD", base).encode("ascii", "ignore").decode()
+            nome = re.sub(r"[^a-zA-Z0-9]+", "-", nome).strip("-").lower()
+            nome = re.sub(r"-{2,}", "-", nome) or "copertina"
+            faccia = "retro" if faccia == "retro" else "fronte"
+
+            dest_dir = os.path.join(SITE_DIR, "libreria")
+            os.makedirs(dest_dir, exist_ok=True)
+            dest = os.path.join(dest_dir, f"{nome}-{faccia}.webp")
+
+            img = Image.open(filepath)
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGB")
+            img.thumbnail((900, 900), Image.LANCZOS)
+            img.save(dest, "WEBP", quality=82, method=6)
+
+            return json.dumps({"ok": True,
+                               "percorso": "libreria/" + os.path.basename(dest),
+                               "kb": os.path.getsize(dest) // 1024})
+        except Exception as e:
+            return json.dumps({"ok": False, "errore": str(e)})
+
     def _ottimizza_immagine(self, filepath: str):
         """
         Ridimensiona e comprime una copertina per il web.

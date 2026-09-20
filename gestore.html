@@ -416,9 +416,9 @@
       <div class="section-label">📚 Libri della libreria gratuita</div>
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
         I libri inseriti qui compaiono nella pagina <strong style="color:var(--white)">libreria.html</strong> del sito.
-        Le copertine (fronte e retro) vengono caricate su <strong style="color:var(--white)">Archive.org</strong> —
-        collezione <strong style="color:var(--white)">Copertine-libri</strong> — e rimpicciolite automaticamente per
-        non appesantire il sito.
+        Le copertine (fronte e retro) finiscono nella cartella <strong style="color:var(--white)">libreria</strong>
+        del sito, rimpicciolite automaticamente a 900 px: restano dentro al sito e partono con «Salva e Pubblica»,
+        senza passare da servizi esterni. Scrivi il titolo prima di premere «Carica»: il nome del file viene da lì.
       </p>
 
       <div id="libreriaList"></div>
@@ -656,9 +656,9 @@
     <div class="field">
       <label>Copertina — fronte</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="libroCopertina" placeholder="https://archive.org/download/Copertine-libri/…" style="flex:1;">
+        <input type="text" id="libroCopertina" placeholder="libreria/… (premi «Carica» per scegliere un'immagine)" style="flex:1;">
         <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;"
-               onclick="caricaImmagineArchive('libroCopertina')">🖼 Carica</label>
+               onclick="caricaCopertina('libroCopertina', 'fronte')">🖼 Carica</label>
       </div>
       <div id="previewCopertina" style="margin-top:8px;"></div>
     </div>
@@ -666,9 +666,9 @@
     <div class="field">
       <label>Copertina — retro</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="libroRetro" placeholder="https://archive.org/download/Copertine-libri/…" style="flex:1;">
+        <input type="text" id="libroRetro" placeholder="libreria/… (premi «Carica» per scegliere un'immagine)" style="flex:1;">
         <label class="btn btn-ghost" style="cursor:pointer;padding:9px 14px;flex-shrink:0;"
-               onclick="caricaImmagineArchive('libroRetro')">🖼 Carica</label>
+               onclick="caricaCopertina('libroRetro', 'retro')">🖼 Carica</label>
       </div>
       <div id="previewRetro" style="margin-top:8px;"></div>
     </div>
@@ -1119,7 +1119,6 @@
   }
 
   // ── LIBRERIA ───────────────────────────────────────────────
-  const LIBRERIA_COLLEZIONE = 'Copertine-libri';
 
   function dispLibro(copie) {
     const n = parseInt(copie);
@@ -1216,201 +1215,46 @@
     toast(idx >= 0 ? '✅ Libro aggiornato' : '✅ Libro aggiunto');
   }
 
-  /* Carica un'immagine su Archive.org e scrive l'URL nel campo indicato */
-  async function caricaImmagineArchive(campoId) {
+  /* Mette la copertina nella cartella "libreria" del sito e scrive il percorso nel campo.
+     Prima finivano su Archive.org: ora restano dentro al sito, cosi' la pagina non
+     dipende da un servizio esterno e le immagini viaggiano con il repository. */
+  async function caricaCopertina(campoId, faccia) {
     if (typeof window.pywebview === 'undefined') { toast('❌ Disponibile solo nell\'app desktop'); return; }
-    const keys = await getS3Keys();
-    if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return; }
 
     let paths;
     try {
       paths = await window.pywebview.api.seleziona_file_immagine();
     } catch(e) {
-      toast('⚠ Ricompila il Gestore (build_exe.bat) per caricare le immagini');
-      alert('Questa versione del Gestore non sa ancora caricare immagini.\n\n' +
-            'Lancia build_exe.bat per aggiornare "Gestore Sito.exe", oppure incolla a mano ' +
-            'l\'URL della copertina già caricata su Archive.org.');
+      toast('⚠ Ricompila il Gestore (build_exe.bat)');
+      alert('Questa versione del Gestore non sa ancora scegliere immagini.\n\n' +
+            'Lancia build_exe.bat per aggiornare "Gestore Sito.exe".');
       return;
     }
     if (!paths || !paths.length) return;
     const path = paths[0];
-    const nome = path.split('\\').pop().split('/').pop();
+    const nomeFile = path.split('\\').pop().split('/').pop();
+    const titolo = (document.getElementById('libroTitolo').value || '').trim();
 
-    document.getElementById('uploadLog').textContent = '';
-    document.getElementById('uploadBar').style.width = '0%';
-    document.getElementById('uploadPct').textContent = '0%';
-    document.getElementById('uploadSpeed').textContent = '';
-    document.getElementById('uploadCloseBtn').style.display = 'none';
-    document.getElementById('uploadInfo').textContent = 'Copertina: ' + nome;
-    document.getElementById('uploadOverlay').classList.add('open');
-    uploadLog('📡 Ottimizzazione e caricamento: ' + nome);
+    if (!titolo) { toast('⚠ Scrivi prima il titolo del libro'); document.getElementById('libroTitolo').focus(); return; }
 
-    await window.pywebview.api.avvia_upload(path, LIBRERIA_COLLEZIONE, keys.access, keys.secret, 'immagine');
-
-    let done = false, url = '';
-    while (!done) {
-      await new Promise(r => setTimeout(r, 400));
-      try {
-        const s = JSON.parse(await window.pywebview.api.stato_upload());
-        document.getElementById('uploadBar').style.width = s.pct + '%';
-        document.getElementById('uploadPct').textContent = s.pct + '%';
-        if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
-        if (s.status === 'done') {
-          url = s.url || '';
-          uploadLog('✅ Caricata!');
-          if (url) uploadLog(url);
-          uploadLog('\n⏳ Archive.org può impiegare qualche minuto prima di mostrare l\'immagine.');
-          done = true;
-        } else if (s.status === 'error') {
-          uploadLog('❌ Errore: ' + s.message); done = true;
-        }
-      } catch(e) { uploadLog('❌ Errore polling: ' + e); done = true; }
+    toast('🖼 Sto preparando ' + nomeFile + '…');
+    let r;
+    try {
+      r = JSON.parse(await window.pywebview.api.salva_copertina(path, titolo, faccia));
+    } catch(e) {
+      toast('⚠ Ricompila il Gestore (build_exe.bat)');
+      alert('Questa versione del Gestore non sa ancora salvare le copertine nel sito.\n\n' +
+            'Lancia build_exe.bat per aggiornare "Gestore Sito.exe".');
+      return;
     }
-    document.getElementById('uploadCloseBtn').style.display = 'inline-block';
 
-    if (url) {
-      document.getElementById(campoId).value = url;
-      previewImmagine(campoId);
-      toast('✅ Immagine caricata');
-    }
+    if (!r.ok) { toast('❌ ' + (r.errore || 'Non riuscito')); return; }
+
+    document.getElementById(campoId).value = r.percorso;
+    previewImmagine(campoId);
+    toast('✅ Copertina salvata nel sito (' + r.kb + ' KB)');
   }
 
-  // ── MUSICA PLAYER ──────────────────────────────────────────
-  async function caricaMusica(input) {
-    const files = Array.from(input.files);
-    if (!files.length) return;
-    const log = document.getElementById('musicaUploadLog');
-    log.style.display = 'block';
-    log.textContent = '⏳ Caricamento in corso...';
-    let ok = 0, fail = 0;
-    for (const file of files) {
-      try {
-        const b64 = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result.split(',')[1]);
-          r.onerror = rej;
-          r.readAsDataURL(file);
-        });
-        if (typeof window.pywebview !== 'undefined') {
-          const result = await window.pywebview.api.salva_musica(file.name, b64);
-          if (result === 'ok') ok++; else { fail++; }
-        } else { ok++; }
-      } catch(e) { fail++; }
-    }
-    log.textContent = ok > 0
-      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} in musica-player/${fail > 0 ? ` — ${fail} errori` : ''}`
-      : `❌ Errore nel caricamento`;
-    input.value = '';
-    renderMusica();
-  }
-
-  async function renderMusica() {
-    const c = document.getElementById('musicaList');
-    if (!c) return;
-    if (typeof window.pywebview !== 'undefined') {
-      try {
-        const result = await window.pywebview.api.lista_musica_url();
-        const items = JSON.parse(result);
-        if (!items.length) { c.innerHTML = emptyState('Nessun brano nella playlist'); return; }
-        c.innerHTML = items.map((f, i) => `
-          <div class="list-item">
-            <div class="list-item-info">
-              <div class="list-item-title">🎵 ${f.title}</div>
-              <div class="list-item-sub" style="font-size:0.75rem;word-break:break-all;">${f.src}</div>
-            </div>
-            <div class="list-item-actions">
-              <button class="btn btn-danger btn-sm" onclick="eliminaMusica(${i})">🗑</button>
-            </div>
-          </div>`).join('');
-      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la playlist'); }
-    } else {
-      c.innerHTML = emptyState('Lista disponibile solo nell\'app desktop');
-    }
-  }
-
-  async function eliminaMusica(idx) {
-    if (!confirm('Rimuovere dalla playlist e tentare eliminazione da Archive.org?')) return;
-    const keys = await getS3Keys();
-    if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_musica_url(idx, keys.access || '', keys.secret || '');
-      if (result === 'ok') { toast('🗑 Rimosso dalla playlist (Archive.org potrebbe richiedere tempo)'); renderMusica(); markDirty(); }
-      else toast('❌ ' + result);
-    }
-  }
-
-  /* ── MODAL HELPERS ── */
-  function openModal(name) {
-    document.getElementById('modal-' + name).classList.add('open');
-  }
-  function closeModal(name) {
-    document.getElementById('modal-' + name).classList.remove('open');
-  }
-  // Chiudi modal cliccando fuori
-  document.querySelectorAll('.modal-bg').forEach(bg => {
-    bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
-  });
-
-  /* ── TABS ── */
-  // ── BASI INNI ──────────────────────────────────────────────
-  async function caricaBasi(input) {
-    const files = Array.from(input.files);
-    if (!files.length) return;
-    const log = document.getElementById('basiUploadLog');
-    log.style.display = 'block'; log.textContent = '⏳ Caricamento...';
-    let ok = 0, fail = 0;
-    for (const file of files) {
-      try {
-        const b64 = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result.split(',')[1]);
-          r.onerror = rej; r.readAsDataURL(file);
-        });
-        if (typeof window.pywebview !== 'undefined') {
-          const result = await window.pywebview.api.salva_base(file.name, b64);
-          if (result === 'ok') ok++; else fail++;
-        } else ok++;
-      } catch(e) { fail++; }
-    }
-    log.textContent = ok > 0 ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''}${fail > 0 ? ` — ${fail} errori` : ''}` : '❌ Errore';
-    input.value = ''; renderBasi();
-  }
-
-  async function renderBasi() {
-    const c = document.getElementById('basiList');
-    if (!c) return;
-    if (typeof window.pywebview !== 'undefined') {
-      try {
-        const result = await window.pywebview.api.lista_basi_url();
-        const items = JSON.parse(result);
-        if (!items.length) { c.innerHTML = emptyState('Nessuna base nella playlist'); return; }
-        c.innerHTML = items.map((f, i) => `
-          <div class="list-item">
-            <div class="list-item-info">
-              <div class="list-item-title">🎹 ${f.title}</div>
-              <div class="list-item-sub" style="font-size:0.75rem;word-break:break-all;">${f.src}</div>
-            </div>
-            <div class="list-item-actions">
-              <button class="btn btn-danger btn-sm" onclick="eliminaBasi(${i})">🗑</button>
-            </div>
-          </div>`).join('');
-      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la playlist'); }
-    } else { c.innerHTML = emptyState('Disponibile solo nell\'app desktop'); }
-  }
-
-  async function eliminaBasi(idx) {
-    if (!confirm('Rimuovere dalla playlist e tentare eliminazione da Archive.org?')) return;
-    const keys = await getS3Keys();
-    if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_base_url(idx, keys.access || '', keys.secret || '');
-      if (result === 'ok') { toast('🗑 Rimossa dalla playlist (Archive.org potrebbe richiedere tempo)'); renderBasi(); markDirty(); }
-      else toast('❌ ' + result);
-    }
-  }
-
-  // ── ARCHIVE.ORG ────────────────────────────────────────────
   async function getS3Keys() {
     if (typeof window.pywebview !== 'undefined') {
       try { return JSON.parse(await window.pywebview.api.leggi_chiavi_s3() || '{}'); }
