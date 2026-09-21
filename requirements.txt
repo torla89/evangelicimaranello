@@ -3,3 +3,5 @@ requests
 mutagen
 pyinstaller
 Pillow
+pytesseract
+zxing-cpp

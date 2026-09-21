@@ -420,12 +420,20 @@
         del sito, rimpicciolite automaticamente a 900 px: restano dentro al sito e partono con «Salva e Pubblica»,
         senza passare da servizi esterni. Scrivi il titolo prima di premere «Carica»: il nome del file viene da lì.
       </p>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+        <strong style="color:var(--white)">Due modi per aggiungere libri:</strong>
+        «Aggiungi libro» per inserirne uno a mano; <strong style="color:var(--white)">«⚡ Caricamento automatico»</strong>
+        per scegliere una cartella di foto (fronte e retro): il programma raddrizza e accoppia le foto, legge
+        titolo, autore, editore, genere e sintesi, e ti fa rivedere tutto prima di aggiungerli.
+      </p>
+
+      <div class="btn-row-start" style="margin-bottom:14px;">
+        <button class="btn btn-ghost" onclick="openLibroModal()">＋ Aggiungi libro (manuale)</button>
+        <button class="btn btn-primary" onclick="caricamentoAutomatico()"
+                title="Scegli la cartella con le foto delle copertine: i libri vengono letti e compilati da soli">⚡ Caricamento automatico</button>
+      </div>
 
       <div id="libreriaList"></div>
-
-      <div class="btn-row-start" style="margin-top:4px;">
-        <button class="btn btn-ghost" onclick="openLibroModal()">＋ Aggiungi libro</button>
-      </div>
     </div>
 
   </div><!-- /#mainApp -->
@@ -682,6 +690,7 @@
   </div>
 </div>
 
+<script src="catalogatore.js"></script>
 <script>
   let dati = null;
   let dirty = false;
@@ -1154,6 +1163,24 @@
         </div>
       </div>`;
     }).join('');
+  }
+
+  /* Caricamento automatico da una cartella di foto (catalogatore.js) */
+  function caricamentoAutomatico() {
+    if (!window.Catalogatore) { toast('⚠ Caricamento automatico non disponibile'); return; }
+    if (!dati) { toast('⚠ Aspetta che dati.json sia caricato'); return; }
+    window.Catalogatore.apri({
+      testoPubblica: 'Aggiungi alla libreria',
+      onPubblicato: (esito) => {
+        const voci = esito.voci || [];
+        if (!dati.libreria) dati.libreria = [];
+        voci.forEach(v => dati.libreria.push(v));
+        renderLibreria();
+        if (voci.length) markDirty();
+        return voci.length + (voci.length === 1 ? ' libro aggiunto' : ' libri aggiunti') +
+               ' alla libreria. Premi «🚀 Salva e Pubblica» per mandarli sul sito.';
+      },
+    });
   }
 
   function previewImmagine(campoId) {

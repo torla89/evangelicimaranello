@@ -16,6 +16,14 @@ import webview
 import json, os, shutil, subprocess, threading, queue, sys
 from datetime import datetime
 
+# caricamento automatico dei libri da una cartella di foto (file condiviso
+# con il Gestore Biblioteca); se manca qualcosa il resto del programma va lo stesso
+try:
+    from catalogatore import CatalogoAPI
+except Exception:
+    class CatalogoAPI:
+        pass
+
 # ── CONFIGURAZIONE REPOSITORY ─────────────────────────────────
 REPO_URL  = "https://github.com/torla89/evangelicimaranello.git"
 GIT_INSTALLER_URL = "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe"
@@ -125,7 +133,7 @@ HTML_FILE  = os.path.join(SITE_DIR, "gestore.html")
 # ──────────────────────────────────────────────────────────────
 
 
-class PythonBridge:
+class PythonBridge(CatalogoAPI):
 
     def __init__(self):
         self._log_q      = queue.Queue()
@@ -851,8 +859,11 @@ class PythonBridge:
             run("git add basi-inni/playlist.json")
             run("git add canti/playlist.json")
             run("git add *.html")
-            # Cartella predicazioni solo se esiste
+            # Copertine dei libri (caricate con «Carica» o dal caricamento automatico)
             import os as _os
+            if _os.path.isdir(_os.path.join(SITE_DIR, "libreria")):
+                run("git add libreria/")
+            # Cartella predicazioni solo se esiste
             if _os.path.exists(_os.path.join(SITE_DIR, "predicazioni")):
                 run("git add predicazioni/")
 
@@ -878,6 +889,21 @@ class PythonBridge:
             log(f"❌ {e}"); log("__ERROR__")
         finally:
             self._running = False
+
+
+    # ── caricamento automatico (vedi catalogatore.py) ─────────────
+    # Senza _catalogo_salva: le voci tornano alla pagina, che le aggiunge
+    # alla lista e poi si salvano e pubblicano come sempre.
+    def _catalogo_sito(self):
+        return SITE_DIR
+
+    def _catalogo_finestra(self):
+        return self._window
+
+    def _catalogo_strumenti(self):
+        # Gestione Chiesa (dove sta la cartella "strumenti") e la cartella del programma
+        gestione = os.path.dirname(os.path.dirname(os.path.abspath(SITE_DIR)))
+        return [gestione, _base_dir()]
 
 
 def main():

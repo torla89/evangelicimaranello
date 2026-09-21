@@ -56,6 +56,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
+rem lettore di testo per il caricamento automatico dei libri (non blocca se non riesce)
+if exist "%~dp0..\..\sorgente\installa_ocr.bat" call "%~dp0..\..\sorgente\installa_ocr.bat"
+
 if exist "build_tmp" rmdir /s /q "build_tmp"
 
 echo Creazione dell'eseguibile...
