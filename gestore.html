@@ -635,16 +635,22 @@
         <label>Genere</label>
         <input type="text" id="libroGenere" list="generiLibri" placeholder="es. Evangelizzazione">
         <datalist id="generiLibri">
-          <option value="Evangelizzazione"></option>
-          <option value="Studio biblico"></option>
-          <option value="Sermoni e meditazioni"></option>
-          <option value="Vita cristiana"></option>
-          <option value="Biografia e testimonianza"></option>
-          <option value="Famiglia e relazioni"></option>
-          <option value="Ragazzi e bambini"></option>
-          <option value="Commentario"></option>
-          <option value="Bibbia"></option>
           <option value="Apologetica"></option>
+          <option value="Archeologia biblica"></option>
+          <option value="Calendario"></option>
+          <option value="Chiesa e ministero"></option>
+          <option value="Creazione ed evoluzione"></option>
+          <option value="Etica cristiana"></option>
+          <option value="Evangelizzazione"></option>
+          <option value="Meditazioni quotidiane"></option>
+          <option value="Preghiera"></option>
+          <option value="Rivista"></option>
+          <option value="Sermoni e meditazioni"></option>
+          <option value="Storia della chiesa"></option>
+          <option value="Studio biblico"></option>
+          <option value="Teologia"></option>
+          <option value="Testimonianze"></option>
+          <option value="Vita cristiana"></option>
         </datalist>
       </div>
       <div class="field"><label>Lingua</label><input type="text" id="libroLingua" placeholder="Italiano"></div>
@@ -1282,6 +1288,142 @@
     toast('✅ Copertina salvata nel sito (' + r.kb + ' KB)');
   }
 
+  // ── MUSICA PLAYER ──────────────────────────────────────────
+  async function caricaMusica(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const log = document.getElementById('musicaUploadLog');
+    log.style.display = 'block';
+    log.textContent = '⏳ Caricamento in corso...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result.split(',')[1]);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+        if (typeof window.pywebview !== 'undefined') {
+          const result = await window.pywebview.api.salva_musica(file.name, b64);
+          if (result === 'ok') ok++; else { fail++; }
+        } else { ok++; }
+      } catch(e) { fail++; }
+    }
+    log.textContent = ok > 0
+      ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''} in musica-player/${fail > 0 ? ` — ${fail} errori` : ''}`
+      : `❌ Errore nel caricamento`;
+    input.value = '';
+    renderMusica();
+  }
+
+  async function renderMusica() {
+    const c = document.getElementById('musicaList');
+    if (!c) return;
+    if (typeof window.pywebview !== 'undefined') {
+      try {
+        const result = await window.pywebview.api.lista_musica_url();
+        const items = JSON.parse(result);
+        if (!items.length) { c.innerHTML = emptyState('Nessun brano nella playlist'); return; }
+        c.innerHTML = items.map((f, i) => `
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="list-item-title">🎵 ${f.title}</div>
+              <div class="list-item-sub" style="font-size:0.75rem;word-break:break-all;">${f.src}</div>
+            </div>
+            <div class="list-item-actions">
+              <button class="btn btn-danger btn-sm" onclick="eliminaMusica(${i})">🗑</button>
+            </div>
+          </div>`).join('');
+      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la playlist'); }
+    } else {
+      c.innerHTML = emptyState('Lista disponibile solo nell\'app desktop');
+    }
+  }
+
+  async function eliminaMusica(idx) {
+    if (!confirm('Rimuovere dalla playlist e tentare eliminazione da Archive.org?')) return;
+    const keys = await getS3Keys();
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.elimina_musica_url(idx, keys.access || '', keys.secret || '');
+      if (result === 'ok') { toast('🗑 Rimosso dalla playlist (Archive.org potrebbe richiedere tempo)'); renderMusica(); markDirty(); }
+      else toast('❌ ' + result);
+    }
+  }
+
+  /* ── MODAL HELPERS ── */
+  function openModal(name) {
+    document.getElementById('modal-' + name).classList.add('open');
+  }
+  function closeModal(name) {
+    document.getElementById('modal-' + name).classList.remove('open');
+  }
+  // Chiudi modal cliccando fuori
+  document.querySelectorAll('.modal-bg').forEach(bg => {
+    bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+  });
+
+  /* ── TABS ── */
+  // ── BASI INNI ──────────────────────────────────────────────
+  async function caricaBasi(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const log = document.getElementById('basiUploadLog');
+    log.style.display = 'block'; log.textContent = '⏳ Caricamento...';
+    let ok = 0, fail = 0;
+    for (const file of files) {
+      try {
+        const b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result.split(',')[1]);
+          r.onerror = rej; r.readAsDataURL(file);
+        });
+        if (typeof window.pywebview !== 'undefined') {
+          const result = await window.pywebview.api.salva_base(file.name, b64);
+          if (result === 'ok') ok++; else fail++;
+        } else ok++;
+      } catch(e) { fail++; }
+    }
+    log.textContent = ok > 0 ? `✅ ${ok} file caricato${ok > 1 ? 'i' : ''}${fail > 0 ? ` — ${fail} errori` : ''}` : '❌ Errore';
+    input.value = ''; renderBasi();
+  }
+
+  async function renderBasi() {
+    const c = document.getElementById('basiList');
+    if (!c) return;
+    if (typeof window.pywebview !== 'undefined') {
+      try {
+        const result = await window.pywebview.api.lista_basi_url();
+        const items = JSON.parse(result);
+        if (!items.length) { c.innerHTML = emptyState('Nessuna base nella playlist'); return; }
+        c.innerHTML = items.map((f, i) => `
+          <div class="list-item">
+            <div class="list-item-info">
+              <div class="list-item-title">🎹 ${f.title}</div>
+              <div class="list-item-sub" style="font-size:0.75rem;word-break:break-all;">${f.src}</div>
+            </div>
+            <div class="list-item-actions">
+              <button class="btn btn-danger btn-sm" onclick="eliminaBasi(${i})">🗑</button>
+            </div>
+          </div>`).join('');
+      } catch(e) { c.innerHTML = emptyState('Impossibile leggere la playlist'); }
+    } else { c.innerHTML = emptyState('Disponibile solo nell\'app desktop'); }
+  }
+
+  async function eliminaBasi(idx) {
+    if (!confirm('Rimuovere dalla playlist e tentare eliminazione da Archive.org?')) return;
+    const keys = await getS3Keys();
+    if (typeof window.pywebview !== 'undefined') {
+      const result = await window.pywebview.api.elimina_base_url(idx, keys.access || '', keys.secret || '');
+      if (result === 'ok') { toast('🗑 Rimossa dalla playlist (Archive.org potrebbe richiedere tempo)'); renderBasi(); markDirty(); }
+      else toast('❌ ' + result);
+    }
+  }
+
+  // ── ARCHIVE.ORG ────────────────────────────────────────────
   async function getS3Keys() {
     if (typeof window.pywebview !== 'undefined') {
       try { return JSON.parse(await window.pywebview.api.leggi_chiavi_s3() || '{}'); }
