@@ -413,6 +413,7 @@
   "libreria": [
     {
       "titolo": "Sii forte",
+      "tipo": "Libro",
       "autore": "David Cook",
       "autore_bio": "Predicatore e docente di scuola biblica di lingua inglese; i capitoli del libro nascono dai sermoni rivolti ai suoi studenti.",
       "editore": "Soli Deo Gloria",
@@ -429,6 +430,7 @@
     },
     {
       "titolo": "Si vive solo una volta",
+      "tipo": "Libro",
       "autore": "William MacDonald",
       "autore_bio": "William MacDonald (1917-2007), insegnante biblico statunitense tra i più letti in ambito evangelico, autore del «Commentario biblico del discepolo» e di numerosi testi di evangelizzazione e vita cristiana.",
       "editore": "Soli Deo Gloria",
@@ -445,6 +447,7 @@
     },
     {
       "titolo": "Gesù nostro destino",
+      "tipo": "Libro",
       "autore": "Wilhelm Busch",
       "autore_bio": "Wilhelm Busch (1897-1966), pastore tedesco, per oltre trent'anni responsabile del lavoro giovanile della Weigle-Haus di Essen. Membro della Chiesa Confessante, fu più volte arrestato durante il nazismo per non aver smesso di predicare il Vangelo.",
       "editore": "Soli Deo Gloria",
@@ -461,6 +464,7 @@
     },
     {
       "titolo": "Calendario 2027: Animali",
+      "tipo": "Calendario",
       "autore": "Evangelici Maranello",
       "autore_bio": "",
       "editore": "",
@@ -477,6 +481,7 @@
     },
     {
       "titolo": "Calendario 2027: Animali dal mondo",
+      "tipo": "Calendario",
       "autore": "Evangelici Maranello",
       "autore_bio": "",
       "editore": "",
@@ -493,6 +498,7 @@
     },
     {
       "titolo": "Calendario 2027: paesaggi",
+      "tipo": "Calendario",
       "autore": "Evangelici Maranello",
       "autore_bio": "",
       "editore": "",
@@ -509,6 +515,7 @@
     },
     {
       "titolo": "Calendario 2027: floreale",
+      "tipo": "Calendario",
       "autore": "Evangelici Maranello",
       "autore_bio": "",
       "editore": "",
@@ -525,6 +532,7 @@
     },
     {
       "titolo": "Aborto",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -541,6 +549,7 @@
     },
     {
       "titolo": "Aurora e Tramonto",
+      "tipo": "Libro",
       "autore": "Giovanni Bertinatti",
       "autore_bio": "",
       "editore": "Claudiana",
@@ -557,6 +566,7 @@
     },
     {
       "titolo": "Certezze n. 99 — novembre/dicembre 1988",
+      "tipo": "Rivista",
       "autore": "Gruppi Biblici Universitari",
       "autore_bio": "",
       "editore": "Gruppi Biblici Universitari",
@@ -573,6 +583,7 @@
     },
     {
       "titolo": "Certezze n. 100-101 — gennaio/marzo 1989",
+      "tipo": "Rivista",
       "autore": "Gruppi Biblici Universitari",
       "autore_bio": "",
       "editore": "Gruppi Biblici Universitari",
@@ -589,6 +600,7 @@
     },
     {
       "titolo": "Certezze n. 123-124 — maggio/giugno 1991",
+      "tipo": "Rivista",
       "autore": "Gruppi Biblici Universitari",
       "autore_bio": "",
       "editore": "Gruppi Biblici Universitari",
@@ -605,6 +617,7 @@
     },
     {
       "titolo": "Compendio del pensiero cristiano nei secoli",
+      "tipo": "Libro",
       "autore": "Tony Lane",
       "autore_bio": "Professore di Dottrina cristiana al London Bible College di Londra.",
       "editore": "Voce della Bibbia",
@@ -621,6 +634,7 @@
     },
     {
       "titolo": "Conoscere Dio",
+      "tipo": "Libro",
       "autore": "James I. Packer",
       "autore_bio": "Ha insegnato al Tyndale Hall ed è stato Rettore al Latimer House di Oxford, prima di diventare condirettore del Trinity College di Bristol nel 1971. Autore, fra l’altro, di «Evangelizzazione e sovranità di Dio».",
       "editore": "",
@@ -637,6 +651,7 @@
     },
     {
       "titolo": "Cos’è il battesimo?",
+      "tipo": "Libro",
       "autore": "Marco Distort",
       "autore_bio": "",
       "editore": "",
@@ -653,6 +668,7 @@
     },
     {
       "titolo": "Creazione o evoluzione",
+      "tipo": "Libro",
       "autore": "Tommaso Heinze",
       "autore_bio": "Laureato in scienze naturali e in teologia, missionario in Italia dal 1963, ha svolto il suo ministero nella provincia di Napoli.",
       "editore": "Centro Biblico",
@@ -669,6 +685,7 @@
     },
     {
       "titolo": "Credere e Comprendere n. 10 — ottobre 1988",
+      "tipo": "Rivista",
       "autore": "Assemblee dei Fratelli",
       "autore_bio": "",
       "editore": "Credere e Comprendere",
@@ -685,6 +702,7 @@
     },
     {
       "titolo": "Cristianesimo attraverso i secoli",
+      "tipo": "Libro",
       "autore": "Earle E. Cairns",
       "autore_bio": "",
       "editore": "",
@@ -701,6 +719,7 @@
     },
     {
       "titolo": "Devi nascere di nuovo!",
+      "tipo": "Libro",
       "autore": "",
       "autore_bio": "",
       "editore": "",
@@ -717,6 +736,7 @@
     },
     {
       "titolo": "Eutanasia",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -733,6 +753,7 @@
     },
     {
       "titolo": "I quattro Evangeli a confronto",
+      "tipo": "Libro",
       "autore": "Roger Liebi",
       "autore_bio": "",
       "editore": "Il Messaggero Cristiano",
@@ -749,6 +770,7 @@
     },
     {
       "titolo": "Il cristiano nel mondo",
+      "tipo": "Libro",
       "autore": "Hans Bürki",
       "autore_bio": "",
       "editore": "Edizioni GBU",
@@ -765,6 +787,7 @@
     },
     {
       "titolo": "Il disegno benevolo di Dio",
+      "tipo": "Libro",
       "autore": "Samuele Negri",
       "autore_bio": "Anziano della Chiesa Evangelica di Rimini.",
       "editore": "IC-Quaderni",
@@ -781,6 +804,7 @@
     },
     {
       "titolo": "Il problema della sofferenza",
+      "tipo": "Libro",
       "autore": "C. S. Lewis",
       "autore_bio": "",
       "editore": "Edizioni GBU",
@@ -797,6 +821,7 @@
     },
     {
       "titolo": "Il trionfo del Cristo crocifisso",
+      "tipo": "Libro",
       "autore": "Erich Sauer",
       "autore_bio": "",
       "editore": "",
@@ -813,6 +838,7 @@
     },
     {
       "titolo": "In difesa della fede",
+      "tipo": "Libro",
       "autore": "Floyd E. Hamilton",
       "autore_bio": "Nato a Batavia (New York) nel 1890, studiò alla Cornell University, al College of Wooster e al Princeton Seminary. Pastore presbiteriano dal 1919 e missionario in Corea dal 1920 al 1953, fu professore di Sacra Scrittura all’Union Christian College di Pyong Yang e di Apologetica al Seminario Teologico di Corea. Morì negli Stati Uniti nel 1969.",
       "editore": "Centro Biblico",
@@ -829,6 +855,7 @@
     },
     {
       "titolo": "Introduzione alla lettura della Bibbia — Antico Testamento",
+      "tipo": "Libro",
       "autore": "H. E. Alexander",
       "autore_bio": "",
       "editore": "",
@@ -845,6 +872,7 @@
     },
     {
       "titolo": "Introduzione alla lettura della Bibbia — Nuovo Testamento",
+      "tipo": "Libro",
       "autore": "H. E. Alexander",
       "autore_bio": "",
       "editore": "",
@@ -861,6 +889,7 @@
     },
     {
       "titolo": "L’altra Bibbia",
+      "tipo": "Libro",
       "autore": "Marcello Cicchese",
       "autore_bio": "",
       "editore": "IC-Quaderni",
@@ -877,6 +906,7 @@
     },
     {
       "titolo": "L’ispirazione e l’autorità della Bibbia",
+      "tipo": "Libro",
       "autore": "René Pache",
       "autore_bio": "",
       "editore": "",
@@ -893,6 +923,7 @@
     },
     {
       "titolo": "L’umanesimo e la Cristianità",
+      "tipo": "Libro",
       "autore": "Francis A. Schaeffer",
       "autore_bio": "",
       "editore": "Centro Biblico",
@@ -909,6 +940,7 @@
     },
     {
       "titolo": "La Bibbia aveva ragione — volume 1",
+      "tipo": "Libro",
       "autore": "Werner Keller",
       "autore_bio": "Nato nel 1909, giornalista, si è occupato soprattutto di archeologia e di storia dell’umanità. Deve la sua fama a questo libro e a «La civiltà etrusca» (1971).",
       "editore": "Garzanti",
@@ -925,6 +957,7 @@
     },
     {
       "titolo": "La Bibbia aveva ragione — volume 2",
+      "tipo": "Libro",
       "autore": "Werner Keller",
       "autore_bio": "Nato nel 1909, giornalista, si è occupato soprattutto di archeologia e di storia dell’umanità. Deve la sua fama a questo libro e a «La civiltà etrusca» (1971).",
       "editore": "Garzanti",
@@ -941,6 +974,7 @@
     },
     {
       "titolo": "La creazione: l’inizio della Genesi",
+      "tipo": "Libro",
       "autore": "Henri Blocher",
       "autore_bio": "",
       "editore": "Edizioni GBU",
@@ -957,6 +991,7 @@
     },
     {
       "titolo": "La parola del Signore 1 — Introduzione all’Antico Testamento",
+      "tipo": "Libro",
       "autore": "Gleason L. Archer",
       "autore_bio": "",
       "editore": "",
@@ -973,6 +1008,7 @@
     },
     {
       "titolo": "La parola del Signore 2 — Introduzione al Nuovo Testamento",
+      "tipo": "Libro",
       "autore": "Everett F. Harrison",
       "autore_bio": "",
       "editore": "",
@@ -989,6 +1025,7 @@
     },
     {
       "titolo": "La preghiera",
+      "tipo": "Libro",
       "autore": "Ole Hallesby",
       "autore_bio": "",
       "editore": "Casa Editrice Battista",
@@ -1005,6 +1042,7 @@
     },
     {
       "titolo": "La tua Bibbia",
+      "tipo": "Libro",
       "autore": "",
       "autore_bio": "",
       "editore": "Istituto Biblico Evangelico",
@@ -1021,6 +1059,7 @@
     },
     {
       "titolo": "La via del Calvario",
+      "tipo": "Libro",
       "autore": "Roy Hession",
       "autore_bio": "",
       "editore": "Edizioni CLC",
@@ -1037,6 +1076,7 @@
     },
     {
       "titolo": "Maria, benedetta fra le donne",
+      "tipo": "Libro",
       "autore": "Gaston Racine",
       "autore_bio": "",
       "editore": "UCEB",
@@ -1053,6 +1093,7 @@
     },
     {
       "titolo": "Origini",
+      "tipo": "Libro",
       "autore": "John C. Whitcomb",
       "autore_bio": "",
       "editore": "Associazione Culturale Evangelica Daniele-Baltassar",
@@ -1069,6 +1110,7 @@
     },
     {
       "titolo": "Per essere chiesa",
+      "tipo": "Libro",
       "autore": "Gary Inrig",
       "autore_bio": "",
       "editore": "UCEB",
@@ -1085,6 +1127,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 01 gennaio/aprile 2021",
+      "tipo": "Libretto",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1101,6 +1144,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 02 maggio/agosto 2021",
+      "tipo": "Libretto",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1117,6 +1161,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 03 settembre/dicembre 2021",
+      "tipo": "Libretto",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1133,6 +1178,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 01 gennaio/aprile 2022",
+      "tipo": "Libretto",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1149,6 +1195,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 02 maggio/agosto 2022",
+      "tipo": "Libretto",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1165,6 +1212,7 @@
     },
     {
       "titolo": "Per un dialogo con Dio",
+      "tipo": "Libro",
       "autore": "Guy Appéré",
       "autore_bio": "",
       "editore": "",
@@ -1181,6 +1229,7 @@
     },
     {
       "titolo": "Raccoglimento",
+      "tipo": "Libro",
       "autore": "",
       "autore_bio": "",
       "editore": "Edizioni GBU",
@@ -1197,6 +1246,7 @@
     },
     {
       "titolo": "Spiritualità vera",
+      "tipo": "Libro",
       "autore": "Francis A. Schaeffer",
       "autore_bio": "",
       "editore": "",
@@ -1213,6 +1263,7 @@
     },
     {
       "titolo": "Studi di teologia 1 — Ermeneutica biblica",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1229,6 +1280,7 @@
     },
     {
       "titolo": "Studi di teologia 15 — Il ministero degli anziani",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1245,6 +1297,7 @@
     },
     {
       "titolo": "Studi di teologia 19 — Lineamenti di consulenza pastorale",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1261,6 +1314,7 @@
     },
     {
       "titolo": "Studi di teologia 23 — Celebrare Dio",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1277,6 +1331,7 @@
     },
     {
       "titolo": "Studi di teologia 27 — Per una cultura cristiana",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1293,6 +1348,7 @@
     },
     {
       "titolo": "Studi di teologia 28 — Mascolinità e femminilità",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1309,6 +1365,7 @@
     },
     {
       "titolo": "Studi di teologia 31 — Il combattimento spirituale",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1325,6 +1382,7 @@
     },
     {
       "titolo": "Studi di teologia 35 — Il ritorno dell’Apocalisse",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1341,6 +1399,7 @@
     },
     {
       "titolo": "Studi di teologia 40 — L’Europa delle religioni",
+      "tipo": "Rivista",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "IFED",
@@ -1357,6 +1416,7 @@
     },
     {
       "titolo": "Studio sintetico del Vecchio Testamento — Legge e storia",
+      "tipo": "Libro",
       "autore": "",
       "autore_bio": "",
       "editore": "Istituto Biblico Evangelico",
@@ -1373,6 +1433,7 @@
     },
     {
       "titolo": "Studio sintetico del Vecchio Testamento — Poesia e profezia",
+      "tipo": "Libro",
       "autore": "",
       "autore_bio": "",
       "editore": "Istituto Biblico Evangelico",
@@ -1389,6 +1450,7 @@
     },
     {
       "titolo": "Tavole sinottiche cronologiche dell’Antico Testamento",
+      "tipo": "Libro",
       "autore": "John H. Walton",
       "autore_bio": "",
       "editore": "Edizioni Casa Biblica",
@@ -1405,6 +1467,7 @@
     },
     {
       "titolo": "Vari aspetti della preghiera",
+      "tipo": "Libro",
       "autore": "Pierre Combe",
       "autore_bio": "",
       "editore": "Il Messaggero Cristiano",
@@ -1421,6 +1484,7 @@
     },
     {
       "titolo": "Verità fondamentali della lettera ai Romani",
+      "tipo": "Libro",
       "autore": "",
       "autore_bio": "",
       "editore": "Poggio Ubertini",
@@ -1437,6 +1501,7 @@
     },
     {
       "titolo": "Vorremmo vedere Gesù",
+      "tipo": "Libro",
       "autore": "Roy Hession",
       "autore_bio": "",
       "editore": "Patmos",
@@ -1453,6 +1518,7 @@
     },
     {
       "titolo": "Credente o cristiano?",
+      "tipo": "Libretto",
       "autore": "Ellero Balzani",
       "autore_bio": "Nato nel 1943, per trentasette anni metalmeccanico e oggi in pensione. Per cinquant’anni ha vissuto intensamente la vita della chiesa evangelica, in alcuni periodi anche come conduttore, e ha tenuto numerosissimi studi biblici nelle case, vedendo molte persone consacrare la loro vita a Gesù Cristo.",
       "editore": "Lampi di Stampa",
@@ -1469,6 +1535,7 @@
     },
     {
       "titolo": "Dalla resurrezione al suo ritorno",
+      "tipo": "Opuscolo",
       "autore": "Don A. Carson",
       "autore_bio": "Donald A. Carson, docente ricercatore di Nuovo Testamento alla Trinity Evangelical Divinity School di Deerfield (Illinois), dove insegna dal 1978.",
       "editore": "Soli Deo Gloria",
@@ -1485,6 +1552,7 @@
     },
     {
       "titolo": "Discepolo",
+      "tipo": "Libro",
       "autore": "Juan Carlos Ortiz",
       "autore_bio": "Pastore argentino, conferenziere itinerante e autore di libri sulla vita cristiana; ha svolto il suo ministero presso la Crystal Cathedral in California e condotto programmi televisivi in lingua spagnola.",
       "editore": "Uomini Nuovi",
@@ -1501,6 +1569,7 @@
     },
     {
       "titolo": "Divorzio",
+      "tipo": "Libro",
       "autore": "John Murray",
       "autore_bio": "John Murray (1898-1975), teologo riformato scozzese, per molti anni professore di teologia sistematica al Westminster Theological Seminary di Filadelfia.",
       "editore": "",
@@ -1517,6 +1586,7 @@
     },
     {
       "titolo": "E se Dio ci fosse davvero…",
+      "tipo": "Libro",
       "autore": "Wolfgang Bühne",
       "autore_bio": "Wolfgang Bühne, evangelista e scrittore tedesco, autore di numerosi libri di evangelizzazione e vita cristiana.",
       "editore": "Edizioni CLC",
@@ -1533,6 +1603,7 @@
     },
     {
       "titolo": "Elementi della fede",
+      "tipo": "Libretto",
       "autore": "Nicola Martella",
       "autore_bio": "Nicola Martella, teologo e scrittore evangelico italiano, autore di numerosi studi biblici e dottrinali.",
       "editore": "Soli Deo Gloria",
@@ -1549,6 +1620,7 @@
     },
     {
       "titolo": "Gesù è l’unica via?",
+      "tipo": "Libretto",
       "autore": "Philip G. Ryken",
       "autore_bio": "Philip Graham Ryken, pastore presbiteriano e teologo statunitense, già pastore della Tenth Presbyterian Church di Filadelfia e presidente del Wheaton College.",
       "editore": "Alfa & Omega",
@@ -1565,6 +1637,7 @@
     },
     {
       "titolo": "Gesù – un incontro speciale!",
+      "tipo": "Libretto",
       "autore": "Daniel Wisler",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1581,6 +1654,7 @@
     },
     {
       "titolo": "Il dono",
+      "tipo": "Opuscolo",
       "autore": "Carlo Chiniquy",
       "autore_bio": "Charles Chiniquy (1809-1899), sacerdote cattolico canadese, famoso predicatore della temperanza, che lasciò la chiesa di Roma dopo aver conosciuto la salvezza per grazia mediante la fede.",
       "editore": "Soli Deo Gloria",
@@ -1597,6 +1671,7 @@
     },
     {
       "titolo": "Il Sermone sul monte",
+      "tipo": "Libro",
       "autore": "Carlo Bertinelli",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1613,6 +1688,7 @@
     },
     {
       "titolo": "Il vero discepolo",
+      "tipo": "Libro",
       "autore": "William MacDonald",
       "autore_bio": "William MacDonald (1917-2007), insegnante biblico statunitense tra i più letti in ambito evangelico, autore del «Commentario biblico del discepolo» e di numerosi testi di evangelizzazione e vita cristiana.",
       "editore": "Centro Biblico",
@@ -1629,6 +1705,7 @@
     },
     {
       "titolo": "JHWH – La password di se stesso",
+      "tipo": "Libro",
       "autore": "Ellero Balzani",
       "autore_bio": "Nato nel 1943, ha vissuto intensamente la vita della chiesa evangelica, svolgendo per anni il compito di conduttore e tenendo per mezzo secolo studi biblici nelle case.",
       "editore": "",
@@ -1645,6 +1722,7 @@
     },
     {
       "titolo": "L’avversario e la vittoria cristiana",
+      "tipo": "Libro",
       "autore": "Vincent Eze Ahanonu",
       "autore_bio": "Medico pneumologo a La Spezia e membro della Chiesa evangelica «dei Fratelli» di Luni, dove ha svolto un ministero nella chiesa.",
       "editore": "La Casa della Bibbia",
@@ -1661,6 +1739,7 @@
     },
     {
       "titolo": "La preghiera che opera miracoli",
+      "tipo": "Libretto",
       "autore": "Helga Anton",
       "autore_bio": "Violinista tedesca; rimasta vedova, accettò la richiesta del pastore della sua comunità a Itzehoe (Germania) di occuparsi a tempo pieno del servizio di preghiera della chiesa.",
       "editore": "Soli Deo Gloria",
@@ -1677,6 +1756,7 @@
     },
     {
       "titolo": "La scritta proibita sul muro",
+      "tipo": "Libretto",
       "autore": "Jan van Reenen",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1693,6 +1773,7 @@
     },
     {
       "titolo": "Analisi di quattro movimenti religiosi contemporanei",
+      "tipo": "Libretto",
       "autore": "Luca Ciotta",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1709,6 +1790,7 @@
     },
     {
       "titolo": "Per essere discepoli",
+      "tipo": "Libretto",
       "autore": "Rinaldo Diprose",
       "autore_bio": "Rinaldo Diprose, teologo evangelico, per molti anni docente all’Istituto Biblico Evangelico Italiano di Roma.",
       "editore": "Soli Deo Gloria",
@@ -1725,6 +1807,7 @@
     },
     {
       "titolo": "Perché la Scrittura è tutto ciò che ci occorre",
+      "tipo": "Libro",
       "autore": "Gene E. Veith",
       "autore_bio": "Gene Edward Veith, scrittore e docente statunitense di letteratura, autore di numerosi libri su fede e cultura.",
       "editore": "Alfa & Omega",
@@ -1741,6 +1824,7 @@
     },
     {
       "titolo": "Perché sono felice",
+      "tipo": "Libro",
       "autore": "Ellero Balzani",
       "autore_bio": "Nato il 26 maggio 1943, oggi in pensione. Ha vissuto intensamente la vita della chiesa evangelica, svolgendo per anni il compito di conduttore, e per mezzo secolo ha tenuto studi biblici nelle case, vedendo molte persone consacrare la loro vita a Gesù Cristo.",
       "editore": "",
@@ -1757,6 +1841,7 @@
     },
     {
       "titolo": "Rendiamo pubblica la verità",
+      "tipo": "Libretto",
       "autore": "I. Howard Marshall",
       "autore_bio": "I. Howard Marshall (1934-2015), professore di Nuovo Testamento all’Università di Aberdeen in Scozia, biblista di fama mondiale.",
       "editore": "Edizioni GBU",
@@ -1773,6 +1858,7 @@
     },
     {
       "titolo": "Stelle oltre le nuvole",
+      "tipo": "Libro",
       "autore": "Jan Pit",
       "autore_bio": "Jan Pit, missionario olandese in Laos con la moglie Lies, collaboratore di Porte Aperte, l’organizzazione al servizio dei cristiani perseguitati.",
       "editore": "Porte Aperte",
