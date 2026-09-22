@@ -341,6 +341,15 @@
       <input data-libro="${l.id}" data-campo="${nome}" value="${esc(v)}" ${extra.attr || ""}></label>`;
   }
 
+  function campoTipo(l) {
+    const tipi = (R.tipi || ["Libro", "Libretto", "Opuscolo", "Rivista", "Calendario", "Bibbia", "Altro"]).slice();
+    const v = l.tipo || "Libro";
+    if (tipi.indexOf(v) < 0) tipi.push(v);
+    return `<label class="k-campo"><span>Tipo</span>
+      <select data-libro="${l.id}" data-campo="tipo">${tipi.map(t =>
+        `<option${t === v ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+  }
+
   function htmlFaccia(l, faccia) {
     const fid = l[faccia];
     const nome = fid && R.foto[fid] ? R.foto[fid].nome : "";
@@ -378,6 +387,7 @@
         <div class="k-griglia">
           ${campo(l, "titolo", "Titolo", { cls: "k-l2" })}
           ${campo(l, "autore", "Autore", { cls: "k-l2" })}
+          ${campoTipo(l)}
           ${campo(l, "editore", "Editore")}
           ${campo(l, "anno", "Anno")}
           ${campo(l, "genere", "Genere", { attr: 'list="kGeneri"' })}
@@ -447,7 +457,7 @@
     }
     if (az === "separa") {
       const nuovo = {
-        id: "b" + Date.now(), fronte: l.retro, retro: "", titolo: "", titolo_file: "", autore: "",
+        id: "b" + Date.now(), fronte: l.retro, retro: "", titolo: "", titolo_file: "", tipo: "Libro", autore: "",
         autore_bio: "", editore: "", anno: "", pagine: 0, genere: "", lingua: "Italiano", isbn: "",
         descrizione: "", note: "", copie: 1, fonte: "", suggerimenti: [], includi: true,
         avvisi: [{ tipo: "titolo", testo: "Libro separato a mano: scrivi i dati" },

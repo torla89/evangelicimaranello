@@ -61,6 +61,21 @@ ESTENSIONI = (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff")
 LATO_OCR = 1500          # px: abbastanza per il testo minuto delle quarte
 LATO_SITO = 900          # px: come le copertine gia' pubblicate
 LATO_MINI = 340          # px: anteprime della schermata di revisione
+TIPI_LIBRO = ["Libro", "Libretto", "Opuscolo", "Rivista", "Calendario", "Bibbia", "Altro"]
+
+
+def tipo_da(pagine, titolo=""):
+    """Una prima ipotesi sul tipo di pubblicazione, da correggere nella revisione."""
+    t = chiave(titolo)
+    if t.startswith("calendario"):
+        return "Calendario"
+    if pagine and pagine <= 40:
+        return "Opuscolo"
+    if pagine and pagine <= 100:
+        return "Libretto"
+    return "Libro"
+
+
 TESSERACT_SETUP_URL = ("https://github.com/UB-Mannheim/tesseract/releases/download/"
                        "v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe")
 
@@ -1220,7 +1235,8 @@ class Catalogatore:
 
         return {
             "fronte": fr["id"], "retro": rt["id"] if rt else "",
-            "titolo": titolo, "titolo_file": titolo_file, "autore": autore, "autore_bio": bio,
+            "titolo": titolo, "titolo_file": titolo_file, "tipo": tipo_da(pagine, titolo),
+            "autore": autore, "autore_bio": bio,
             "editore": editore, "anno": anno, "pagine": pagine, "genere": genere,
             "lingua": "Italiano", "isbn": isbn, "descrizione": sintesi, "note": "",
             "copie": 1, "fonte": fonte, "suggerimenti": suggerimenti,
@@ -1235,7 +1251,7 @@ class Catalogatore:
                        "vuota": f.get("vuota", False)}
         generi = sorted(set(self.stato.get("generi", [])) | {g for _, g in REGOLE_GENERE},
                         key=lambda g: senza_accenti(g).lower())
-        return {"libri": self.libri, "foto": foto, "generi": generi,
+        return {"libri": self.libri, "foto": foto, "generi": generi, "tipi": TIPI_LIBRO,
                 "avvisi": self.stato.get("avvisi", []), "ocr": self.stato.get("ocr", False)}
 
     def miniatura(self, fid):
@@ -1298,7 +1314,8 @@ class Catalogatore:
             except (TypeError, ValueError):
                 pagine = 0
             voci.append({
-                "titolo": titolo, "autore": (l.get("autore") or "").strip(),
+                "titolo": titolo, "tipo": (l.get("tipo") or "Libro").strip(),
+                "autore": (l.get("autore") or "").strip(),
                 "autore_bio": (l.get("autore_bio") or "").strip(),
                 "editore": (l.get("editore") or "").strip(), "anno": str(l.get("anno") or "").strip(),
                 "pagine": pagine, "genere": (l.get("genere") or "").strip(),

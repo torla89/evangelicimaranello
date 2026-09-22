@@ -617,7 +617,16 @@
     <h3 id="modalLibroTitle">Nuovo libro</h3>
     <input type="hidden" id="libroEditIdx" value="-1">
 
-    <div class="field"><label>Titolo</label><input type="text" id="libroTitolo" placeholder="es. Gesù nostro destino"></div>
+    <div class="field-row" style="grid-template-columns:3fr 1fr;">
+      <div class="field"><label>Titolo</label><input type="text" id="libroTitolo" placeholder="es. Gesù nostro destino"></div>
+      <div class="field">
+        <label>Tipo</label>
+        <select id="libroTipo">
+          <option>Libro</option><option>Libretto</option><option>Opuscolo</option>
+          <option>Rivista</option><option>Calendario</option><option>Bibbia</option><option>Altro</option>
+        </select>
+      </div>
+    </div>
 
     <div class="field-row">
       <div class="field"><label>Autore</label><input type="text" id="libroAutore" placeholder="es. Wilhelm Busch"></div>
@@ -1149,7 +1158,7 @@
       c.innerHTML = emptyState('Nessun libro inserito'); return;
     }
     c.innerHTML = dati.libreria.map((l, i) => {
-      const meta = [l.autore, l.editore, l.anno, (parseInt(l.pagine) > 0 ? l.pagine + ' pagine' : ''), l.genere]
+      const meta = [l.tipo, l.autore, l.editore, l.anno, (parseInt(l.pagine) > 0 ? l.pagine + ' pagine' : ''), l.genere]
         .filter(Boolean).join(' · ');
       const cover = l.copertina
         ? `<img src="${escAttr(l.copertina)}" alt="" style="width:42px;height:60px;object-fit:contain;border-radius:4px;background:rgba(255,255,255,0.05);flex-shrink:0;" onerror="this.style.display='none'">`
@@ -1202,6 +1211,10 @@
     document.getElementById('modalLibroTitle').textContent = idx >= 0 ? 'Modifica libro' : 'Nuovo libro';
     const l = idx >= 0 ? dati.libreria[idx] : {};
     document.getElementById('libroTitolo').value      = l.titolo      || '';
+    const selTipo = document.getElementById('libroTipo');
+    const tipo = l.tipo || 'Libro';
+    if (![...selTipo.options].some(o => o.value === tipo)) selTipo.add(new Option(tipo, tipo));
+    selTipo.value = tipo;
     document.getElementById('libroAutore').value      = l.autore      || '';
     document.getElementById('libroEditore').value     = l.editore     || '';
     document.getElementById('libroAnno').value        = l.anno        || '';
@@ -1227,6 +1240,7 @@
     if (!titolo) { toast('⚠ Inserisci almeno il titolo'); return; }
     const libro = {
       titolo:      titolo,
+      tipo:        document.getElementById('libroTipo').value.trim() || 'Libro',
       autore:      document.getElementById('libroAutore').value.trim(),
       autore_bio:  document.getElementById('libroAutoreBio').value.trim(),
       editore:     document.getElementById('libroEditore').value.trim(),

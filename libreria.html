@@ -209,7 +209,7 @@
       padding: 16px 18px; margin-bottom: 22px;
     }
     .filtri-riga { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-    .filtro-campo { display: flex; flex-direction: column; gap: 5px; flex: 1 1 180px; min-width: 0; }
+    .filtro-campo { display: flex; flex-direction: column; gap: 5px; flex: 1 1 150px; min-width: 0; }
     .filtro-campo label {
       font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
       color: rgba(255,255,255,0.45);
@@ -339,6 +339,10 @@
           <select id="fAutore" onchange="applicaFiltri()"></select>
         </div>
         <div class="filtro-campo">
+          <label for="fTipo">Tipo</label>
+          <select id="fTipo" onchange="applicaFiltri()"></select>
+        </div>
+        <div class="filtro-campo">
           <label for="fGenere">Genere</label>
           <select id="fGenere" onchange="applicaFiltri()"></select>
         </div>
@@ -428,6 +432,7 @@
     );
 
     const chips = [];
+    if (l.tipo)    chips.push(esc(l.tipo));
     if (l.genere)  chips.push(esc(l.genere));
     if (l.editore) chips.push('Ed. ' + esc(l.editore));
     if (l.anno)    chips.push(esc(l.anno));
@@ -547,6 +552,7 @@
 
   function costruisciFiltri() {
     riempiSelect('fAutore',  'Tutti gli autori',  elenco('autore'));
+    riempiSelect('fTipo',    'Tutti i tipi',      elenco('tipo'));
     riempiSelect('fGenere',  'Tutti i generi',    elenco('genere'));
     riempiSelect('fEditore', 'Tutti gli editori', elenco('editore'));
   }
@@ -554,18 +560,20 @@
   function applicaFiltri() {
     const a = document.getElementById('fAutore').value;
     const g = document.getElementById('fGenere').value;
+    const t = document.getElementById('fTipo').value;
     const e = document.getElementById('fEditore').value;
     const q = document.getElementById('fCerca').value.trim().toLowerCase();
 
     const risultati = LIBRI.filter(l =>
       (!a || (l.autore  || '').trim() === a) &&
       (!g || (l.genere  || '').trim() === g) &&
+      (!t || (l.tipo    || '').trim() === t) &&
       (!e || (l.editore || '').trim() === e) &&
       (!q || ((l.titolo || '') + ' ' + (l.autore || '') + ' ' + (l.descrizione || ''))
                .toLowerCase().indexOf(q) !== -1)
     );
 
-    const attivi = !!(a || g || e || q);
+    const attivi = !!(a || g || t || e || q);
     document.getElementById('btnAzzera').hidden = !attivi;
     document.getElementById('conteggio').innerHTML = attivi
       ? `<strong>${risultati.length}</strong> ${risultati.length === 1 ? 'libro trovato' : 'libri trovati'} su ${LIBRI.length}`
@@ -583,6 +591,7 @@
   function azzeraFiltri() {
     document.getElementById('fAutore').value  = '';
     document.getElementById('fGenere').value  = '';
+    document.getElementById('fTipo').value    = '';
     document.getElementById('fEditore').value = '';
     document.getElementById('fCerca').value   = '';
     applicaFiltri();
