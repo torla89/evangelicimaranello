@@ -2365,6 +2365,40 @@
       "retro": "libreria/dio-ti-ama-retro.webp",
       "copie": 1,
       "note": ""
+    },
+    {
+      "titolo": "La Bibbia dei fanciulli",
+      "tipo": "Libro",
+      "autore": "",
+      "autore_bio": "",
+      "editore": "Elle Di Ci",
+      "anno": "",
+      "pagine": 0,
+      "genere": "Bambini",
+      "lingua": "Italiano",
+      "isbn": "88-01-10423-5",
+      "descrizione": "La più bella storia del mondo. La Bibbia è una vera miniera di racconti che i bambini facilmente comprendono e da sempre apprezzano. Il linguaggio semplice e chiaro aiuta i genitori a leggerla insieme ai loro bambini, e lascia che siano i figli stessi a scoprirne il fascino. Il libro contiene tutte le più importanti storie della Bibbia: dalla creazione alla storia del popolo d’Israele, dalla vita di Gesù fino al naufragio di Paolo e al suo arrivo a Roma. Volutamente piccolo e facile da maneggiare, con caratteri chiari e grandi e le luminose illustrazioni di Carolyn Cox.",
+      "copertina": "libreria/la-bibbia-dei-fanciulli-fronte.webp",
+      "retro": "libreria/la-bibbia-dei-fanciulli-retro.webp",
+      "copie": 1,
+      "note": "Illustrazioni di Carolyn Cox. Edizione cattolica (Elle Di Ci)."
+    },
+    {
+      "titolo": "La mia prima Bibbia",
+      "tipo": "Libro",
+      "autore": "",
+      "autore_bio": "",
+      "editore": "Elle Di Ci",
+      "anno": "",
+      "pagine": 0,
+      "genere": "Bambini",
+      "lingua": "Italiano",
+      "isbn": "88-01-00846-5",
+      "descrizione": "La più grande storia del mondo raccontata ai piccoli. Questo libro raccoglie le più belle storie bibliche, scelte con particolare attenzione per i bambini, per formare i primi gradini che permettono di entrare nel meraviglioso mondo della Bibbia. Storie facili da capire, interessanti da leggere in gruppo, da raccontare e da vivere insieme, soprattutto quando sono lette ad alta voce da una persona cara. Le simpatiche illustrazioni integrano vivacemente il testo.",
+      "copertina": "libreria/la-mia-prima-bibbia-fronte.webp",
+      "retro": "libreria/la-mia-prima-bibbia-retro.webp",
+      "copie": 1,
+      "note": "Edizione cattolica (Elle Di Ci)."
     }
   ]
 }
