@@ -1889,6 +1889,57 @@
       "retro": "libreria/dio-e-fedele-retro.webp",
       "copie": 12,
       "note": ""
+    },
+    {
+      "titolo": "Il Figlio di Dio",
+      "tipo": "Libretto",
+      "autore": "",
+      "autore_bio": "",
+      "editore": "",
+      "anno": "",
+      "pagine": 0,
+      "genere": "Libretto",
+      "lingua": "Italiano",
+      "isbn": "",
+      "descrizione": "Libretto tascabile di evangelizzazione dedicato alla persona di Gesù Cristo, il Figlio di Dio. In copertina il pesce con la croce, l’antico simbolo con cui i primi cristiani confessavano la loro fede in Gesù.",
+      "copertina": "libreria/il-figlio-di-dio-fronte.webp",
+      "retro": "libreria/il-figlio-di-dio-retro.webp",
+      "copie": 6,
+      "note": "Stampa: Grafiche Gattei, Rimini."
+    },
+    {
+      "titolo": "Il perché",
+      "tipo": "Libretto",
+      "autore": "",
+      "autore_bio": "",
+      "editore": "",
+      "anno": "",
+      "pagine": 0,
+      "genere": "Libretto",
+      "lingua": "Italiano",
+      "isbn": "",
+      "descrizione": "Libretto illustrato di evangelizzazione. In copertina un giovane pensieroso, seduto ai piedi della collina del Calvario con le tre croci: le domande della vita trovano risposta nella croce di Cristo.",
+      "copertina": "libreria/il-perche-fronte.webp",
+      "retro": "libreria/il-perche-retro.webp",
+      "copie": 3,
+      "note": ""
+    },
+    {
+      "titolo": "Tentazione",
+      "tipo": "Libretto",
+      "autore": "",
+      "autore_bio": "",
+      "editore": "",
+      "anno": "",
+      "pagine": 0,
+      "genere": "Libretto",
+      "lingua": "Italiano",
+      "isbn": "",
+      "descrizione": "Libretto tascabile sul tema della tentazione: che cos’è, da dove viene e come il credente può resistervi con l’aiuto di Dio.",
+      "copertina": "libreria/tentazione-fronte.webp",
+      "retro": "libreria/tentazione-retro.webp",
+      "copie": 12,
+      "note": ""
     }
   ]
 }
