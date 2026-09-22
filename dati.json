@@ -1127,7 +1127,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 01 gennaio/aprile 2021",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1144,7 +1144,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 02 maggio/agosto 2021",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1161,7 +1161,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 03 settembre/dicembre 2021",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1178,7 +1178,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 01 gennaio/aprile 2022",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1195,7 +1195,7 @@
     },
     {
       "titolo": "Per l’ora che passa — 02 maggio/agosto 2022",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "AA. VV.",
       "autore_bio": "",
       "editore": "La Casa della Bibbia",
@@ -1518,7 +1518,7 @@
     },
     {
       "titolo": "Credente o cristiano?",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Ellero Balzani",
       "autore_bio": "Nato nel 1943, per trentasette anni metalmeccanico e oggi in pensione. Per cinquant’anni ha vissuto intensamente la vita della chiesa evangelica, in alcuni periodi anche come conduttore, e ha tenuto numerosissimi studi biblici nelle case, vedendo molte persone consacrare la loro vita a Gesù Cristo.",
       "editore": "Lampi di Stampa",
@@ -1535,7 +1535,7 @@
     },
     {
       "titolo": "Dalla resurrezione al suo ritorno",
-      "tipo": "Opuscolo",
+      "tipo": "Libro",
       "autore": "Don A. Carson",
       "autore_bio": "Donald A. Carson, docente ricercatore di Nuovo Testamento alla Trinity Evangelical Divinity School di Deerfield (Illinois), dove insegna dal 1978.",
       "editore": "Soli Deo Gloria",
@@ -1603,7 +1603,7 @@
     },
     {
       "titolo": "Elementi della fede",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Nicola Martella",
       "autore_bio": "Nicola Martella, teologo e scrittore evangelico italiano, autore di numerosi studi biblici e dottrinali.",
       "editore": "Soli Deo Gloria",
@@ -1620,7 +1620,7 @@
     },
     {
       "titolo": "Gesù è l’unica via?",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Philip G. Ryken",
       "autore_bio": "Philip Graham Ryken, pastore presbiteriano e teologo statunitense, già pastore della Tenth Presbyterian Church di Filadelfia e presidente del Wheaton College.",
       "editore": "Alfa & Omega",
@@ -1637,7 +1637,7 @@
     },
     {
       "titolo": "Gesù – un incontro speciale!",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Daniel Wisler",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1654,7 +1654,7 @@
     },
     {
       "titolo": "Il dono",
-      "tipo": "Opuscolo",
+      "tipo": "Libro",
       "autore": "Carlo Chiniquy",
       "autore_bio": "Charles Chiniquy (1809-1899), sacerdote cattolico canadese, famoso predicatore della temperanza, che lasciò la chiesa di Roma dopo aver conosciuto la salvezza per grazia mediante la fede.",
       "editore": "Soli Deo Gloria",
@@ -1739,7 +1739,7 @@
     },
     {
       "titolo": "La preghiera che opera miracoli",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Helga Anton",
       "autore_bio": "Violinista tedesca; rimasta vedova, accettò la richiesta del pastore della sua comunità a Itzehoe (Germania) di occuparsi a tempo pieno del servizio di preghiera della chiesa.",
       "editore": "Soli Deo Gloria",
@@ -1756,7 +1756,7 @@
     },
     {
       "titolo": "La scritta proibita sul muro",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Jan van Reenen",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1773,7 +1773,7 @@
     },
     {
       "titolo": "Analisi di quattro movimenti religiosi contemporanei",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Luca Ciotta",
       "autore_bio": "",
       "editore": "Soli Deo Gloria",
@@ -1790,7 +1790,7 @@
     },
     {
       "titolo": "Per essere discepoli",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "Rinaldo Diprose",
       "autore_bio": "Rinaldo Diprose, teologo evangelico, per molti anni docente all’Istituto Biblico Evangelico Italiano di Roma.",
       "editore": "Soli Deo Gloria",
@@ -1841,7 +1841,7 @@
     },
     {
       "titolo": "Rendiamo pubblica la verità",
-      "tipo": "Libretto",
+      "tipo": "Libro",
       "autore": "I. Howard Marshall",
       "autore_bio": "I. Howard Marshall (1934-2015), professore di Nuovo Testamento all’Università di Aberdeen in Scozia, biblista di fama mondiale.",
       "editore": "Edizioni GBU",
@@ -1881,7 +1881,7 @@
       "editore": "Voce della Bibbia",
       "anno": "1986",
       "pagine": 0,
-      "genere": "Libretto",
+      "genere": "Vita cristiana",
       "lingua": "Italiano",
       "isbn": "",
       "descrizione": "Riprendendo il titolo, l'autore Richard W. De Haan (noto insegnante biblico radiofonico e scrittore del ministero internazionale Our Daily Bread / Ministeri De Haan) offre riflessioni spirituali basate sulle Scritture per spiegare come la fedeltà e le promesse di Dio rimangano incrollabili, rappresentando una guida e un'ancora sicura per i credenti anche nei momenti di difficoltà o prova",
@@ -1898,7 +1898,7 @@
       "editore": "",
       "anno": "",
       "pagine": 0,
-      "genere": "Libretto",
+      "genere": "Evangelizzazione",
       "lingua": "Italiano",
       "isbn": "",
       "descrizione": "Libretto tascabile di evangelizzazione dedicato alla persona di Gesù Cristo, il Figlio di Dio. In copertina il pesce con la croce, l’antico simbolo con cui i primi cristiani confessavano la loro fede in Gesù.",
@@ -1915,7 +1915,7 @@
       "editore": "",
       "anno": "",
       "pagine": 0,
-      "genere": "Libretto",
+      "genere": "Evangelizzazione",
       "lingua": "Italiano",
       "isbn": "",
       "descrizione": "Libretto illustrato di evangelizzazione. In copertina un giovane pensieroso, seduto ai piedi della collina del Calvario con le tre croci: le domande della vita trovano risposta nella croce di Cristo.",
@@ -1932,7 +1932,7 @@
       "editore": "",
       "anno": "",
       "pagine": 0,
-      "genere": "Libretto",
+      "genere": "Vita cristiana",
       "lingua": "Italiano",
       "isbn": "",
       "descrizione": "Libretto tascabile sul tema della tentazione: che cos’è, da dove viene e come il credente può resistervi con l’aiuto di Dio.",
