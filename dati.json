@@ -154,9 +154,9 @@
     {
       "nome": "Moises Studio",
       "importo": 34.99,
-      "tipo_rinnovo": "mensile",
+      "tipo_rinnovo": "disattivato",
       "scadenza": "14/06",
-      "note": "applicazione per creare la base degli inni"
+      "note": "applicazione per creare la base degli inni rimarrà attivo fino al 14/10/26"
     }
   ],
   "riunioni": [
