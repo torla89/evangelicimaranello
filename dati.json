@@ -1,6 +1,6 @@
 {
-  "saldo": 5495.36,
-  "aggiornato_il": "2026-09-20",
+  "saldo": 3119.36,
+  "aggiornato_il": "2026-09-30",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -113,6 +113,10 @@
     {
       "data": "2026-09-20",
       "saldo": 5495.36
+    },
+    {
+      "data": "2026-09-30",
+      "saldo": 3119.36
     }
   ],
   "spese_fisse": [
@@ -157,6 +161,13 @@
       "tipo_rinnovo": "disattivato",
       "scadenza": "14/06",
       "note": "applicazione per creare la base degli inni rimarrà attivo fino al 14/10/26"
+    },
+    {
+      "nome": "Affitto locale via Resistenza",
+      "importo": 425,
+      "tipo_rinnovo": "mensile",
+      "scadenza": "Ogni 20 del mese",
+      "note": ""
     }
   ],
   "riunioni": [
@@ -412,8 +423,16 @@
       "stato": "in_corso",
       "spese": [
         {
-          "voce": "Sedie (20)",
+          "voce": "Sedie (20 sedie)",
           "importo": 249.79
+        },
+        {
+          "voce": "Provvigione agenzia immobiliare",
+          "importo": 488
+        },
+        {
+          "voce": "Cauzione, prima mensilità, spese contrattuali",
+          "importo": 1888
         }
       ]
     }
