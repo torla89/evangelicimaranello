@@ -1,5 +1,5 @@
 {
-  "saldo": 3119.36,
+  "saldo": 2935.35,
   "aggiornato_il": "2026-09-30",
   "storico_saldo": [
     {
@@ -116,7 +116,7 @@
     },
     {
       "data": "2026-09-30",
-      "saldo": 3119.36
+      "saldo": 2935.35
     }
   ],
   "spese_fisse": [
@@ -441,6 +441,10 @@
         {
           "voce": "Cauzione, prima mensilità, spese contrattuali",
           "importo": 1888
+        },
+        {
+          "voce": "Vernice, pennelli ecc..",
+          "importo": 184.01
         }
       ]
     }
