@@ -124,7 +124,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 0 20px 60px; /* spinge il testo un po' verso l'alto, lasciando spazio visivo prima delle card */
+      padding: 0 20px 40px; /* spinge il testo un po' verso l'alto, lasciando spazio visivo prima delle card */
     }
 
     .hero h1 {
@@ -176,10 +176,19 @@
     }
 
     /* Bottoni — trasparenti, bordo bianco, come nel target */
+    /* Griglia 2 colonne uguali: "Chi Siamo" e "In Cosa Crediamo" sopra,
+       "Dove Siamo" sotto, centrato e largo quanto uno dei due */
     .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 24px;
+      row-gap: 14px;
+    }
+    .buttons a { text-align: center; }
+    .buttons a.btn-center {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: calc((100% - 24px) / 2);
     }
 
     .buttons a {
@@ -335,12 +344,12 @@
 
       /* Bottoni: in colonna, larghezza piena */
       .buttons {
-        flex-direction: column;
-        align-items: stretch;
+        grid-template-columns: 1fr;
         gap: 10px;
         width: 100%;
         max-width: 280px;
       }
+      .buttons a.btn-center { width: 100%; }
       .buttons a {
         text-align: center;
         padding: 13px 20px;
@@ -432,6 +441,7 @@
     <div class="buttons">
       <a href="chi-siamo.html">Chi Siamo</a>
       <a href="cosa-crediamo.html">In Cosa Crediamo</a>
+      <a href="dove-siamo.html" class="btn-center">Dove Siamo</a>
     </div>
   </section>
 
@@ -439,8 +449,8 @@
   <div class="sections">
 
     <a href="culto.html" class="section">
-      <h3>Il Nostro Culto</h3>
-      <p>Orari e informazioni sulle nostre celebrazioni</p>
+      <h3>La Nostra Riunione Domenicale</h3>
+      <p>Orari e informazioni sul nostro incontro della domenica</p>
       <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
         <rect x="29" y="1"  width="6"  height="13" rx="1"/>
         <rect x="24" y="5"  width="16" height="3"  rx="1"/>
