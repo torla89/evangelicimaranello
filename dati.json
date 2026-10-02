@@ -1,6 +1,6 @@
 {
-  "saldo": 2935.35,
-  "aggiornato_il": "2026-09-30",
+  "saldo": 3105.28,
+  "aggiornato_il": "2026-10-02",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -117,6 +117,10 @@
     {
       "data": "2026-09-30",
       "saldo": 2935.35
+    },
+    {
+      "data": "2026-10-02",
+      "saldo": 3105.28
     }
   ],
   "spese_fisse": [
@@ -445,6 +449,10 @@
         {
           "voce": "Vernice, pennelli ecc..",
           "importo": 184.01
+        },
+        {
+          "voce": "Materiale pulizia saletta",
+          "importo": 30.07
         }
       ]
     }
