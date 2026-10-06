@@ -1,5 +1,5 @@
 {
-  "saldo": 2749.03,
+  "saldo": 2698.46,
   "aggiornato_il": "2026-10-06",
   "storico_saldo": [
     {
@@ -124,7 +124,7 @@
     },
     {
       "data": "2026-10-06",
-      "saldo": 2749.03
+      "saldo": 2698.46
     }
   ],
   "spese_fisse": [
@@ -463,8 +463,8 @@
           "importo": 173.73
         },
         {
-          "voce": "Librerie (2 librerie)",
-          "importo": 155.62
+          "voce": "2 Librerie (1 libri e 1 innari)",
+          "importo": 208.19
         }
       ]
     }
