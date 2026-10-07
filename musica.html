@@ -292,7 +292,7 @@
 ============================ -->
 <script>
 const ARCHIVE_ID   = "musica-cristiana_202608";
-const ARCHIVE_BASE = "https://archive.org/download/" + ARCHIVE_ID + "/";
+const ARCHIVE_BASE = "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/musica-cristiana_202608/";
 
 // Elenco di riserva, usato solo se non riusciamo a leggere l'elenco
 // aggiornato da archive.org (nel frattempo la pagina resta comunque utilizzabile).
@@ -309,22 +309,24 @@ const BRANI_FALLBACK = [
   "Melodic Trap - Corona e Cenere.mp3",
   "Melodic Trap - Fuoco e Ceneri.mp3",
   "Melodic Trap - Luce in tasca.mp3",
+  "Melodic Trap - Scusa Se Ho Fatto Tardi.mp3",
   "Melodic Trap - Sotto Le Macerie.mp3",
   "Melodic Trap - Strada Di Luce.mp3",
   "Melodic Trap - Strada e Grazia.mp3",
+  "Metal - Armor of the Dawn.mp3",
   "Pop - Croce Bussola.mp3",
   "Pop - E torno a Te.mp3",
   "Pop - Fonte Chiara.mp3",
-  "Pop - Gioia Nel Tuo Amore.mp3",
+  "Pop - Gioia Nel Tuo Nome.mp3",
   "Pop - Hold Me In Grace.mp3",
   "Pop - Mai Da Solo.mp3",
   "Pop - Mani Nel Buio.mp3",
   "Pop - Portami Su.mp3",
   "Raggaeton - Luce Sola.mp3",
+  "Rap Melodico - Riportami a casa.mp3",
   "Trap - Croce Prezzo.mp3",
   "Trap - Maschera sul Viso.mp3",
   "Trap - Non cercavo niente.mp3",
-  "Trap - Roveto Bruciante.mp3",
   "Trap - Valle Oscura.mp3",
   "Trap - Via Coltello.mp3",
   "Trap - Vieni Senza Scosse.mp3"
@@ -597,6 +599,7 @@ async function scaricaBrano(url, filename, btnEl) {
 
 /* ── Caricamento elenco brani da archive.org ── */
 async function caricaElencoBrani() {
+  if (!ARCHIVE_BASE.includes('archive.org')) { renderBrani(BRANI_FALLBACK); return; }
   try {
     const res = await fetch('https://archive.org/metadata/' + ARCHIVE_ID);
     if (!res.ok) throw new Error('metadata non raggiungibile');
@@ -626,22 +629,22 @@ caricaElencoBrani();
 
 const PLAYLIST_FALLBACK = [
   {
-    src:    "https://archive.org/download/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3",
+    src:    "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/Cem-Musica-Player/Gioia%20nel%20tuo%20nome.mp3",
     title:  "Gioia nel tuo nome",
     artist: "Chiesa Evangelica Maranello",
-    cover:  "https://archive.org/download/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.jpg"
+    cover:  "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/Cem-Musica-Player/Gioia%20nel%20tuo%20nome_cover.jpg"
   },
   {
-    src:    "https://archive.org/download/Cem-Musica-Player/Croce%20Bussola.mp3",
+    src:    "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/Cem-Musica-Player/Croce%20Bussola.mp3",
     title:  "Croce Bussola",
     artist: "Chiesa Evangelica Maranello",
-    cover:  "https://archive.org/download/Cem-Musica-Player/Croce%20Bussola_cover.jpg"
+    cover:  "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/Cem-Musica-Player/Croce%20Bussola_cover.jpg"
   },
   {
-    src:    "https://archive.org/download/Cem-Musica-Player/E%20torno%20a%20Te.mp3",
+    src:    "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/Cem-Musica-Player/E%20torno%20a%20Te.mp3",
     title:  "E torno a Te",
     artist: "Chiesa Evangelica Maranello",
-    cover:  "https://archive.org/download/Cem-Musica-Player/E%20torno%20a%20Te_cover.jpg"
+    cover:  "https://pub-bf2076e1d2704f6bbe4cdd4abb476b62.r2.dev/Cem-Musica-Player/E%20torno%20a%20Te_cover.jpg"
   }
 ];
 

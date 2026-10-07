@@ -382,30 +382,43 @@
     <div class="panel" id="panel-musica">
       <div class="section-label">🎵 Brani riprodotti in maniera casuale nel player</div>
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
-        I file MP3 vengono salvati nella cartella <strong style="color:var(--white)">musica-player/</strong>
+        I file MP3 vengono caricati su <strong style="color:var(--white)">Cloudflare R2</strong>
         e riprodotti in ordine casuale nel player in fondo al sito.
       </p>
 
       <div id="musicaList"></div>
 
       <div class="btn-row-start" style="margin-top:12px;">
-        <button class="btn btn-ghost" onclick="aggiungiFileArchive('musica')">🎵 Aggiungi MP3</button>
+        <button class="btn btn-ghost" onclick="aggiungiFileR2('musica')">🎵 Aggiungi MP3</button>
       </div>
 
       <div id="musicaUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
+
+      <div class="section-label" style="margin-top:28px;">🎶 Pagina «Musica» (brani divisi per genere)</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+        Scegli insieme l'MP3, il testo (<strong style="color:var(--white)">.txt</strong>) e la copertina
+        (<strong style="color:var(--white)">.jpg</strong> o .png): devono avere lo stesso nome,
+        nel formato <strong style="color:var(--white)">Genere - Titolo</strong>
+        (es. «Pop - Fonte Chiara.mp3», «Pop - Fonte Chiara.txt», «Pop - Fonte Chiara.jpg»).
+        Finito il caricamento l'elenco della pagina si aggiorna da solo; poi premi «Salva e Pubblica».
+      </p>
+      <div class="btn-row-start">
+        <button class="btn btn-ghost" onclick="aggiungiFileR2('pagina-musica')">🎶 Aggiungi brani alla pagina Musica</button>
+        <button class="btn btn-ghost" onclick="aggiornaElencoMusica()" title="Rilegge i brani presenti su Cloudflare R2 e riscrive l'elenco nella pagina">🔄 Aggiorna elenco</button>
+      </div>
     </div>
 
     <!-- ══ BASI INNI ══ -->
     <div class="panel" id="panel-basi">
       <div class="section-label">🎹 Basi strumentali degli inni</div>
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
-        Le basi sono su <strong style="color:var(--white)">Archive.org</strong> — collezione <strong style="color:var(--white)">Cem-basi-inni</strong>.
+        Le basi sono su <strong style="color:var(--white)">Cloudflare R2</strong> — cartella <strong style="color:var(--white)">Cem-basi-inni</strong>.
       </p>
 
       <div id="basiList"></div>
 
       <div class="btn-row-start" style="margin-top:12px;">
-        <button class="btn btn-ghost" onclick="aggiungiFileArchive('basi')">🎹 Aggiungi base</button>
+        <button class="btn btn-ghost" onclick="aggiungiFileR2('basi')">🎹 Aggiungi base</button>
       </div>
 
       <div id="basiUploadLog" style="margin-top:10px;font-size:0.80rem;color:var(--green);display:none;"></div>
@@ -444,7 +457,7 @@
   <div class="save-bar-msg" id="saveBarMsg">Carica un file <strong>dati.json</strong> per iniziare</div>
   <div style="display:flex;gap:10px;flex-shrink:0;">
     <button class="btn btn-ghost" onclick="risincronizza()" title="Scarica ultime modifiche da GitHub">🔄 Sincronizza</button>
-    <button class="btn btn-ghost" onclick="apriModalS3()" title="Chiavi Archive.org">🔑 Archive.org</button>
+    <button class="btn btn-ghost" onclick="apriModalR2()" title="Collegamento a Cloudflare R2 (archivio di audio e copertine)">☁ Cloudflare R2</button>
     <button class="btn btn-ghost" id="btnSalva" onclick="saveFile()" disabled
       title="Salva dati.json con backup automatico">
       💾 Salva dati.json
@@ -1356,11 +1369,10 @@
   }
 
   async function eliminaMusica(idx) {
-    if (!confirm('Rimuovere dalla playlist e tentare eliminazione da Archive.org?')) return;
-    const keys = await getS3Keys();
+    if (!confirm('Rimuovere dalla playlist? (il file resta su Cloudflare R2)')) return;
     if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_musica_url(idx, keys.access || '', keys.secret || '');
-      if (result === 'ok') { toast('🗑 Rimosso dalla playlist (Archive.org potrebbe richiedere tempo)'); renderMusica(); markDirty(); }
+      const result = await window.pywebview.api.elimina_musica_url(idx);
+      if (result === 'ok') { toast('🗑 Rimosso dalla playlist'); renderMusica(); markDirty(); }
       else toast('❌ ' + result);
     }
   }
@@ -1428,37 +1440,47 @@
   }
 
   async function eliminaBasi(idx) {
-    if (!confirm('Rimuovere dalla playlist e tentare eliminazione da Archive.org?')) return;
-    const keys = await getS3Keys();
+    if (!confirm('Rimuovere dalla playlist? (il file resta su Cloudflare R2)')) return;
     if (typeof window.pywebview !== 'undefined') {
-      const result = await window.pywebview.api.elimina_base_url(idx, keys.access || '', keys.secret || '');
-      if (result === 'ok') { toast('🗑 Rimossa dalla playlist (Archive.org potrebbe richiedere tempo)'); renderBasi(); markDirty(); }
+      const result = await window.pywebview.api.elimina_base_url(idx);
+      if (result === 'ok') { toast('🗑 Rimossa dalla playlist'); renderBasi(); markDirty(); }
       else toast('❌ ' + result);
     }
   }
 
-  // ── ARCHIVE.ORG ────────────────────────────────────────────
-  async function getS3Keys() {
-    if (typeof window.pywebview !== 'undefined') {
-      try { return JSON.parse(await window.pywebview.api.leggi_chiavi_s3() || '{}'); }
-      catch(e) { return {}; }
-    }
-    return {};
+  // ── CLOUDFLARE R2 ──────────────────────────────────────────
+  async function r2Attivo() {
+    if (typeof window.pywebview === 'undefined') return false;
+    try { return !!(await window.pywebview.api.r2_attivo()); } catch(e) { return false; }
   }
 
-  async function salvaChiaviS3() {
-    const access = document.getElementById('s3AccessKey').value.trim();
-    const secret = document.getElementById('s3SecretKey').value.trim();
-    if (!access || !secret) { toast('⚠ Inserisci entrambe le chiavi'); return; }
-    await window.pywebview.api.salva_chiavi_s3(access, secret);
-    closeModal('s3'); toast('✅ Chiavi S3 salvate');
+  async function apriModalR2() {
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
+    let c = {};
+    try { c = JSON.parse(await window.pywebview.api.leggi_config_r2() || '{}'); } catch(e) {}
+    document.getElementById('r2Endpoint').value  = c.endpoint || '';
+    document.getElementById('r2AccessKey').value = c.access_key || '';
+    document.getElementById('r2SecretKey').value = '';
+    document.getElementById('r2SecretKey').placeholder = c.ha_segreta ? '(già salvata: lascia vuoto per non cambiarla)' : '';
+    document.getElementById('r2Bucket').value    = c.bucket || 'evangelicimaranello-media';
+    document.getElementById('r2PublicUrl').value = c.public_url || '';
+    document.getElementById('r2Stato').textContent = c.attivo ? '✅ Collegamento configurato' : '';
+    openModal('r2');
   }
 
-  async function apriModalS3() {
-    const keys = await getS3Keys();
-    if (keys.access) document.getElementById('s3AccessKey').value = keys.access;
-    if (keys.secret) document.getElementById('s3SecretKey').value = keys.secret;
-    openModal('s3');
+  async function salvaConfigR2() {
+    const cfg = {
+      endpoint:   document.getElementById('r2Endpoint').value.trim(),
+      access_key: document.getElementById('r2AccessKey').value.trim(),
+      secret_key: document.getElementById('r2SecretKey').value.trim(),
+      bucket:     document.getElementById('r2Bucket').value.trim(),
+      public_url: document.getElementById('r2PublicUrl').value.trim()
+    };
+    const stato = document.getElementById('r2Stato');
+    stato.textContent = '⏳ Provo il collegamento...';
+    const res = await window.pywebview.api.salva_config_r2(JSON.stringify(cfg));
+    if (res === 'ok') { closeModal('r2'); toast('✅ Cloudflare R2 collegato'); }
+    else stato.textContent = '❌ ' + res;
   }
 
   function uploadLog(msg) {
@@ -1466,15 +1488,30 @@
     el.textContent += msg + '\n'; el.scrollTop = el.scrollHeight;
   }
 
-  async function aggiungiFileArchive(tipo) {
-    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
-    const keys = await getS3Keys();
-    if (!keys.access || !keys.secret) { toast('⚠ Configura le chiavi 🔑 Archive.org'); apriModalS3(); return; }
+  async function aggiornaElencoMusica(silenzioso) {
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return false; }
+    const res = await window.pywebview.api.aggiorna_elenco_musica();
+    if (res.startsWith('ok:')) {
+      const msg = '✅ Pagina Musica: ' + res.slice(3) + ' brani in elenco';
+      if (silenzioso) uploadLog(msg); else toast(msg);
+      markDirty();
+      return true;
+    }
+    if (silenzioso) uploadLog('❌ ' + res); else toast('❌ ' + res);
+    return false;
+  }
 
-    const paths = await window.pywebview.api.seleziona_file_mp3();
+  async function aggiungiFileR2(tipo) {
+    if (typeof window.pywebview === 'undefined') { toast('❌ pywebview non disponibile'); return; }
+    if (!(await r2Attivo())) { toast('⚠ Configura prima ☁ Cloudflare R2'); apriModalR2(); return; }
+
+    const paths = tipo === 'pagina-musica'
+      ? await window.pywebview.api.seleziona_file_brani()
+      : await window.pywebview.api.seleziona_file_mp3();
     if (!paths || !paths.length) { toast('⚠ Nessun file selezionato'); return; }
 
-    const collezione = tipo === 'musica' ? 'Cem-Musica-Player' : 'Cem-basi-inni';
+    // per la pagina Musica la cartella la decide il programma (la legge da musica.html)
+    const collezione = tipo === 'musica' ? 'Cem-Musica-Player' : (tipo === 'basi' ? 'Cem-basi-inni' : '');
 
     // Apri modal upload
     document.getElementById('uploadLog').textContent = '';
@@ -1495,7 +1532,7 @@
       document.getElementById('uploadSpeed').textContent = '';
 
       // Avvia upload in background
-      await window.pywebview.api.avvia_upload(path, collezione, keys.access, keys.secret, tipo);
+      await window.pywebview.api.avvia_upload(path, collezione, tipo);
 
       // Polling stato
       let done = false;
@@ -1524,6 +1561,7 @@
     uploadLog(tuttiOk ? '\n🎉 Tutti i file caricati!' : '\n⚠ Completato con errori.');
     document.getElementById('uploadCloseBtn').style.display = 'inline-block';
 
+    if (tipo === 'pagina-musica') { await aggiornaElencoMusica(true); return; }
     if (tipo === 'musica') renderMusica(); else renderBasi();
     markDirty();
   }
@@ -1736,17 +1774,24 @@
 </script>
 
 <!-- ══ MODAL CHIAVI S3 ══ -->
-<div class="modal-bg" id="modal-s3">
-  <div class="modal">
-    <h3>🔑 Chiavi S3 Archive.org</h3>
+<div class="modal-bg" id="modal-r2">
+  <div class="modal" style="max-width:560px;">
+    <h3>☁ Cloudflare R2</h3>
     <p style="font-size:0.85rem;color:var(--muted);margin-bottom:14px;">
-      Trovi le chiavi su <strong style="color:var(--white)">archive.org/account/s3.php</strong>
+      Audio e copertine dei brani stanno su Cloudflare R2. I dati si trovano nella dashboard di Cloudflare:
+      <strong style="color:var(--white)">R2 → Manage API Tokens</strong> (endpoint e chiavi) e
+      <strong style="color:var(--white)">bucket → Impostazioni</strong> (indirizzo pubblico).
+      Restano solo su questo computer, nel file <strong style="color:var(--white)">.r2config</strong>.
     </p>
-    <div class="field"><label>Access Key</label><input type="text" id="s3AccessKey" style="font-family:monospace;"></div>
-    <div class="field"><label>Secret Key</label><input type="password" id="s3SecretKey" style="font-family:monospace;"></div>
+    <div class="field"><label>Endpoint S3</label><input type="text" id="r2Endpoint" placeholder="https://….r2.cloudflarestorage.com" style="font-family:monospace;"></div>
+    <div class="field"><label>Access Key ID</label><input type="text" id="r2AccessKey" style="font-family:monospace;"></div>
+    <div class="field"><label>Secret Access Key</label><input type="password" id="r2SecretKey" style="font-family:monospace;"></div>
+    <div class="field"><label>Bucket</label><input type="text" id="r2Bucket" style="font-family:monospace;"></div>
+    <div class="field"><label>Indirizzo pubblico</label><input type="text" id="r2PublicUrl" placeholder="https://pub-….r2.dev" style="font-family:monospace;"></div>
+    <div id="r2Stato" style="font-size:0.82rem;color:var(--muted);min-height:1.2em;margin-top:6px;"></div>
     <div class="btn-row-end" style="margin-top:14px;">
-      <button class="btn btn-ghost" onclick="closeModal('s3')">Annulla</button>
-      <button class="btn btn-primary" onclick="salvaChiaviS3()">💾 Salva</button>
+      <button class="btn btn-ghost" onclick="closeModal('r2')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaConfigR2()">💾 Salva e prova</button>
     </div>
   </div>
 </div>
@@ -1769,10 +1814,10 @@
   </div>
 </div>
 
-<!-- ══ MODAL UPLOAD ARCHIVE.ORG ══ -->
+<!-- ══ MODAL UPLOAD CLOUDFLARE R2 ══ -->
 <div class="modal-bg" id="uploadOverlay">
   <div class="modal" style="max-width:520px;">
-    <h3>📡 Caricamento su Archive.org</h3>
+    <h3>📡 Caricamento su Cloudflare R2</h3>
     <div id="uploadInfo" style="font-size:0.85rem;color:var(--muted);margin:10px 0 6px;"></div>
     <pre id="uploadLog" style="
       background:rgba(0,0,0,0.40);border:1px solid var(--border);border-radius:8px;

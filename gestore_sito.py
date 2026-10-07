@@ -24,6 +24,12 @@ except Exception:
     class CatalogoAPI:
         pass
 
+# Archivio dei media (audio, copertine dei brani) su Cloudflare R2
+try:
+    import r2_storage
+except Exception:
+    r2_storage = None
+
 # ── CONFIGURAZIONE REPOSITORY ─────────────────────────────────
 REPO_URL  = "https://github.com/torla89/evangelicimaranello.git"
 GIT_INSTALLER_URL = "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe"
@@ -275,13 +281,44 @@ class PythonBridge(CatalogoAPI):
 
     # ──────────────────────────────────────────────────────────
 
-    def avvia_upload(self, filepath: str, collezione: str,
-                      access_key: str, secret_key: str, tipo: str = 'musica') -> str:
-        """Avvia upload in background e aggiorna lo stato."""
+    # ── CLOUDFLARE R2 ─────────────────────────────────────────
+    def _r2_config(self):
+        """Configurazione R2, oppure None se non e' ancora stata inserita."""
+        if r2_storage is None:
+            return None
+        return r2_storage.leggi_config(SITE_DIR)
+
+    def r2_attivo(self) -> bool:
+        return self._r2_config() is not None
+
+    def _r2_carica(self, collezione: str, filename: str, data: bytes,
+                   content_type: str = '', progresso=None):
+        """Carica su R2 e restituisce l'URL pubblico; None se R2 non e' configurato."""
+        cfg = self._r2_config()
+        if not cfg:
+            return None
+        if not content_type or content_type == 'audio/mpeg':
+            content_type = r2_storage.tipo_file(filename, content_type)
+        return r2_storage.carica_dati(cfg, collezione, filename, data,
+                                      content_type, progresso)
+
+    def _registra_audio(self, tipo: str, filename: str, file_url: str):
+        """Aggiunge il file appena caricato alla playlist giusta."""
+        import re
+        base = os.path.splitext(filename)[0]
+        if tipo == 'basi':
+            self._aggiungi_a_playlist_basi(file_url, base.strip())
+        else:
+            self._aggiungi_a_playlist_musica(
+                file_url, re.sub(r'^\d+\s*-\s*', '', base).strip())
+
+    def avvia_upload(self, filepath: str, collezione: str, tipo: str = 'musica') -> str:
+        """Avvia il caricamento su Cloudflare R2 in background.
+        tipo: 'musica', 'basi' o 'pagina-musica'."""
         self._upload_stato = {"status": "uploading", "pct": 0, "speed": "", "message": ""}
         threading.Thread(
             target=self._upload_thread,
-            args=(filepath, collezione, access_key, secret_key, tipo),
+            args=(filepath, collezione, tipo),
             daemon=True
         ).start()
         return "started"
@@ -372,87 +409,45 @@ class PythonBridge(CatalogoAPI):
         except Exception:
             return []
 
-    def _upload_thread(self, filepath: str, collezione: str,
-                        access_key: str, secret_key: str, tipo: str):
-        import re, time, io
-        from urllib.parse import quote
+    def _upload_thread(self, filepath: str, collezione: str, tipo: str):
+        import time
         try:
+            if not self._r2_config():
+                raise RuntimeError("Cloudflare R2 non e' configurato (pulsante ☁ Cloudflare R2)")
+            if tipo == 'pagina-musica':
+                collezione = r2_storage.collezione_pagina_musica(SITE_DIR)
+                if not collezione:
+                    raise RuntimeError("collezione della pagina Musica non trovata in musica.html")
             if tipo == 'immagine':
                 data, filename, content_type = self._ottimizza_immagine(filepath)
-                mediatype = 'image'
             else:
                 with open(filepath, 'rb') as f:
                     data = f.read()
                 filename = os.path.basename(filepath)
-                content_type = 'audio/mpeg'
-                mediatype = 'audio'
+                content_type = ''
+            if not data:
+                raise RuntimeError("file vuoto")
             total = len(data)
-            filename_encoded = quote(filename, safe='')
-            url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
 
-            # Upload con tracking progresso
-            import requests
-            uploaded = [0]
-            start_time = [time.time()]
-            chunk_size = 256 * 1024  # 256KB chunks
+            inviati = [0]
+            t0 = time.time()
+            def _avanzamento(n):
+                inviati[0] += n
+                trascorso = time.time() - t0
+                vel = inviati[0] / trascorso if trascorso > 0 else 0
+                vel_str = (f"{vel/1024/1024:.1f} MB/s" if vel > 1024*1024
+                           else f"{vel/1024:.0f} KB/s") if vel else ""
+                self._upload_stato = {
+                    "status": "uploading",
+                    "pct": min(99, int(inviati[0] / max(total, 1) * 100)),
+                    "speed": vel_str, "message": ""}
 
-            class ProgressReader(io.RawIOBase):
-                def __init__(self, data):
-                    self._data = data
-                    self._pos = 0
-                # Questi due servono a far sapere a requests quanto e' lungo
-                # il file. Senza, lo manda "a pezzi" (chunked) e Archive.org
-                # rifiuta gli invii di cui non conosce la lunghezza: HTTP 411.
-                def __len__(self):
-                    return len(self._data)
-                def tell(self):
-                    return self._pos
-                def read(self, n=-1):
-                    chunk = self._data[self._pos:self._pos+n] if n > 0 else self._data[self._pos:]
-                    self._pos += len(chunk)
-                    uploaded[0] = self._pos
-                    elapsed = time.time() - start_time[0]
-                    pct = int(self._pos / total * 100)
-                    if elapsed > 0:
-                        speed_bps = self._pos / elapsed
-                        if speed_bps > 1024*1024:
-                            speed_str = f"{speed_bps/1024/1024:.1f} MB/s"
-                        else:
-                            speed_str = f"{speed_bps/1024:.0f} KB/s"
-                    else:
-                        speed_str = ""
-                    self._outer._upload_stato = {
-                        "status": "uploading", "pct": pct, "speed": speed_str, "message": ""
-                    }
-                    return chunk
-                def readable(self): return True
-
-            reader = ProgressReader(data)
-            reader._outer = self
-
-            headers = {
-                'Authorization': f'LOW {access_key}:{secret_key}',
-                'x-archive-auto-make-bucket': '1',
-                'x-archive-meta-mediatype': mediatype,
-                'Content-Type': content_type,
-                'Content-Length': str(total),
-            }
-            r = requests.put(url, data=reader, headers=headers, timeout=600)
-
-            if r.status_code in (200, 201):
-                file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
-                if tipo == 'immagine':
-                    pass  # nessuna playlist da aggiornare: l'URL torna all'interfaccia
-                elif tipo == 'basi':
-                    title = filename.replace('.mp3','').replace('.MP3','').strip()
-                    self._aggiungi_a_playlist_basi(file_url, title)
-                else:
-                    title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
-                    self._aggiungi_a_playlist_musica(file_url, title)
-                self._upload_stato = {"status": "done", "pct": 100, "speed": "",
-                                      "message": "", "url": file_url}
-            else:
-                self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": f"HTTP {r.status_code}"}
+            file_url = self._r2_carica(collezione, filename, data,
+                                       content_type, _avanzamento)
+            if tipo in ('musica', 'basi'):
+                self._registra_audio(tipo, filename, file_url)
+            self._upload_stato = {"status": "done", "pct": 100, "speed": "",
+                                  "message": "", "url": file_url}
         except Exception as e:
             self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": str(e)}
 
@@ -471,124 +466,77 @@ class PythonBridge(CatalogoAPI):
         except Exception as e:
             return []
 
-    def carica_file_su_archive(self, filepath: str, collezione: str,
-                                access_key: str, secret_key: str,
-                                tipo: str = 'musica') -> str:
-        """Carica un file direttamente dal path locale su Archive.org."""
+    def seleziona_file_brani(self) -> list:
+        """File per la pagina Musica: mp3, testo (.txt) e copertina con lo stesso nome."""
         try:
-            import re, requests, io
-            from urllib.parse import quote
+            import webview
+            result = self._window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                allow_multiple=True,
+                file_types=('Brani, testi e copertine (*.mp3;*.txt;*.jpg;*.jpeg;*.png)',
+                            'Tutti i file (*.*)')
+            )
+            return list(result) if result else []
+        except Exception:
+            return []
 
-            filename = os.path.basename(filepath)
-            with open(filepath, 'rb') as f:
-                data = f.read()
-
-            if not data:
-                return "Errore: file vuoto"
-
-            filename_encoded = quote(filename, safe='')
-            url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
-
-            headers = {
-                'Authorization': f'LOW {access_key}:{secret_key}',
-                'x-archive-auto-make-bucket': '1',
-                'x-archive-meta-mediatype': 'audio',
-                'Content-Type': 'audio/mpeg',
-                'Content-Length': str(len(data)),
-            }
-            r = requests.put(url, data=io.BytesIO(data), headers=headers, timeout=600)
-            if r.status_code not in (200, 201):
-                return f"Errore HTTP {r.status_code}: {r.text[:200]}"
-
-            file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
-            if tipo == 'basi':
-                title = filename.replace('.mp3','').replace('.MP3','').replace('.wav','').replace('.WAV','').strip()
-                self._aggiungi_a_playlist_basi(file_url, title)
-            else:
-                title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
-                self._aggiungi_a_playlist_musica(file_url, title)
-
-            return "ok"
+    def aggiorna_elenco_musica(self) -> str:
+        """Riscrive in musica.html l'elenco dei brani presenti su R2."""
+        try:
+            cfg = self._r2_config()
+            if not cfg:
+                return "Errore: Cloudflare R2 non e' configurato"
+            # finche' la pagina legge ancora da Archive.org non la tocco: prima
+            # vanno spostati tutti i brani, altrimenti l'elenco resterebbe a meta'
+            with open(os.path.join(SITE_DIR, "musica.html"), encoding='utf-8') as f:
+                if 'const ARCHIVE_BASE = "https://archive.org' in f.read():
+                    return ("Errore: la pagina Musica e' ancora su Archive.org. "
+                            "Completa prima la migrazione con «Migra su R2.bat»")
+            n = r2_storage.aggiorna_pagina_musica(SITE_DIR, cfg)
+            return f"ok:{n}"
         except Exception as e:
-            return str(e)
+            return f"Errore: {e}"
 
-    def salva_chiavi_s3(self, access: str, secret: str) -> str:
-        """Salva le chiavi S3 in un file locale."""
+    def leggi_config_r2(self) -> str:
+        """Configurazione R2 per la finestra delle impostazioni (senza la chiave segreta)."""
+        import json
+        vuota = {"endpoint": "", "access_key": "", "bucket": "evangelicimaranello-media",
+                 "public_url": "", "ha_segreta": False, "attivo": False}
+        if r2_storage is None:
+            return json.dumps(vuota)
         try:
-            import json
-            path = os.path.join(SITE_DIR, ".s3keys")
-            with open(path, 'w', encoding='utf-8', newline='\n') as f:
-                json.dump({"access": access, "secret": secret}, f)
-            return "ok"
-        except Exception as e:
-            return str(e)
+            with open(os.path.join(SITE_DIR, r2_storage.CONFIG_NAME), encoding='utf-8') as f:
+                cfg = r2_storage.pulisci_config(json.load(f))
+        except Exception:
+            return json.dumps(vuota)
+        return json.dumps({
+            "endpoint": cfg["endpoint"], "access_key": cfg["access_key"],
+            "bucket": cfg["bucket"] or vuota["bucket"], "public_url": cfg["public_url"],
+            "ha_segreta": bool(cfg["secret_key"]), "attivo": self.r2_attivo()})
 
-    def leggi_chiavi_s3(self) -> str:
-        """Legge le chiavi S3 dal file locale."""
+    def salva_config_r2(self, json_str: str) -> str:
+        """Salva la configurazione R2 e prova subito il collegamento."""
+        import json
+        if r2_storage is None:
+            return "Errore: modulo r2_storage mancante"
         try:
-            import json
-            path = os.path.join(SITE_DIR, ".s3keys")
-            if os.path.exists(path):
-                with open(path) as f:
-                    return f.read()
-            return "{}"
-        except Exception as e:
-            return "{}"
-
-    def carica_su_archive(self, filename: str, base64_data: str,
-                           collezione: str, access_key: str, secret_key: str,
-                           tipo: str = 'musica') -> str:
-        """Carica un file su Archive.org via S3 e aggiorna il playlist.json locale."""
-        try:
-            import base64 as b64mod, re, io
-            from urllib.parse import quote
-            data = b64mod.b64decode(base64_data)
-            if not data:
-                return "Errore: file vuoto"
-
-            filename_encoded = quote(filename, safe='')
-            url = f"https://s3.us.archive.org/{collezione}/{filename_encoded}"
-
-            try:
-                import requests
-                headers = {
-                    'Authorization': f'LOW {access_key}:{secret_key}',
-                    'x-archive-auto-make-bucket': '1',
-                    'x-archive-meta-mediatype': 'audio',
-                    'Content-Type': 'audio/mpeg',
-                    'Content-Length': str(len(data)),
-                }
-                r = requests.put(url, data=io.BytesIO(data), headers=headers, timeout=600)
-                if r.status_code not in (200, 201):
-                    return f"Errore HTTP {r.status_code}: {r.text[:200]}"
-            except ImportError:
-                # Fallback a urllib se requests non è installato
-                import urllib.request, urllib.error
-                req = urllib.request.Request(url, data=data, method='PUT')
-                req.add_header('Authorization', f'LOW {access_key}:{secret_key}')
-                req.add_header('x-archive-auto-make-bucket', '1')
-                req.add_header('x-archive-meta-mediatype', 'audio')
-                req.add_header('Content-Type', 'audio/mpeg')
-                req.add_header('Content-Length', str(len(data)))
+            nuovo = json.loads(json_str)
+            if not str(nuovo.get("secret_key", "")).strip():
+                # chiave segreta lasciata vuota: resta quella gia' salvata
                 try:
-                    with urllib.request.urlopen(req, timeout=600) as r:
-                        if r.status not in (200, 201):
-                            return f"Errore HTTP {r.status}"
-                except urllib.error.HTTPError as e:
-                    return f"Errore HTTP {e.code}: {e.reason}"
-
-            # Aggiorna playlist.json locale
-            file_url = f"https://archive.org/download/{collezione}/{filename_encoded}"
-            if tipo == 'basi':
-                title = filename.replace('.mp3','').replace('.MP3','').strip()
-                self._aggiungi_a_playlist_basi(file_url, title)
-            else:
-                title = re.sub(r'^\d+\s*-\s*', '', filename.replace('.mp3','').replace('.MP3','')).strip()
-                self._aggiungi_a_playlist_musica(file_url, title)
-
+                    with open(os.path.join(SITE_DIR, r2_storage.CONFIG_NAME), encoding='utf-8') as f:
+                        nuovo["secret_key"] = json.load(f).get("secret_key", "")
+                except Exception:
+                    pass
+            cfg = r2_storage.pulisci_config(nuovo)
+            mancanti = [k for k in r2_storage.CAMPI if not cfg.get(k)]
+            if mancanti:
+                return "Errore: compila tutti i campi"
+            r2_storage.prova(cfg)
+            r2_storage.salva_config(SITE_DIR, cfg)
             return "ok"
         except Exception as e:
-            return str(e)
+            return f"Errore: {e}"
 
     def _aggiungi_a_playlist_musica(self, url: str, titolo: str):
         import json
@@ -642,7 +590,7 @@ class PythonBridge(CatalogoAPI):
                 json.dump(playlist, f, ensure_ascii=False, indent=2)
 
     def aggiungi_musica_url(self, url: str, titolo: str, cover: str = '') -> str:
-        """Aggiunge un brano alla playlist musica-player/playlist.json tramite URL Archive.org."""
+        """Aggiunge un brano alla playlist musica-player/playlist.json tramite URL."""
         try:
             import json
             playlist_path = os.path.join(SITE_DIR, "musica-player", "playlist.json")
@@ -686,7 +634,7 @@ class PythonBridge(CatalogoAPI):
             return str(e)
 
     def aggiungi_base_url(self, url: str, titolo: str) -> str:
-        """Aggiunge una base a basi-inni/playlist.json tramite URL Archive.org."""
+        """Aggiunge una base a basi-inni/playlist.json tramite URL."""
         try:
             self._aggiungi_a_playlist_basi(url, titolo)
             return "ok"
@@ -859,6 +807,8 @@ class PythonBridge(CatalogoAPI):
             run("git add basi-inni/playlist.json")
             run("git add canti/playlist.json")
             run("git add *.html")
+            # file del programma (cosi' arrivano anche sull'altro computer)
+            run('git add gestore_sito.py r2_storage.py migra_su_r2.py "Migra su R2.bat" requirements.txt .gitignore')
             # Copertine dei libri (caricate con «Carica» o dal caricamento automatico)
             import os as _os
             if _os.path.isdir(_os.path.join(SITE_DIR, "libreria")):

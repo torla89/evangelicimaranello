@@ -5,3 +5,4 @@ dist/
 backup/
 build_tmp/
 __pycache__/
+.r2config

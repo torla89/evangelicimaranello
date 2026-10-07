@@ -5,3 +5,4 @@ pyinstaller
 Pillow
 pytesseract
 zxing-cpp
+boto3
