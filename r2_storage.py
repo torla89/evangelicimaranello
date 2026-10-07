@@ -170,3 +170,36 @@ def aggiorna_pagina_musica(site_dir: str, cfg: dict) -> int:
         with open(path, "w", encoding="utf-8", newline="") as f:
             f.write(nuovo)
     return len(brani)
+
+
+# ── INDICE DELLE CARTELLE (per il Gestore Canti) ──────────────
+# R2 non ha un elenco pubblico dei file: il Gestore Canti legge
+# "<cartella>/indice.json", nello stesso formato dei metadati di archive.org
+# ({"files": [{"name", "size", "md5"}]}), per sapere cosa scaricare.
+INDICE = "indice.json"
+
+
+def aggiorna_indice(cfg: dict, collezione: str) -> int:
+    """Rigenera <collezione>/indice.json dal contenuto del bucket.
+    Restituisce il numero di file elencati."""
+    s3 = client(cfg)
+    prefisso = collezione + "/"
+    files = []
+    for pagina in s3.get_paginator("list_objects_v2").paginate(
+            Bucket=cfg["bucket"], Prefix=prefisso):
+        for o in pagina.get("Contents", []):
+            nome = o["Key"][len(prefisso):]
+            if not nome or nome == INDICE or "/" in nome:
+                continue
+            voce = {"name": nome, "size": str(o["Size"])}
+            etag = o.get("ETag", "").strip('"')
+            # l'ETag e' l'md5 del file solo se e' stato caricato in un pezzo unico
+            if len(etag) == 32 and "-" not in etag:
+                voce["md5"] = etag
+            files.append(voce)
+    files.sort(key=lambda v: v["name"])
+    corpo = json.dumps({"files": files}, ensure_ascii=False).encode("utf-8")
+    s3.put_object(Bucket=cfg["bucket"], Key=prefisso + INDICE, Body=corpo,
+                  ContentType="application/json; charset=utf-8",
+                  CacheControl="no-cache, max-age=0")
+    return len(files)

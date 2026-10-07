@@ -446,6 +446,12 @@ class PythonBridge(CatalogoAPI):
                                        content_type, _avanzamento)
             if tipo in ('musica', 'basi'):
                 self._registra_audio(tipo, filename, file_url)
+            # elenco dei file della cartella, letto dal Gestore Canti per
+            # sapere cosa scaricare: se non riesce il caricamento resta valido
+            try:
+                r2_storage.aggiorna_indice(self._r2_config(), collezione)
+            except Exception:
+                pass
             self._upload_stato = {"status": "done", "pct": 100, "speed": "",
                                   "message": "", "url": file_url}
         except Exception as e:
@@ -808,7 +814,7 @@ class PythonBridge(CatalogoAPI):
             run("git add canti/playlist.json")
             run("git add *.html")
             # file del programma (cosi' arrivano anche sull'altro computer)
-            run('git add gestore_sito.py r2_storage.py migra_su_r2.py "Migra su R2.bat" requirements.txt .gitignore')
+            run('git add gestore_sito.py r2_storage.py migra_su_r2.py "Migra su R2.bat" pubblica_canti_r2.py "Pubblica Gestore Canti su R2.bat" requirements.txt .gitignore')
             # Copertine dei libri (caricate con «Carica» o dal caricamento automatico)
             import os as _os
             if _os.path.isdir(_os.path.join(SITE_DIR, "libreria")):
