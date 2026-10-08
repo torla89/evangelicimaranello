@@ -469,6 +469,10 @@
         {
           "voce": "2 Librerie (1 libri e 1 innari)",
           "importo": 208.19
+        },
+        {
+          "voce": "libreria opuscoli",
+          "importo": 51.99
         }
       ]
     }
