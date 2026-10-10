@@ -108,6 +108,16 @@
     }
     .nota-prenotazione a { color: #ffd060; text-decoration: underline; }
 
+    .avviso-evento {
+      display: flex; gap: 14px; align-items: flex-start;
+      margin: 4px 0 18px; padding: 16px 18px;
+      background: rgba(100,180,255,0.10); border: 1px solid rgba(100,180,255,0.32);
+      border-radius: 8px; font-size: 0.95rem; color: rgba(255,255,255,0.88); line-height: 1.65;
+    }
+    .avviso-evento .avviso-icona { font-size: 1.5rem; flex-shrink: 0; line-height: 1.2; }
+    .avviso-evento strong { color: #8ecfff; font-weight: 700; }
+    .avviso-evento .avviso-titolo { display: block; font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: #8ecfff; margin-bottom: 4px; }
+
     @media (max-width: 680px) {
       .bg { position: absolute; background-attachment: scroll; }
       header { padding: 0 16px; }
@@ -324,6 +334,15 @@
         </div>
       </div>
 
+      <div class="avviso-evento">
+        <div class="avviso-icona">🎉</div>
+        <div>
+          <span class="avviso-titolo">Inaugurazione</span>
+          <strong>Sabato 24 ottobre, ore 15:00</strong> sarà inaugurata la sede della libreria,
+          in <strong>Viale della Resistenza 69/71 a Maranello (MO)</strong>. Ti aspettiamo!
+        </div>
+      </div>
+
       <p>
         Vogliamo creare uno spazio dove chiunque possa accedere liberamente a libri cristiani,
         Bibbie, studi biblici e materiale di approfondimento spirituale — senza costi, senza
@@ -344,14 +363,15 @@
       </p>
 
       <div class="nota-prenotazione">
-        <strong style="color:#ffd060;">Nel frattempo</strong> — se sei interessato o vuoi
-        richiedere materiale cristiano, scrivici a
+        <strong style="color:#ffd060;">Nel frattempo</strong> — se sei interessato puoi già
+        <a href="libreria.html">sfogliare il nostro catalogo online</a>. Per richiedere
+        materiale cristiano scrivici a
         <a href="mailto:libreria@evangelicimaranello.it">libreria@evangelicimaranello.it</a>.
         È completamente gratuito e senza alcun impegno.
       </div>
 
       <div class="btn-row">
-        <a href="libreria.html" class="btn-link">📚 Vai alla libreria</a>
+        <a href="libreria.html" class="btn-link">📚 Sfoglia il catalogo online</a>
         <a href="contatti.html" class="btn-link">✉️ Contattaci</a>
         <a href="https://www.facebook.com/share/19qbfk9JJK/" target="_blank" class="btn-link">📘 Seguici su Facebook</a>
       </div>
