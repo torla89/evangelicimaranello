@@ -1,5 +1,5 @@
 {
-  "saldo": 2814.48,
+  "saldo": 2610.59,
   "aggiornato_il": "2026-10-14",
   "storico_saldo": [
     {
@@ -132,7 +132,7 @@
     },
     {
       "data": "2026-10-14",
-      "saldo": 2814.48
+      "saldo": 2610.59
     }
   ],
   "spese_fisse": [
@@ -501,6 +501,10 @@
         {
           "voce": "Timbro associazione",
           "importo": 23.8
+        },
+        {
+          "voce": "Frigo",
+          "importo": 203.89
         }
       ]
     }
