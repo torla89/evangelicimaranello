@@ -693,6 +693,141 @@ class PythonBridge(CatalogoAPI):
         except Exception as e:
             return str(e)
 
+    # ── PREDICAZIONI SU R2 ────────────────────────────────────
+    # PDF e MP3 delle predicazioni vanno su Cloudflare R2 (cartella
+    # PRED_COLLEZIONE) e in dati.json resta solo il link: cosi' i file
+    # grandi non finiscono nel repository GitHub.
+    PRED_COLLEZIONE = "cem-predicazioni"
+
+    def avvia_upload_predicazione(self, filename: str, base64_data: str) -> str:
+        """Carica su R2 un PDF/MP3 di predicazione in background.
+        Lo stato si legge con stato_upload(); a fine caricamento contiene "url".
+        Se R2 non e' configurato il file viene salvato nella cartella locale
+        "predicazioni" come prima (e verra' spostato su R2 alla pubblicazione)."""
+        self._upload_stato = {"status": "uploading", "pct": 0, "speed": "", "message": ""}
+        threading.Thread(target=self._upload_pred_thread,
+                         args=(filename, base64_data), daemon=True).start()
+        return "started"
+
+    def _upload_pred_thread(self, filename: str, base64_data: str):
+        import base64 as b64mod, time
+        try:
+            data = b64mod.b64decode(base64_data)
+            if not data:
+                raise RuntimeError("file vuoto")
+            if not self._r2_config():
+                esito = self.salva_pdf(filename, base64_data)
+                if esito != "ok":
+                    raise RuntimeError(esito)
+                self._upload_stato = {"status": "done", "pct": 100, "speed": "",
+                                      "message": "R2 non configurato: salvato in locale",
+                                      "url": "predicazioni/" + filename}
+                return
+            total = len(data)
+            inviati = [0]
+            t0 = time.time()
+
+            def _avanzamento(n):
+                inviati[0] += n
+                trascorso = time.time() - t0
+                vel = inviati[0] / trascorso if trascorso > 0 else 0
+                vel_str = (f"{vel/1024/1024:.1f} MB/s" if vel > 1024*1024
+                           else f"{vel/1024:.0f} KB/s") if vel else ""
+                self._upload_stato = {"status": "uploading",
+                                      "pct": min(99, int(inviati[0] / max(total, 1) * 100)),
+                                      "speed": vel_str, "message": ""}
+
+            url = self._r2_carica(self.PRED_COLLEZIONE, filename, data, '', _avanzamento)
+            self._upload_stato = {"status": "done", "pct": 100, "speed": "",
+                                  "message": "", "url": url}
+        except Exception as e:
+            self._upload_stato = {"status": "error", "pct": 0, "speed": "", "message": str(e)}
+
+    def _predicazioni_locali_su_r2(self, log) -> bool:
+        """Prima di pubblicare: carica su R2 i file ancora nella cartella
+        "predicazioni", sostituisce i percorsi in dati.json con i link R2 e
+        sposta le copie locali in backup/predicazioni (fuori da git).
+        Restituisce False se qualcosa e' andato storto (in quel caso non
+        bisogna pubblicare, per non lasciare link rotti)."""
+        cartella = os.path.join(SITE_DIR, "predicazioni")
+        if not os.path.isdir(cartella):
+            return True
+        cfg = self._r2_config()
+        if not cfg:
+            log("⚠  Cloudflare R2 non configurato: i file delle predicazioni restano in locale")
+            return True
+        try:
+            with open(JSON_FILE, encoding="utf-8") as f:
+                dati = json.load(f)
+        except Exception as e:
+            log(f"❌ Lettura dati.json non riuscita: {e}")
+            return False
+
+        caricati = {}   # percorso locale -> link R2
+        cambiato = False
+        for p in dati.get("predicazioni", []):
+            for campo in ("pdf", "mp3"):
+                val = (p.get(campo) or "").strip()
+                if not val or val.startswith("http"):
+                    continue
+                rel = val if "/" in val else "predicazioni/" + val
+                if rel not in caricati:
+                    locale = os.path.join(SITE_DIR, *rel.split("/"))
+                    if not os.path.isfile(locale):
+                        log(f"⚠  File non trovato, lo lascio com'e': {rel}")
+                        continue
+                    nome = os.path.basename(locale)
+                    log(f"☁  Carico su R2: {nome}")
+                    try:
+                        with open(locale, "rb") as f:
+                            caricati[rel] = self._r2_carica(self.PRED_COLLEZIONE, nome, f.read())
+                    except Exception as e:
+                        log(f"❌ Caricamento su R2 non riuscito ({nome}): {e}")
+                        return False
+                p[campo] = caricati[rel]
+                cambiato = True
+
+        if cambiato:
+            with open(JSON_FILE, "w", encoding="utf-8", newline="\n") as f:
+                json.dump(dati, f, ensure_ascii=False, indent=2)
+            log(f"✅ {len(caricati)} file delle predicazioni spostati su R2")
+
+        # tutto quello che resta nella cartella (gia' caricato o non piu'
+        # usato) va in backup/predicazioni, che non viene pubblicato
+        dest_dir = os.path.join(BACKUP_DIR, "predicazioni")
+        for nome in os.listdir(cartella):
+            src = os.path.join(cartella, nome)
+            if os.path.isfile(src):
+                os.makedirs(dest_dir, exist_ok=True)
+                try:
+                    shutil.move(src, os.path.join(dest_dir, nome))
+                except Exception:
+                    pass
+        try:
+            os.rmdir(cartella)
+        except OSError:
+            pass
+        return True
+
+    def _correggi_link_predicazioni(self, dati: dict):
+        """La pagina puo' avere ancora in memoria i vecchi percorsi locali
+        ("predicazioni/nome.mp3") di file gia' spostati su R2: li trasformo
+        nel link R2, cosi' salvando di nuovo non tornano link rotti."""
+        cfg = self._r2_config()
+        if not cfg:
+            return
+        for p in dati.get("predicazioni", []) if isinstance(dati, dict) else []:
+            for campo in ("pdf", "mp3"):
+                val = (p.get(campo) or "").strip()
+                if not val or val.startswith("http"):
+                    continue
+                rel = val if "/" in val else "predicazioni/" + val
+                nome = rel.split("/")[-1]
+                if os.path.isfile(os.path.join(SITE_DIR, *rel.split("/"))):
+                    continue   # ancora in locale: lo carica la pubblicazione
+                if os.path.isfile(os.path.join(BACKUP_DIR, "predicazioni", nome)):
+                    p[campo] = r2_storage.url_pubblico(cfg, self.PRED_COLLEZIONE, nome)
+
     def salva_pdf(self, filename: str, base64_data: str) -> str:
         try:
             import base64 as b64mod
@@ -761,6 +896,7 @@ class PythonBridge(CatalogoAPI):
     def salva_json(self, json_str: str) -> str:
         try:
             dati = json.loads(json_str)
+            self._correggi_link_predicazioni(dati)
             os.makedirs(BACKUP_DIR, exist_ok=True)
             if os.path.exists(JSON_FILE):
                 ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -803,7 +939,13 @@ class PythonBridge(CatalogoAPI):
             log("")
 
             # Configura credential helper per non chiedere password
-            run("git config credential.helper manager-core")
+            # (Git for Windows ha rinominato "manager-core" in "manager")
+            run("git config credential.helper manager")
+
+            # PDF e MP3 delle predicazioni: su R2, non su GitHub
+            if not self._predicazioni_locali_su_r2(log):
+                log("❌ Pubblicazione annullata: riprova quando la connessione funziona")
+                log("__ERROR__"); return
 
             log("📡 git add...")
             # Aggiungi solo ciò che esiste
@@ -819,9 +961,9 @@ class PythonBridge(CatalogoAPI):
             import os as _os
             if _os.path.isdir(_os.path.join(SITE_DIR, "libreria")):
                 run("git add libreria/")
-            # Cartella predicazioni solo se esiste
-            if _os.path.exists(_os.path.join(SITE_DIR, "predicazioni")):
-                run("git add predicazioni/")
+            # I file delle predicazioni ora stanno su R2: se erano nel
+            # repository li tolgo da li' (le copie locali sono in backup/)
+            run("git rm -r --cached --quiet --ignore-unmatch predicazioni")
 
             # Verifica che ci sia qualcosa da committare
             status = subprocess.run("git status --porcelain", cwd=SITE_DIR,

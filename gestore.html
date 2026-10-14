@@ -977,27 +977,58 @@
     reader.readAsDataURL(file);
   }
 
+  // Carica un file della predicazione su R2 mostrando l'avanzamento.
+  // Restituisce il link da scrivere in dati.json, oppure null se non riesce.
+  async function caricaFilePredicazione(nome, dati) {
+    if (typeof window.pywebview === 'undefined') return 'predicazioni/' + nome;
+    const ov = document.getElementById('uploadOverlay');
+    document.getElementById('uploadLog').textContent = '';
+    document.getElementById('uploadInfo').textContent = nome;
+    document.getElementById('uploadBar').style.width = '0%';
+    document.getElementById('uploadPct').textContent = '0%';
+    document.getElementById('uploadSpeed').textContent = '';
+    document.getElementById('uploadCloseBtn').style.display = 'none';
+    ov.classList.add('open');
+    uploadLog('📡 Caricamento: ' + nome);
+
+    await window.pywebview.api.avvia_upload_predicazione(nome, dati);
+    while (true) {
+      await new Promise(r => setTimeout(r, 400));
+      let s;
+      try { s = JSON.parse(await window.pywebview.api.stato_upload()); }
+      catch (e) { s = { status: 'error', message: String(e) }; }
+      document.getElementById('uploadBar').style.width = (s.pct || 0) + '%';
+      document.getElementById('uploadPct').textContent = (s.pct || 0) + '%';
+      if (s.speed) document.getElementById('uploadSpeed').textContent = s.speed;
+      if (s.status === 'done') {
+        if (s.message) toast('⚠ ' + s.message);
+        ov.classList.remove('open');
+        return s.url;
+      }
+      if (s.status === 'error') {
+        uploadLog('❌ Errore: ' + s.message);
+        document.getElementById('uploadCloseBtn').style.display = 'inline-block';
+        toast('❌ Caricamento non riuscito: ' + s.message);
+        return null;
+      }
+    }
+  }
+
   async function salvaPred() {
     const data = document.getElementById('predData').value;
     if (!data) { toast('⚠ Inserisci la data'); return; }
 
-    // Salva PDF se presente
+    // Carica PDF e MP3 su Cloudflare R2 (in dati.json resta solo il link)
     if (_pdfPendingName && _pdfPendingData) {
-      if (typeof window.pywebview !== 'undefined') {
-        const result = await window.pywebview.api.salva_pdf(_pdfPendingName, _pdfPendingData);
-        if (result !== 'ok') { toast('❌ Errore salvataggio PDF: ' + result); return; }
-      }
-      document.getElementById('predPdf').value = 'predicazioni/' + _pdfPendingName;
+      const url = await caricaFilePredicazione(_pdfPendingName, _pdfPendingData);
+      if (!url) return;
+      document.getElementById('predPdf').value = url;
       _pdfPendingName = null; _pdfPendingData = null;
     }
-
-    // Salva MP3 se presente
     if (_mp3PendingName && _mp3PendingData) {
-      if (typeof window.pywebview !== 'undefined') {
-        const result = await window.pywebview.api.salva_pdf(_mp3PendingName, _mp3PendingData);
-        if (result !== 'ok') { toast('❌ Errore salvataggio MP3: ' + result); return; }
-      }
-      document.getElementById('predMp3').value = 'predicazioni/' + _mp3PendingName;
+      const url = await caricaFilePredicazione(_mp3PendingName, _mp3PendingData);
+      if (!url) return;
+      document.getElementById('predMp3').value = url;
       _mp3PendingName = null; _mp3PendingData = null;
     }
 

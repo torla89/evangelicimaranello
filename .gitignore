@@ -6,3 +6,6 @@ backup/
 build_tmp/
 __pycache__/
 .r2config
+
+# file delle predicazioni: stanno su Cloudflare R2
+predicazioni/
