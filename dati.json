@@ -1,6 +1,6 @@
 {
-  "saldo": 2849.47,
-  "aggiornato_il": "2026-10-08",
+  "saldo": 2814.48,
+  "aggiornato_il": "2026-10-14",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -129,6 +129,10 @@
     {
       "data": "2026-10-08",
       "saldo": 2849.47
+    },
+    {
+      "data": "2026-10-14",
+      "saldo": 2814.48
     }
   ],
   "spese_fisse": [
@@ -481,6 +485,22 @@
         {
           "voce": "libreria opuscoli",
           "importo": 51.99
+        },
+        {
+          "voce": "Registratore (per messaggi)",
+          "importo": 45
+        },
+        {
+          "voce": "Cassa per musica",
+          "importo": 89.99
+        },
+        {
+          "voce": "Targhetta esterno locale",
+          "importo": 31.33
+        },
+        {
+          "voce": "Timbro associazione",
+          "importo": 23.8
         }
       ]
     }
