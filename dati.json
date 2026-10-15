@@ -446,7 +446,16 @@
       "descrizione": "Gestione libreria, approvvigionamento libri, allestimento locale ecc...",
       "responsabile": "Susanna",
       "stato": "in_corso",
-      "spese": []
+      "spese": [
+        {
+          "voce": "2 Librerie (1 libri e 1 innari)",
+          "importo": 208.19
+        },
+        {
+          "voce": "Libri casa della bibbia",
+          "importo": 170.78
+        }
+      ]
     },
     {
       "nome": "Locale",
@@ -477,10 +486,6 @@
         {
           "voce": "Pulpito e scrivania pc",
           "importo": 173.73
-        },
-        {
-          "voce": "2 Librerie (1 libri e 1 innari)",
-          "importo": 208.19
         },
         {
           "voce": "libreria opuscoli",
