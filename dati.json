@@ -448,12 +448,16 @@
       "stato": "in_corso",
       "spese": [
         {
-          "voce": "2 Librerie (1 libri e 1 innari)",
-          "importo": 208.19
+          "voce": "1 libreria grande",
+          "importo": 152.95
         },
         {
           "voce": "Libri casa della bibbia",
           "importo": 170.78
+        },
+        {
+          "voce": "1 libreria opuscoli",
+          "importo": 51.99
         }
       ]
     },
@@ -488,10 +492,6 @@
           "importo": 173.73
         },
         {
-          "voce": "libreria opuscoli",
-          "importo": 51.99
-        },
-        {
           "voce": "Registratore (per messaggi)",
           "importo": 45
         },
@@ -510,6 +510,10 @@
         {
           "voce": "Frigo",
           "importo": 203.89
+        },
+        {
+          "voce": "Libreria innari",
+          "importo": 55.24
         }
       ]
     }
