@@ -946,5 +946,67 @@ async function caricaPlaylistEAvvia() {
 }
 
 </script>
+<!-- MEDIA SESSION: titolo, copertina e tasti nella tendina di Android, sull'orologio e sulla tastiera -->
+<script>
+(function () {
+  if (!('mediaSession' in navigator)) return;
+  // Il player viene creato dopo il caricamento della playlist: aspetto che compaia
+  var tentativi = 0;
+  var attesa = setInterval(function () {
+    var a = document.getElementById('cemAudio');
+    if (a) { clearInterval(attesa); avvia(a); }
+    else if (++tentativi > 100) clearInterval(attesa);
+  }, 200);
+
+  function avvia(audio) {
+  var ms = navigator.mediaSession;
+  var LOGO = new URL('icon-192.png', location.href).href;
+  function set(action, fn) { try { ms.setActionHandler(action, fn); } catch (e) {} }
+  function txt(id) { var el = document.getElementById(id); return el ? el.textContent.trim() : ''; }
+
+  function aggiorna() {
+    var c = document.getElementById('cplCover');
+    var img = (c && c.style.display !== 'none' && c.getAttribute('src')) ? new URL(c.getAttribute('src'), location.href).href : LOGO;
+    try {
+      ms.metadata = new MediaMetadata({
+        title:  txt('cplTitle') || 'Chiesa Evangelica Maranello',
+        artist: txt('cplArtist') || 'Chiesa Evangelica Maranello',
+        album:  'Chiesa Evangelica Maranello',
+        artwork: [{ src: img, sizes: '512x512' }]
+      });
+    } catch (e) {}
+
+    var p = window._player;
+    set('play',  function () { if (audio.paused && p) p.toggle(); });
+    set('pause', function () { if (!audio.paused && p) p.toggle(); });
+    if (window._playerSingleMode) {
+      // Messaggio singolo: avanti/indietro di 15 secondi
+      set('previoustrack', null);
+      set('nexttrack', null);
+      set('seekbackward', function () { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+      set('seekforward',  function () { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 15); });
+    } else {
+      // Playlist: brano precedente/successivo
+      set('seekbackward', null);
+      set('seekforward', null);
+      set('previoustrack', function () { if (p) p.prev(); });
+      set('nexttrack',     function () { if (p) p.next(); });
+    }
+    set('seekto', function (d) { if (audio.duration) audio.currentTime = d.seekTime; });
+  }
+
+  function posizione() {
+    if (!ms.setPositionState || !audio.duration || !isFinite(audio.duration)) return;
+    try { ms.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: Math.min(audio.currentTime, audio.duration) }); } catch (e) {}
+  }
+
+  audio.addEventListener('play',  function () { aggiorna(); ms.playbackState = 'playing'; });
+  audio.addEventListener('pause', function () { ms.playbackState = 'paused'; });
+  audio.addEventListener('loadedmetadata', function () { aggiorna(); posizione(); });
+  audio.addEventListener('seeked', posizione);
+  if (!audio.paused) { aggiorna(); ms.playbackState = 'playing'; }
+  }
+})();
+</script>
 </body>
 </html>
