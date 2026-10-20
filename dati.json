@@ -1,6 +1,6 @@
 {
-  "saldo": 2710.59,
-  "aggiornato_il": "2026-10-19",
+  "saldo": 2285.59,
+  "aggiornato_il": "2026-10-20",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -137,6 +137,10 @@
     {
       "data": "2026-10-19",
       "saldo": 2710.59
+    },
+    {
+      "data": "2026-10-20",
+      "saldo": 2285.59
     }
   ],
   "spese_fisse": [
@@ -518,6 +522,10 @@
         {
           "voce": "Libreria innari",
           "importo": 55.24
+        },
+        {
+          "voce": "Affitto novembre 26",
+          "importo": 425
         }
       ]
     }
