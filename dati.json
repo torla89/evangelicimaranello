@@ -1,6 +1,6 @@
 {
-  "saldo": 2285.59,
-  "aggiornato_il": "2026-10-20",
+  "saldo": 2180.48,
+  "aggiornato_il": "2026-10-22",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -141,6 +141,10 @@
     {
       "data": "2026-10-20",
       "saldo": 2285.59
+    },
+    {
+      "data": "2026-10-22",
+      "saldo": 2180.48
     }
   ],
   "spese_fisse": [
@@ -466,6 +470,10 @@
         {
           "voce": "1 libreria opuscoli",
           "importo": 51.99
+        },
+        {
+          "voce": "Bere e spuntini per inaugurazione",
+          "importo": 69.12
         }
       ]
     },
@@ -526,6 +534,10 @@
         {
           "voce": "Affitto novembre 26",
           "importo": 425
+        },
+        {
+          "voce": "Mensola per cassa",
+          "importo": 35.99
         }
       ]
     }
