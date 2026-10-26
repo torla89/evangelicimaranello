@@ -1,6 +1,6 @@
 {
-  "saldo": 2180.48,
-  "aggiornato_il": "2026-10-22",
+  "saldo": 2302.33,
+  "aggiornato_il": "2026-10-26",
   "storico_saldo": [
     {
       "data": "2026-04-21",
@@ -145,6 +145,10 @@
     {
       "data": "2026-10-22",
       "saldo": 2180.48
+    },
+    {
+      "data": "2026-10-26",
+      "saldo": 2302.33
     }
   ],
   "spese_fisse": [
@@ -538,6 +542,10 @@
         {
           "voce": "Mensola per cassa",
           "importo": 35.99
+        },
+        {
+          "voce": "Rinfresco inaugurazione",
+          "importo": 139.65
         }
       ]
     }
