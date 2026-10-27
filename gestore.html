@@ -540,7 +540,7 @@
           <option value="uscita">⬇️ Uscita</option>
         </select>
       </div>
-      <div class="field"><label>Data</label><input type="date" id="movData"></div>
+      <div class="field"><label>Mese</label><input type="month" id="movData"></div>
     </div>
     <div class="field">
       <label>Causale</label>
@@ -1053,7 +1053,7 @@
         <div class="list-item">
           <div class="list-item-info">
             <div class="list-item-title">${labelCategoria(m)}</div>
-            <div class="list-item-sub">${formatData(m.data)}${m.note ? ' · ' + String(m.note).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])) : ''}</div>
+            <div class="list-item-sub">${m.tipo === 'uscita' ? 'Uscita' : 'Entrata'}${m.note ? ' · ' + String(m.note).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])) : ''}</div>
           </div>
           <div class="list-item-actions">
             <span style="font-weight:700;white-space:nowrap;margin-right:6px;color:${m.tipo === 'uscita' ? 'var(--red)' : 'var(--green)'};">
@@ -1080,14 +1080,14 @@
       const m = dati.movimenti[idx];
       document.getElementById('movTipo').value    = m.tipo;
       aggiornaCategorieMov(m.categoria);
-      document.getElementById('movData').value    = m.data;
+      document.getElementById('movData').value    = (m.data || '').slice(0, 7);
       document.getElementById('movImporto').value = m.importo;
       document.getElementById('movNote').value    = m.note || '';
       document.getElementById('modalMovTitle').textContent = 'Modifica movimento';
     } else {
       document.getElementById('movTipo').value    = 'entrata';
       aggiornaCategorieMov();
-      document.getElementById('movData').value    = today();
+      document.getElementById('movData').value    = today().slice(0, 7);
       document.getElementById('movImporto').value = '';
       document.getElementById('movNote').value    = '';
       document.getElementById('modalMovTitle').textContent = 'Nuovo movimento';
@@ -1098,7 +1098,7 @@
   function salvaMovimento() {
     const data = document.getElementById('movData').value;
     const imp  = parseFloat(document.getElementById('movImporto').value);
-    if (!data || isNaN(imp) || imp <= 0) { toast('⚠ Inserisci data e importo (maggiore di zero)'); return; }
+    if (!/^\d{4}-\d{2}$/.test(data) || isNaN(imp) || imp <= 0) { toast('⚠ Inserisci mese e importo (maggiore di zero)'); return; }
     const obj = {
       data,
       tipo:      document.getElementById('movTipo').value,

@@ -1666,7 +1666,7 @@
         <div class="mov-riga">
           <div>
             <div>${escHtml(CATEGORIE_MOV[m.categoria] || m.categoria || "—")}</div>
-            <div class="mov-riga-sub">${formatData(m.data)}${m.note ? " · " + escHtml(m.note) : ""}</div>
+            ${m.note ? `<div class="mov-riga-sub">${escHtml(m.note)}</div>` : ""}
           </div>
           <span class="mov-riga-importo ${m.tipo === "uscita" ? "mov-neg" : "mov-pos"}">${m.tipo === "uscita" ? "− " : "+ "}${formatEuro(imp(m))}</span>
         </div>`).join("");
