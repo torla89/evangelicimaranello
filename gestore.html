@@ -305,7 +305,7 @@
   <div id="mainApp" style="display:none;">
 
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('saldo',this)">💰 Saldo</button>
+      <button class="tab active" onclick="switchTab('saldo',this)">💰 Saldo e movimenti</button>
       <button class="tab" onclick="switchTab('spese',this)">📋 Spese</button>
       <button class="tab" onclick="switchTab('riunioni',this)">🏛️ Riunioni</button>
       <button class="tab" onclick="switchTab('predicazioni',this)">📅 Predicazioni</button>
@@ -321,10 +321,14 @@
       <div class="card">
         <div class="saldo-big" id="saldoDisplay">€ 0,00</div>
         <div class="saldo-meta" id="saldoMeta">Aggiornato il —</div>
-        <div style="margin-top:20px;">
+        <p style="font-size:0.82rem;color:var(--muted);margin-top:14px;line-height:1.6;">
+          Il saldo si aggiorna da solo quando registri un movimento qui sotto.
+          Usa la correzione manuale solo per allinearlo all'estratto conto.
+        </p>
+        <div style="margin-top:14px;">
           <div class="field-row">
             <div class="field">
-              <label>Nuovo saldo (€)</label>
+              <label>Correggi saldo manualmente (€)</label>
               <input type="number" id="nuovoSaldo" step="0.01" placeholder="es. 1250.00">
             </div>
             <div class="field">
@@ -336,10 +340,17 @@
             </div>
           </div>
           <div class="btn-row-start">
-            <button class="btn btn-primary" onclick="aggiornaSaldo()">💾 Aggiorna saldo</button>
+            <button class="btn btn-ghost" onclick="aggiornaSaldo()">💾 Correggi saldo</button>
+            <button class="btn btn-ghost" onclick="apriCifra('imposta')" title="Cambia la password con cui sono cifrati i dati riservati">🔑 Cambia password area privata</button>
           </div>
         </div>
       </div>
+
+      <div class="section-label" style="margin-top:28px;">Entrate e uscite</div>
+      <div class="btn-row-start" style="margin-bottom:14px;">
+        <button class="btn btn-primary" onclick="openMovModal()">＋ Nuovo movimento</button>
+      </div>
+      <div id="movimentiList"></div>
     </div>
 
     <!-- ══ SPESE ══ -->
@@ -501,6 +512,49 @@
 </div>
 
 <!-- ══ MODAL SPESA ══ -->
+<div class="modal-bg" id="modal-cifra">
+  <div class="modal" style="max-width:480px;">
+    <h3 id="cifraTitolo">🔒 Dati riservati</h3>
+    <p id="cifraTesto" style="font-size:0.86rem;color:var(--muted);margin-bottom:16px;line-height:1.6;"></p>
+    <div class="field"><label id="cifraLabelPw">Password del profilo «socio»</label>
+      <input type="password" id="cifraPw" autocomplete="off"></div>
+    <div class="field" id="cifraCampoConferma"><label>Ripeti la password</label>
+      <input type="password" id="cifraPw2" autocomplete="off"></div>
+    <p id="cifraErrore" style="font-size:0.84rem;color:var(--red);min-height:1.2em;margin:4px 0 8px;"></p>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" id="cifraAnnulla" onclick="closeModal('cifra')">Annulla</button>
+      <button class="btn btn-primary" id="cifraOk" onclick="confermaCifra()">🔓 Sblocca</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-movimento">
+  <div class="modal">
+    <h3 id="modalMovTitle">Nuovo movimento</h3>
+    <input type="hidden" id="movEditIdx" value="-1">
+    <div class="field-row">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="movTipo" onchange="aggiornaCategorieMov()">
+          <option value="entrata">⬆️ Entrata</option>
+          <option value="uscita">⬇️ Uscita</option>
+        </select>
+      </div>
+      <div class="field"><label>Data</label><input type="date" id="movData"></div>
+    </div>
+    <div class="field">
+      <label>Causale</label>
+      <select id="movCategoria"></select>
+    </div>
+    <div class="field"><label>Importo (€)</label><input type="number" id="movImporto" step="0.01" min="0" placeholder="es. 150.00"></div>
+    <div class="field"><label>Nota (opzionale)</label><input type="text" id="movNote" placeholder="es. Affitto di ottobre, materiale per la scuola domenicale…"></div>
+    <div class="btn-row-end">
+      <button class="btn btn-ghost" onclick="closeModal('movimento')">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaMovimento()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modal-spesa">
   <div class="modal">
     <h3 id="modalSpesaTitle">Nuova spesa fissa</h3>
@@ -723,11 +777,158 @@
   let dati = null;
   let dirty = false;
 
-  function parsaECarica(jsonStr, filename) {
+  /* ══ CIFRATURA DATI RISERVATI ══════════════════════════════════
+     Le voci qui sotto non vengono mai scritte in chiaro in dati.json:
+     finiscono nel campo "riservato", cifrate (AES-GCM 256) con una chiave
+     ricavata dalla password del profilo «socio» (PBKDF2-SHA256).
+     L'area privata del sito le decifra nel browser dopo il login.
+     Predicazioni e libreria restano in chiaro perché le usano le pagine pubbliche. */
+  const CHIAVI_RISERVATE = ['saldo', 'aggiornato_il', 'storico_saldo', 'spese_fisse',
+                            'movimenti', 'riunioni', 'attivita'];
+  const CIFRA_ITER = 600000;
+  let _cifra = null;            // { chiave: CryptoKey, salt: Uint8Array, iter }
+  let _cifraInAttesa = null;    // { grezzo, filename } mentre si aspetta la password
+
+  function _b64(buf) {
+    const a = new Uint8Array(buf); let s = '';
+    for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  function _unb64(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+
+  async function derivaChiave(password, salt, iter) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' },
+                                   base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function decifraConChiave(riservato, chiave) {
+    const chiaro = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _unb64(riservato.iv) }, chiave, _unb64(riservato.dati));
+    return JSON.parse(new TextDecoder().decode(chiaro));
+  }
+  async function cifraOggetto(obj) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, _cifra.chiave,
+                                           new TextEncoder().encode(JSON.stringify(obj)));
+    return { v: 1, kdf: 'PBKDF2-SHA256', iter: _cifra.iter, alg: 'AES-GCM',
+             salt: _b64(_cifra.salt), iv: _b64(iv), dati: _b64(ct) };
+  }
+
+  // Prepara il testo di dati.json da salvare: parte pubblica in chiaro + "riservato" cifrato
+  async function jsonDaSalvare() {
+    if (!_cifra) {
+      apriCifra('imposta');
+      toast('🔒 Imposta prima la password dell\'area privata');
+      return null;
+    }
+    const pubblico = {}, privato = {};
+    Object.keys(dati).forEach(k => {
+      if (k === 'riservato') return;
+      (CHIAVI_RISERVATE.includes(k) ? privato : pubblico)[k] = dati[k];
+    });
+    pubblico.riservato = await cifraOggetto(privato);
+    return JSON.stringify(pubblico, null, 2);
+  }
+
+  function apriCifra(modo) {
+    const m = document.getElementById('modal-cifra');
+    m.dataset.modo = modo;
+    document.getElementById('cifraPw').value  = '';
+    document.getElementById('cifraPw2').value = '';
+    document.getElementById('cifraErrore').textContent = '';
+    const sblocca = modo === 'sblocca';
+    document.getElementById('cifraCampoConferma').style.display = sblocca ? 'none' : '';
+    document.getElementById('cifraAnnulla').style.display = sblocca || !_cifra ? 'none' : '';
+    document.getElementById('cifraOk').textContent = sblocca ? '🔓 Sblocca' : '🔒 Imposta password';
+    document.getElementById('cifraLabelPw').textContent = sblocca
+      ? 'Password del profilo «socio»' : 'Nuova password del profilo «socio»';
+    document.getElementById('cifraTitolo').textContent = sblocca
+      ? '🔒 Sblocca i dati riservati' : (_cifra ? '🔑 Cambia password area privata' : '🔒 Proteggi i dati dell\'area privata');
+    document.getElementById('cifraTesto').innerHTML = sblocca
+      ? 'Saldo, movimenti, spese, riunioni e attività sono cifrati. Inserisci la password con cui i soci entrano nell\'area privata del sito.'
+      : (_cifra
+          ? 'I dati riservati verranno cifrati con la nuova password quando salvi e pubblichi. Da quel momento i soci dovranno usare la nuova password per entrare nell\'area privata.'
+          : 'Da ora saldo, movimenti, spese, riunioni e attività saranno pubblicati <strong style="color:var(--white)">cifrati</strong>: senza la password nessuno potrà leggerli, nemmeno aprendo dati.json.<br><br>'
+            + 'Scegli una password <strong style="color:var(--white)">nuova</strong> (non quella usata finora) e lunga, almeno 12 caratteri: per esempio tre o quattro parole. '
+            + 'Sarà la password con cui i soci entrano nell\'area privata. <strong style="color:var(--amber)">Se la perdi, i dati cifrati non si possono recuperare</strong> (restano solo i backup locali).');
+    if (!window.crypto || !crypto.subtle) {
+      document.getElementById('cifraErrore').textContent = '❌ Questa finestra non supporta la cifratura (crypto.subtle non disponibile).';
+    }
+    m.classList.add('open');
+    setTimeout(() => document.getElementById('cifraPw').focus(), 50);
+  }
+
+  async function confermaCifra() {
+    const modo = document.getElementById('modal-cifra').dataset.modo;
+    const pw   = document.getElementById('cifraPw').value;
+    const err  = document.getElementById('cifraErrore');
+    const ok   = document.getElementById('cifraOk');
+    err.textContent = '';
+    if (modo === 'sblocca') {
+      const r = _cifraInAttesa && _cifraInAttesa.grezzo.riservato;
+      if (!r) return;
+      ok.disabled = true; ok.textContent = '⏳ Verifica…';
+      try {
+        const salt = _unb64(r.salt);
+        const chiave = await derivaChiave(pw, salt, r.iter);
+        const privato = await decifraConChiave(r, chiave);
+        _cifra = { chiave, salt, iter: r.iter };
+        const { grezzo, filename } = _cifraInAttesa;
+        _cifraInAttesa = null;
+        closeModal('cifra');
+        avviaConDati(grezzo, privato, filename);
+      } catch (e) {
+        err.textContent = 'Password errata.';
+      } finally {
+        ok.disabled = false; ok.textContent = '🔓 Sblocca';
+      }
+    } else {
+      if (pw.length < 12) { err.textContent = 'Usa almeno 12 caratteri.'; return; }
+      if (pw !== document.getElementById('cifraPw2').value) { err.textContent = 'Le due password non coincidono.'; return; }
+      ok.disabled = true;
+      try {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        _cifra = { chiave: await derivaChiave(pw, salt, CIFRA_ITER), salt, iter: CIFRA_ITER };
+        closeModal('cifra');
+        markDirty();
+        toast('✅ Password impostata — ora clicca «Salva e Pubblica»');
+      } catch (e) {
+        err.textContent = '❌ ' + e;
+      } finally {
+        ok.disabled = false;
+      }
+    }
+  }
+
+  async function parsaECarica(jsonStr, filename) {
+    let grezzo;
+    try { grezzo = JSON.parse(jsonStr); }
+    catch (e) { setStatus('warn', 'Errore parsing JSON'); toast('❌ Errore nel file JSON'); return; }
+
+    if (grezzo.riservato) {
+      // Già sbloccato in questa sessione (es. dopo «Sincronizza»): riusa la chiave
+      if (_cifra && _b64(_cifra.salt) === grezzo.riservato.salt) {
+        try { avviaConDati(grezzo, await decifraConChiave(grezzo.riservato, _cifra.chiave), filename); return; }
+        catch (e) { /* chiave cambiata: chiedi di nuovo la password */ }
+      }
+      _cifra = null;
+      _cifraInAttesa = { grezzo, filename };
+      setStatus('warn', 'Dati riservati bloccati — inserisci la password');
+      apriCifra('sblocca');
+      return;
+    }
+    // dati.json ancora in chiaro (prima volta): carica e chiedi di impostare la password
+    avviaConDati(grezzo, null, filename);
+    if (!_cifra) apriCifra('imposta');
+  }
+
+  function avviaConDati(grezzo, privato, filename) {
     try {
-      dati = JSON.parse(jsonStr);
+      dati = grezzo;
+      delete dati.riservato;
+      if (privato) Object.assign(dati, privato);
       if (!dati.storico_saldo)  dati.storico_saldo  = [];
       if (!dati.spese_fisse)    dati.spese_fisse    = [];
+      if (!dati.movimenti)      dati.movimenti      = [];
       if (!dati.riunioni)       dati.riunioni       = [];
       if (!dati.predicazioni)   dati.predicazioni   = [];
       if (!dati.attivita)       dati.attivita       = [];
@@ -760,6 +961,7 @@
   /* ── RENDER ALL ── */
   function renderAll() {
     renderSaldo();
+    renderMovimenti();
     renderSpese();
     renderRiunioni();
     renderPredicazioni();
@@ -787,6 +989,142 @@
       dati.storico_saldo.sort((a,b) => a.data.localeCompare(b.data));
     }
     renderSaldo(); markDirty(); toast('✅ Saldo aggiornato');
+  }
+
+  /* ── MOVIMENTI (entrate / uscite) ── */
+  const CATEGORIE_MOV = {
+    entrata: {
+      donazioni_fondatori: 'Donazioni dei soci fondatori',
+      donazioni_altri:     'Donazioni di altri sostenitori'
+    },
+    uscita: {
+      gestione_locale:     'Gestione del locale',
+      gestione_attivita:   'Gestione delle attività'
+    }
+  };
+  const MESI_LUNGHI = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+                       'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+  function labelCategoria(m) {
+    return (CATEGORIE_MOV[m.tipo] || {})[m.categoria] || m.categoria || '—';
+  }
+  function valoreMov(m) {
+    const imp = parseFloat(m.importo) || 0;
+    return m.tipo === 'uscita' ? -imp : imp;
+  }
+  function euro(n) {
+    return '€ ' + (parseFloat(n) || 0).toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  // Applica una variazione al saldo e aggiorna lo storico del grafico (punto di oggi)
+  function applicaDeltaSaldo(delta) {
+    if (!delta) return;
+    dati.saldo = Math.round(((parseFloat(dati.saldo) || 0) + delta) * 100) / 100;
+    dati.aggiornato_il = today();
+    dati.storico_saldo = dati.storico_saldo.filter(s => s.data !== today());
+    dati.storico_saldo.push({ data: today(), saldo: dati.saldo });
+    dati.storico_saldo.sort((a,b) => a.data.localeCompare(b.data));
+    renderSaldo();
+  }
+
+  function renderMovimenti() {
+    const c = document.getElementById('movimentiList');
+    if (!dati.movimenti.length) { c.innerHTML = emptyState('Nessun movimento registrato'); return; }
+    // Raggruppa per mese (più recente in alto)
+    const perMese = {};
+    dati.movimenti.forEach((m, i) => {
+      const k = (m.data || '').slice(0, 7);
+      (perMese[k] = perMese[k] || []).push({ m, i });
+    });
+    c.innerHTML = Object.keys(perMese).sort().reverse().map(k => {
+      const righe = perMese[k].sort((a,b) => b.m.data.localeCompare(a.m.data));
+      const ent = righe.filter(r => r.m.tipo === 'entrata').reduce((t,r) => t + valoreMov(r.m), 0);
+      const usc = righe.filter(r => r.m.tipo === 'uscita').reduce((t,r) => t - valoreMov(r.m), 0);
+      const [y, mm] = k.split('-');
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 8px;gap:10px;flex-wrap:wrap;">
+          <div style="font-weight:700;">${MESI_LUNGHI[parseInt(mm)]} ${y}</div>
+          <div style="font-size:0.80rem;color:var(--muted);">
+            <span style="color:var(--green);">+ ${euro(ent)}</span> ·
+            <span style="color:var(--red);">− ${euro(usc)}</span>
+          </div>
+        </div>
+        ${righe.map(({m, i}) => `
+        <div class="list-item">
+          <div class="list-item-info">
+            <div class="list-item-title">${labelCategoria(m)}</div>
+            <div class="list-item-sub">${formatData(m.data)}${m.note ? ' · ' + String(m.note).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])) : ''}</div>
+          </div>
+          <div class="list-item-actions">
+            <span style="font-weight:700;white-space:nowrap;margin-right:6px;color:${m.tipo === 'uscita' ? 'var(--red)' : 'var(--green)'};">
+              ${m.tipo === 'uscita' ? '−' : '+'} ${euro(m.importo)}
+            </span>
+            <button class="btn btn-ghost btn-sm" onclick="openMovModal(${i})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminaMovimento(${i})">🗑</button>
+          </div>
+        </div>`).join('')}`;
+    }).join('');
+  }
+
+  function aggiornaCategorieMov(selezionata) {
+    const tipo = document.getElementById('movTipo').value;
+    const sel  = document.getElementById('movCategoria');
+    sel.innerHTML = Object.entries(CATEGORIE_MOV[tipo])
+      .map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    if (selezionata && CATEGORIE_MOV[tipo][selezionata]) sel.value = selezionata;
+  }
+
+  function openMovModal(idx = -1) {
+    document.getElementById('movEditIdx').value = idx;
+    if (idx >= 0) {
+      const m = dati.movimenti[idx];
+      document.getElementById('movTipo').value    = m.tipo;
+      aggiornaCategorieMov(m.categoria);
+      document.getElementById('movData').value    = m.data;
+      document.getElementById('movImporto').value = m.importo;
+      document.getElementById('movNote').value    = m.note || '';
+      document.getElementById('modalMovTitle').textContent = 'Modifica movimento';
+    } else {
+      document.getElementById('movTipo').value    = 'entrata';
+      aggiornaCategorieMov();
+      document.getElementById('movData').value    = today();
+      document.getElementById('movImporto').value = '';
+      document.getElementById('movNote').value    = '';
+      document.getElementById('modalMovTitle').textContent = 'Nuovo movimento';
+    }
+    document.getElementById('modal-movimento').classList.add('open');
+  }
+
+  function salvaMovimento() {
+    const data = document.getElementById('movData').value;
+    const imp  = parseFloat(document.getElementById('movImporto').value);
+    if (!data || isNaN(imp) || imp <= 0) { toast('⚠ Inserisci data e importo (maggiore di zero)'); return; }
+    const obj = {
+      data,
+      tipo:      document.getElementById('movTipo').value,
+      categoria: document.getElementById('movCategoria').value,
+      importo:   Math.round(imp * 100) / 100,
+      note:      document.getElementById('movNote').value.trim()
+    };
+    const idx = parseInt(document.getElementById('movEditIdx').value);
+    let delta = valoreMov(obj);
+    if (idx >= 0) {
+      delta -= valoreMov(dati.movimenti[idx]);   // togli il vecchio valore, metti il nuovo
+      dati.movimenti[idx] = obj;
+    } else {
+      dati.movimenti.push(obj);
+    }
+    applicaDeltaSaldo(delta);
+    renderMovimenti(); closeModal('movimento'); markDirty();
+    toast(`✅ Movimento salvato — saldo ${euro(dati.saldo)}`);
+  }
+
+  function eliminaMovimento(idx) {
+    const m = dati.movimenti[idx];
+    if (!confirm(`Eliminare il movimento "${labelCategoria(m)}" di ${euro(m.importo)}?\nIl saldo verrà ricalcolato.`)) return;
+    dati.movimenti.splice(idx, 1);
+    applicaDeltaSaldo(-valoreMov(m));
+    renderMovimenti(); markDirty(); toast('🗑 Movimento eliminato');
   }
 
   /* ── SPESE ── */
@@ -1416,11 +1754,14 @@
     document.getElementById('modal-' + name).classList.remove('open');
   }
   // Chiudi modal cliccando fuori
+  // (la finestra della password non si chiude cliccando fuori o con Esc)
   document.querySelectorAll('.modal-bg').forEach(bg => {
+    if (bg.id === 'modal-cifra') return;
     bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+    if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open:not(#modal-cifra)').forEach(m => m.classList.remove('open'));
+    if (e.key === 'Enter' && document.getElementById('modal-cifra').classList.contains('open')) confermaCifra();
   });
 
   /* ── TABS ── */
@@ -1614,7 +1955,8 @@
 
   async function saveFile() {
     if (!dati) return;
-    const json = JSON.stringify(dati, null, 2);
+    const json = await jsonDaSalvare();
+    if (!json) return;
 
     if (IS_APP || typeof window.pywebview !== 'undefined') {
       // modalità app desktop: invia a Python
@@ -1645,7 +1987,8 @@
 
   async function pubblicaSuGithub() {
     if (!dati) return;
-    const json = JSON.stringify(dati, null, 2);
+    const json = await jsonDaSalvare();
+    if (!json) return;
 
     if (typeof window.pywebview !== 'undefined') {
       // Prima salva

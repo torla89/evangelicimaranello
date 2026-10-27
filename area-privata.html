@@ -310,6 +310,109 @@
     }
     .grafico-wrap canvas { width: 100% !important; }
 
+    /* Tendine (spese fisse / entrate e uscite) */
+    .tendina {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .tendina summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tendina summary::-webkit-details-marker { display: none; }
+    .tendina summary:hover { background: rgba(255,255,255,0.04); }
+    .tendina-titolo { font-size: 0.95rem; font-weight: 700; }
+    .tendina-info {
+      flex: 1;
+      text-align: right;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.45);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tendina-freccia { font-size: 0.7rem; opacity: 0.45; transition: transform 0.3s; }
+    .tendina[open] .tendina-freccia { transform: rotate(180deg); }
+    .tendina-corpo { padding: 4px 18px 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+    /* Entrate / uscite mensili */
+    .mesi-pillole {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 14px 0 12px;
+      scrollbar-width: thin;
+    }
+    .mese-pillola {
+      flex-shrink: 0;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.20);
+      color: rgba(255,255,255,0.65);
+      font-size: 0.80rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .mese-pillola:hover { color: #fff; border-color: rgba(255,255,255,0.40); }
+    .mese-pillola.attiva {
+      background: rgba(212,168,85,0.25);
+      border-color: rgba(212,168,85,0.70);
+      color: #fff;
+      font-weight: 700;
+    }
+    .mov-totali {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .mov-totale {
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .mov-totale-label {
+      font-size: 0.66rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 4px;
+    }
+    .mov-totale-valore { font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
+    .mov-pos { color: #7fd69a; }
+    .mov-neg { color: #ef8a8a; }
+    .mov-sezione {
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+      margin: 14px 0 6px;
+    }
+    .mov-riga {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.90rem;
+    }
+    .mov-riga:last-child { border-bottom: none; }
+    .mov-riga-sub { font-size: 0.76rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .mov-riga-importo { font-weight: 700; white-space: nowrap; }
+    .mov-vuoto { color: rgba(255,255,255,0.40); font-size: 0.88rem; font-style: italic; padding: 12px 0 4px; }
+
     /* Spese fisse */
     .spesa-row {
       display: flex;
@@ -695,6 +798,16 @@
       /* Spese: layout compatto */
       .spesa-row { flex-wrap: wrap; gap: 6px; }
 
+      /* Tendine e totali mensili */
+      .tendina summary { padding: 12px 14px; }
+      .tendina-corpo { padding: 4px 14px 14px; }
+      .tendina-info { display: none; }
+      .tendina-titolo { flex: 1; }
+      .mov-totali { gap: 6px; }
+      .mov-totale { padding: 8px 6px; }
+      .mov-totale-label { font-size: 0.58rem; letter-spacing: 0.10em; }
+      .mov-totale-valore { font-size: 0.86rem; }
+
       /* Menu mobile */
       .mob-menu a { font-size: 1.6rem; }
     }
@@ -769,9 +882,31 @@
               <canvas id="grafico-saldo"></canvas>
             </div>
           </div>
-          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.10);margin:20px 0;">
-          <div style="font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.40);margin-bottom:14px;">Spese fisse</div>
-          <div id="spese-container"><p class="errore-caricamento">Caricamento...</p></div>
+          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.10);margin:20px 0 14px;">
+
+          <!-- Tendina: spese fisse -->
+          <details class="tendina">
+            <summary>
+              <span class="tendina-titolo">Spese fisse</span>
+              <span class="tendina-info" id="spese-riassunto"></span>
+              <span class="tendina-freccia">▼</span>
+            </summary>
+            <div class="tendina-corpo">
+              <div id="spese-container"><p class="errore-caricamento">Caricamento...</p></div>
+            </div>
+          </details>
+
+          <!-- Tendina: entrate e uscite mese per mese -->
+          <details class="tendina">
+            <summary>
+              <span class="tendina-titolo">Dettaglio entrate e uscite</span>
+              <span class="tendina-info" id="mov-riassunto"></span>
+              <span class="tendina-freccia">▼</span>
+            </summary>
+            <div class="tendina-corpo">
+              <div id="movimenti-container"><p class="errore-caricamento">Caricamento...</p></div>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -876,25 +1011,77 @@
 
 <script>
   // ── CREDENZIALI ──────────────────────────────────────────────
-  // Le password sono cifrate con SHA-256 — non modificare il formato
+  // Profilo "simpatizzante": vede solo canti e basi (dati non riservati),
+  // la password è controllata con SHA-256 — non modificare il formato.
+  // Profilo "socio": NON c'è nessun hash qui. La password è la chiave che
+  // decifra i dati riservati in dati.json (campo "riservato", AES-GCM +
+  // PBKDF2): se la decifratura riesce, la password è giusta.
   const UTENTI = [
-    { username: "socio",         passwordHash: "28d898220a66fb9ee698eaaf8128f848783115008ba1c857eb291c4389f326b2", ruolo: "socio" },
     { username: "simpatizzante", passwordHash: "b622da6e50e9408ffebd85f95ad1931e7d0615e988247c369eea0f79b16e26e8", ruolo: "simpatizzante" }
   ];
   // ─────────────────────────────────────────────────────────────
 
-  // Controlla se già loggato (sessione attiva)
-  if (sessionStorage.getItem("loggedIn") === "true") {
+  // Dati riservati decifrati: restano solo in memoria, mai salvati nel browser
+  let _datiRiservati = null;
+
+  // Controlla se già loggato (sessione attiva). Il socio deve sempre
+  // reinserire la password, perché la chiave non viene conservata.
+  if (sessionStorage.getItem("loggedIn") === "true" && sessionStorage.getItem("ruolo") === "simpatizzante") {
     mostraContenuto();
+  }
+
+  /* ── Cifratura (compatibile con il Gestore Sito) ── */
+  function _unb64(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+
+  async function decifraRiservato(riservato, password) {
+    const base = await crypto.subtle.importKey(
+      "raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+    const chiave = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: _unb64(riservato.salt), iterations: riservato.iter, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const chiaro = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: _unb64(riservato.iv) }, chiave, _unb64(riservato.dati));
+    return JSON.parse(new TextDecoder().decode(chiaro));
   }
 
   async function login() {
     const u = document.getElementById("username").value.trim();
     const p = document.getElementById("password").value;
     const errore = document.getElementById("msg-errore");
+    const btn = document.querySelector(".btn-login");
+
+    const sbagliato = () => {
+      errore.textContent = "Nome utente o password non corretti.";
+      document.getElementById("password").value = "";
+    };
+
+    if (u === "socio") {
+      if (!p) { sbagliato(); return; }
+      if (!window.crypto || !crypto.subtle) {
+        errore.textContent = "Questo browser non supporta l'accesso protetto. Prova con un browser aggiornato.";
+        return;
+      }
+      errore.textContent = "";
+      if (btn) { btn.disabled = true; btn.textContent = "Verifica in corso…"; }
+      try {
+        const res  = await fetch("dati.json?t=" + Date.now());
+        const dati = await res.json();
+        if (!dati.riservato) throw new Error("dati riservati non presenti");
+        _datiRiservati = await decifraRiservato(dati.riservato, p);
+      } catch (e) {
+        _datiRiservati = null;
+        sbagliato();
+        return;
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Accedi"; }
+      }
+      sessionStorage.setItem("loggedIn", "true");
+      sessionStorage.setItem("ruolo", "socio");
+      mostraContenuto();
+      return;
+    }
 
     const hashHex = sha256(p);
-
     const trovato = UTENTI.find(x => x.username === u && x.passwordHash === hashHex);
 
     if (trovato) {
@@ -903,8 +1090,7 @@
       errore.textContent = "";
       mostraContenuto();
     } else {
-      errore.textContent = "Nome utente o password non corretti.";
-      document.getElementById("password").value = "";
+      sbagliato();
     }
   }
 
@@ -1285,14 +1471,17 @@
 
   async function caricaDati() {
     try {
-      const res  = await fetch("dati.json?t=" + Date.now());
-      const dati = await res.json();
+      if (!_datiRiservati) { logout(); return; }
+      const dati = _datiRiservati;
       renderSaldo(dati);
       renderSpese(dati.spese_fisse);
+      renderMovimenti(dati.movimenti);
       renderRiunioni(dati.riunioni);
       renderAttivita(dati.attivita);
     } catch(e) {
       document.getElementById("spese-container").innerHTML =
+        '<p class="errore-caricamento">Impossibile caricare dati.json</p>';
+      document.getElementById("movimenti-container").innerHTML =
         '<p class="errore-caricamento">Impossibile caricare dati.json</p>';
       document.getElementById("riunioni-container").innerHTML =
         '<p class="errore-caricamento">Impossibile caricare dati.json</p>';
@@ -1382,6 +1571,107 @@
         </div>`;
     });
     document.getElementById("spese-container").innerHTML = html;
+
+    // Riassunto nell'intestazione chiusa: numero di spese attive e prossima scadenza
+    const attive = spese.filter(s => s.tipo_rinnovo !== 'disattivato');
+    const prossima = attive
+      .filter(s => /^\d{4}-\d{2}-\d{2}$/.test(s.scadenza || "") && new Date(s.scadenza) >= oggi)
+      .sort((a, b) => a.scadenza.localeCompare(b.scadenza))[0];
+    document.getElementById("spese-riassunto").textContent =
+      `${attive.length} attive` + (prossima ? ` · prossima: ${prossima.nome}, ${formatDataBreve(prossima.scadenza)}` : "");
+  }
+
+  /* ── Entrate e uscite mese per mese ── */
+  const CATEGORIE_MOV = {
+    donazioni_fondatori: "Donazioni dei soci fondatori",
+    donazioni_altri:     "Donazioni di altri sostenitori",
+    gestione_locale:     "Gestione del locale",
+    gestione_attivita:   "Gestione delle attività"
+  };
+  const MESI_BREVI  = ["","Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+  const MESI_LUNGHI = ["","gennaio","febbraio","marzo","aprile","maggio","giugno",
+                       "luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  let _movimenti = [];
+
+  function renderMovimenti(movimenti) {
+    _movimenti = Array.isArray(movimenti) ? movimenti.filter(m => m && m.data) : [];
+    const box = document.getElementById("movimenti-container");
+    if (!_movimenti.length) {
+      box.innerHTML = '<p class="mov-vuoto">Nessun movimento registrato ancora.</p>';
+      document.getElementById("mov-riassunto").textContent = "";
+      return;
+    }
+    // Mesi dal primo movimento al mese corrente (inclusi i mesi senza movimenti)
+    const primo = _movimenti.map(m => m.data.slice(0, 7)).sort()[0];
+    const ora   = new Date();
+    const fine  = `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, "0")}`;
+    const mesi  = [];
+    let [y, m]  = primo.split("-").map(Number);
+    while (`${y}-${String(m).padStart(2, "0")}` <= fine && mesi.length < 240) {
+      mesi.push(`${y}-${String(m).padStart(2, "0")}`);
+      if (++m > 12) { m = 1; y++; }
+    }
+    const piuAnni = new Set(mesi.map(k => k.slice(0, 4))).size > 1;
+    box.innerHTML = `
+      <div class="mesi-pillole" id="mesi-pillole">
+        ${mesi.map(k => {
+          const [yy, mm] = k.split("-");
+          const label = MESI_BREVI[parseInt(mm)] + (piuAnni ? " " + yy.slice(2) : "");
+          return `<button class="mese-pillola" data-mese="${k}" onclick="mostraMese('${k}')">${label}</button>`;
+        }).join("")}
+      </div>
+      <div id="mese-dettaglio"></div>`;
+    mostraMese(mesi[mesi.length - 1]);
+  }
+
+  function mostraMese(chiave) {
+    document.querySelectorAll(".mese-pillola").forEach(b =>
+      b.classList.toggle("attiva", b.dataset.mese === chiave));
+    const attiva = document.querySelector(".mese-pillola.attiva");
+    const fila = document.getElementById("mesi-pillole");
+    if (attiva && fila) fila.scrollLeft = attiva.offsetLeft - fila.clientWidth / 2 + attiva.clientWidth / 2;
+
+    const delMese = _movimenti
+      .filter(m => m.data.slice(0, 7) === chiave)
+      .sort((a, b) => b.data.localeCompare(a.data));
+    const imp = m => parseFloat(m.importo) || 0;
+    const entrate = delMese.filter(m => m.tipo === "entrata");
+    const uscite  = delMese.filter(m => m.tipo === "uscita");
+    const totE = entrate.reduce((t, m) => t + imp(m), 0);
+    const totU = uscite.reduce((t, m) => t + imp(m), 0);
+    const diff = totE - totU;
+    const [yy, mm] = chiave.split("-");
+    document.getElementById("mov-riassunto").textContent = `${MESI_LUNGHI[parseInt(mm)]} ${yy}`;
+
+    const perCategoria = lista => {
+      const tot = {};
+      lista.forEach(m => { const c = CATEGORIE_MOV[m.categoria] || m.categoria || "Altro"; tot[c] = (tot[c] || 0) + imp(m); });
+      return Object.entries(tot).map(([c, v]) =>
+        `<div class="mov-riga"><span>${escHtml(c)}</span><span class="mov-riga-importo">${formatEuro(v)}</span></div>`).join("");
+    };
+
+    let html = `
+      <div class="mov-totali">
+        <div class="mov-totale"><div class="mov-totale-label">Entrate</div><div class="mov-totale-valore mov-pos">${formatEuro(totE)}</div></div>
+        <div class="mov-totale"><div class="mov-totale-label">Uscite</div><div class="mov-totale-valore mov-neg">${formatEuro(totU)}</div></div>
+        <div class="mov-totale"><div class="mov-totale-label">Differenza</div><div class="mov-totale-valore ${diff >= 0 ? "mov-pos" : "mov-neg"}">${diff >= 0 ? "+ " : "− "}${formatEuro(Math.abs(diff))}</div></div>
+      </div>`;
+
+    if (!delMese.length) {
+      html += `<p class="mov-vuoto">Nessun movimento a ${MESI_LUNGHI[parseInt(mm)]} ${yy}.</p>`;
+    } else {
+      if (entrate.length) html += `<div class="mov-sezione">Entrate per causale</div>${perCategoria(entrate)}`;
+      if (uscite.length)  html += `<div class="mov-sezione">Uscite per causale</div>${perCategoria(uscite)}`;
+      html += `<div class="mov-sezione">Tutti i movimenti del mese</div>` + delMese.map(m => `
+        <div class="mov-riga">
+          <div>
+            <div>${escHtml(CATEGORIE_MOV[m.categoria] || m.categoria || "—")}</div>
+            <div class="mov-riga-sub">${formatData(m.data)}${m.note ? " · " + escHtml(m.note) : ""}</div>
+          </div>
+          <span class="mov-riga-importo ${m.tipo === "uscita" ? "mov-neg" : "mov-pos"}">${m.tipo === "uscita" ? "− " : "+ "}${formatEuro(imp(m))}</span>
+        </div>`).join("");
+    }
+    document.getElementById("mese-dettaglio").innerHTML = html;
   }
 
   function badgeScadenza(scadenza, oggi, tipo_rinnovo) {
@@ -1585,6 +1875,7 @@
   }
 
   function logout() {
+    _datiRiservati = null;
     sessionStorage.removeItem("loggedIn");
     sessionStorage.removeItem("ruolo");
     localStorage.removeItem("areaPrivataToken");
