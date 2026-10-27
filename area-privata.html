@@ -1678,33 +1678,39 @@
 
   function dettaglioMese(lista) {
     const imp = m => parseFloat(m.importo) || 0;
+    // Una sola riga per causale: somma gli importi e unisce le note
+    const raggruppa = l => {
+      const g = {};
+      l.forEach(m => {
+        const c = CATEGORIE_MOV[m.categoria] || m.categoria || "Altro";
+        g[c] = g[c] || { importo: 0, note: [] };
+        g[c].importo += imp(m);
+        const n = (m.note || "").trim();
+        if (n && !g[c].note.includes(n)) g[c].note.push(n);
+      });
+      return Object.entries(g);
+    };
     const entrate = lista.filter(m => m.tipo === "entrata");
     const uscite  = lista.filter(m => m.tipo === "uscita");
     const totE = entrate.reduce((t, m) => t + imp(m), 0);
     const totU = uscite.reduce((t, m) => t + imp(m), 0);
     const diff = totE - totU;
-    const perCategoria = l => {
-      const t = {};
-      l.forEach(m => { const c = CATEGORIE_MOV[m.categoria] || m.categoria || "Altro"; t[c] = (t[c] || 0) + imp(m); });
-      return Object.entries(t).map(([c, v]) =>
-        `<div class="mov-riga"><span>${escHtml(c)}</span><span class="mov-riga-importo">${formatEuro(v)}</span></div>`).join("");
-    };
+    const righe = (l, segno, cls) => raggruppa(l).map(([c, v]) => `
+      <div class="mov-riga">
+        <div>
+          <div>${escHtml(c)}</div>
+          ${v.note.length ? `<div class="mov-riga-sub">${escHtml(v.note.join("; "))}</div>` : ""}
+        </div>
+        <span class="mov-riga-importo ${cls}">${segno} ${formatEuro(v.importo)}</span>
+      </div>`).join("");
     let html = `
       <div class="mov-totali">
         <div class="mov-totale"><div class="mov-totale-label">Entrate</div><div class="mov-totale-valore mov-pos">${formatEuro(totE)}</div></div>
         <div class="mov-totale"><div class="mov-totale-label">Uscite</div><div class="mov-totale-valore mov-neg">${formatEuro(totU)}</div></div>
         <div class="mov-totale"><div class="mov-totale-label">Differenza</div><div class="mov-totale-valore ${diff >= 0 ? "mov-pos" : "mov-neg"}">${diff >= 0 ? "+ " : "− "}${formatEuro(Math.abs(diff))}</div></div>
       </div>`;
-    if (entrate.length) html += `<div class="mov-sezione">Entrate per causale</div>${perCategoria(entrate)}`;
-    if (uscite.length)  html += `<div class="mov-sezione">Uscite per causale</div>${perCategoria(uscite)}`;
-    html += `<div class="mov-sezione">Tutti i movimenti</div>` + lista.map(m => `
-      <div class="mov-riga">
-        <div>
-          <div>${escHtml(CATEGORIE_MOV[m.categoria] || m.categoria || "—")}</div>
-          ${m.note ? `<div class="mov-riga-sub">${escHtml(m.note)}</div>` : ""}
-        </div>
-        <span class="mov-riga-importo ${m.tipo === "uscita" ? "mov-neg" : "mov-pos"}">${m.tipo === "uscita" ? "− " : "+ "}${formatEuro(imp(m))}</span>
-      </div>`).join("");
+    if (entrate.length) html += `<div class="mov-sezione">Entrate</div>${righe(entrate, "+", "mov-pos")}`;
+    if (uscite.length)  html += `<div class="mov-sezione">Uscite</div>${righe(uscite, "−", "mov-neg")}`;
     return html;
   }
 

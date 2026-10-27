@@ -1150,13 +1150,24 @@
     let delta = valoreMov(obj);
     if (idx >= 0) {
       delta -= valoreMov(dati.movimenti[idx]);   // togli il vecchio valore, metti il nuovo
-      dati.movimenti[idx] = obj;
+      dati.movimenti.splice(idx, 1);
+    }
+    // Una sola voce per causale in ogni mese: se esiste già, somma l'importo
+    const stessa = dati.movimenti.find(m =>
+      (m.data || '').slice(0, 7) === obj.data && m.tipo === obj.tipo && m.categoria === obj.categoria);
+    if (stessa) {
+      stessa.data    = obj.data;
+      stessa.importo = Math.round(((parseFloat(stessa.importo) || 0) + obj.importo) * 100) / 100;
+      if (obj.note && !(stessa.note || '').includes(obj.note))
+        stessa.note = stessa.note ? `${stessa.note}; ${obj.note}` : obj.note;
     } else {
       dati.movimenti.push(obj);
     }
     applicaDeltaSaldo(delta);
     renderMovimenti(); closeModal('movimento'); markDirty();
-    toast(`✅ Movimento salvato — saldo ${euro(dati.saldo)}`);
+    toast(stessa && idx < 0
+      ? `✅ Sommato a «${labelCategoria(obj)}» di ${MESI_LUNGHI[parseInt(obj.data.slice(5, 7))].toLowerCase()}: ${euro(stessa.importo)}`
+      : `✅ Movimento salvato — saldo ${euro(dati.saldo)}`);
   }
 
   function eliminaMovimento(idx) {
