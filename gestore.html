@@ -520,6 +520,10 @@
       <input type="password" id="cifraPw" autocomplete="off"></div>
     <div class="field" id="cifraCampoConferma"><label>Ripeti la password</label>
       <input type="password" id="cifraPw2" autocomplete="off"></div>
+    <label id="cifraRicordaRiga" style="display:flex;align-items:center;gap:8px;font-size:0.86rem;color:var(--muted);cursor:pointer;margin-top:2px;">
+      <input type="checkbox" id="cifraRicorda" checked style="width:auto;">
+      Ricorda la password su questo computer
+    </label>
     <p id="cifraErrore" style="font-size:0.84rem;color:var(--red);min-height:1.2em;margin:4px 0 8px;"></p>
     <div class="btn-row-end">
       <button class="btn btn-ghost" id="cifraAnnulla" onclick="closeModal('cifra')">Annulla</button>
@@ -799,7 +803,31 @@
   async function derivaChiave(password, salt, iter) {
     const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
     return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' },
-                                   base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+                                   base, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  }
+
+  /* Chiave ricordata su questo computer (file .chiave_area_privata, mai pubblicato).
+     Serve il Gestore Sito.exe aggiornato: con quello vecchio chiede sempre la password. */
+  function _apiChiave() {
+    const api = window.pywebview && window.pywebview.api;
+    return api && typeof api.leggi_chiave_locale === 'function' ? api : null;
+  }
+  async function leggiChiaveLocale() {
+    try {
+      const api = _apiChiave(); if (!api) return null;
+      const testo = await api.leggi_chiave_locale(); if (!testo) return null;
+      const o = JSON.parse(testo);
+      const chiave = await crypto.subtle.importKey('raw', _unb64(o.chiave), { name: 'AES-GCM' }, true, ['encrypt', 'decrypt']);
+      return { chiave, salt: _unb64(o.salt), iter: o.iter, saltB64: o.salt };
+    } catch (e) { return null; }
+  }
+  async function ricordaChiave(ricorda) {
+    try {
+      const api = _apiChiave(); if (!api) return;
+      if (!ricorda || !_cifra) { await api.salva_chiave_locale(''); return; }
+      const raw = await crypto.subtle.exportKey('raw', _cifra.chiave);
+      await api.salva_chiave_locale(JSON.stringify({ salt: _b64(_cifra.salt), iter: _cifra.iter, chiave: _b64(raw) }));
+    } catch (e) { /* non bloccare il lavoro se il file non si salva */ }
   }
   async function decifraConChiave(riservato, chiave) {
     const chiaro = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: _unb64(riservato.iv) }, chiave, _unb64(riservato.dati));
@@ -872,6 +900,7 @@
         const chiave = await derivaChiave(pw, salt, r.iter);
         const privato = await decifraConChiave(r, chiave);
         _cifra = { chiave, salt, iter: r.iter };
+        await ricordaChiave(document.getElementById('cifraRicorda').checked);
         const { grezzo, filename } = _cifraInAttesa;
         _cifraInAttesa = null;
         closeModal('cifra');
@@ -888,6 +917,7 @@
       try {
         const salt = crypto.getRandomValues(new Uint8Array(16));
         _cifra = { chiave: await derivaChiave(pw, salt, CIFRA_ITER), salt, iter: CIFRA_ITER };
+        await ricordaChiave(document.getElementById('cifraRicorda').checked);
         closeModal('cifra');
         markDirty();
         toast('✅ Password impostata — ora clicca «Salva e Pubblica»');
@@ -909,6 +939,16 @@
       if (_cifra && _b64(_cifra.salt) === grezzo.riservato.salt) {
         try { avviaConDati(grezzo, await decifraConChiave(grezzo.riservato, _cifra.chiave), filename); return; }
         catch (e) { /* chiave cambiata: chiedi di nuovo la password */ }
+      }
+      // Chiave ricordata su questo computer
+      const loc = await leggiChiaveLocale();
+      if (loc && loc.saltB64 === grezzo.riservato.salt) {
+        try {
+          const privato = await decifraConChiave(grezzo.riservato, loc.chiave);
+          _cifra = { chiave: loc.chiave, salt: loc.salt, iter: loc.iter };
+          avviaConDati(grezzo, privato, filename);
+          return;
+        } catch (e) { /* password cambiata da un altro computer: chiedila di nuovo */ }
       }
       _cifra = null;
       _cifraInAttesa = { grezzo, filename };

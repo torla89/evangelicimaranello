@@ -884,6 +884,32 @@ class PythonBridge(CatalogoAPI):
         except Exception as e:
             return _json.dumps({"ok": False, "message": str(e)[:200]})
 
+    # ── chiave dei dati riservati, ricordata su questo computer ──
+    # Il file resta solo in locale (è in .gitignore e non viene mai
+    # aggiunto da «Salva e Pubblica»): contiene la chiave già ricavata
+    # dalla password, così il Gestore non la chiede a ogni avvio.
+    def _file_chiave(self) -> str:
+        return os.path.join(SITE_DIR, ".chiave_area_privata")
+
+    def leggi_chiave_locale(self) -> str:
+        try:
+            with open(self._file_chiave(), encoding="utf-8") as f:
+                return f.read()
+        except Exception:
+            return ""
+
+    def salva_chiave_locale(self, testo: str) -> str:
+        try:
+            if not testo:
+                if os.path.exists(self._file_chiave()):
+                    os.remove(self._file_chiave())
+                return "ok"
+            with open(self._file_chiave(), "w", encoding="utf-8") as f:
+                f.write(testo)
+            return "ok"
+        except Exception as e:
+            return str(e)
+
     def carica_auto(self) -> str:
         try:
             if os.path.exists(JSON_FILE):

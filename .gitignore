@@ -9,3 +9,6 @@ __pycache__/
 
 # file delle predicazioni: stanno su Cloudflare R2
 predicazioni/
+
+# chiave dell area privata ricordata su questo computer (mai su GitHub)
+.chiave_area_privata
