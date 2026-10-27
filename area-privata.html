@@ -491,6 +491,8 @@
       color: rgba(255,255,255,0.78);
       white-space: pre-line;
     }
+    .tendina-riunione > .tendina-corpo { padding-top: 14px; }
+    .tendina-riunione > summary .tendina-titolo { flex: 1; }
     .riunione-vuoto {
       font-size: 0.88rem;
       color: rgba(255,255,255,0.30);
@@ -1737,16 +1739,26 @@
         '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;">Nessuna riunione inserita.</p>';
       return;
     }
+    // Una tendina per ogni riunione, dalla più recente; tutte chiuse
+    const ordinate = [...riunioni].sort((a, b) => (b.data || "").localeCompare(a.data || ""));
     let html = "";
-    riunioni.forEach(r => {
+    ordinate.forEach(r => {
+      const etichetta = r.data ? `Riunione del ${formatData(r.data)}` : (r.titolo || "Riunione");
+      // il titolo si mostra dentro solo se dice qualcosa in più della data
+      const titoloExtra = r.titolo && !/riunione/i.test(r.titolo) ? r.titolo : "";
       html += `
-        <div class="riunione">
-          <div class="riunione-data">${formatData(r.data)}</div>
-          <div class="riunione-titolo">${r.titolo}</div>
-          ${r.testo
-            ? `<div class="riunione-testo">${r.testo}</div>`
-            : `<div class="riunione-vuoto">Verbale non ancora inserito.</div>`}
-        </div>`;
+        <details class="tendina tendina-riunione">
+          <summary>
+            <span class="tendina-titolo">${etichetta}</span>
+            <span class="tendina-freccia">▼</span>
+          </summary>
+          <div class="tendina-corpo">
+            ${titoloExtra ? `<div class="riunione-titolo">${titoloExtra}</div>` : ""}
+            ${r.testo
+              ? `<div class="riunione-testo">${r.testo}</div>`
+              : `<div class="riunione-vuoto">Verbale non ancora inserito.</div>`}
+          </div>
+        </details>`;
     });
     document.getElementById("riunioni-container").innerHTML = html;
   }
