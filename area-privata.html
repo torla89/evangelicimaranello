@@ -340,7 +340,7 @@
       text-overflow: ellipsis;
     }
     .tendina-freccia { font-size: 0.7rem; opacity: 0.45; transition: transform 0.3s; }
-    .tendina[open] .tendina-freccia { transform: rotate(180deg); }
+    .tendina[open] > summary .tendina-freccia { transform: rotate(180deg); }
     .tendina-corpo { padding: 4px 18px 16px; border-top: 1px solid rgba(255,255,255,0.08); }
 
     /* Entrate / uscite mensili */
@@ -412,6 +412,23 @@
     .mov-riga-sub { font-size: 0.76rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
     .mov-riga-importo { font-weight: 700; white-space: nowrap; }
     .mov-vuoto { color: rgba(255,255,255,0.40); font-size: 0.88rem; font-style: italic; padding: 12px 0 4px; }
+
+    /* Tendine annuali e mensili dentro «Dettaglio entrate e uscite» */
+    .tendina-anno { margin: 12px 0 0; background: rgba(0,0,0,0.18); }
+    .tendina-anno > summary .tendina-titolo { font-size: 1rem; }
+    .tendina-mese { margin: 8px 0 0; background: rgba(255,255,255,0.03); }
+    .tendina-mese > summary { padding: 11px 14px; }
+    .tendina-mese > summary .tendina-titolo { font-size: 0.90rem; font-weight: 600; }
+    .tendina-mese > .tendina-corpo { padding-top: 12px; }
+    .mov-tot-sum {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
 
     /* Spese fisse */
     .spesa-row {
@@ -807,6 +824,14 @@
       .mov-totale { padding: 8px 6px; }
       .mov-totale-label { font-size: 0.58rem; letter-spacing: 0.10em; }
       .mov-totale-valore { font-size: 0.86rem; }
+      .mov-tot-sum { flex-direction: column; align-items: flex-end; gap: 2px; font-size: 0.76rem; }
+      .tendina-anno > .tendina-corpo { padding: 2px 8px 10px; }
+      .tendina-mese > summary { padding: 10px 10px; }
+      .tendina-mese > .tendina-corpo { padding: 10px 10px 12px; }
+      .mov-totali { grid-template-columns: 1fr; gap: 4px; }
+      .mov-totale { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 10px; text-align: left; }
+      .mov-totale-label { margin-bottom: 0; font-size: 0.62rem; }
+      .mov-totale-valore { font-size: 0.92rem; }
 
       /* Menu mobile */
       .mob-menu a { font-size: 1.6rem; }
@@ -1596,82 +1621,89 @@
   function renderMovimenti(movimenti) {
     _movimenti = Array.isArray(movimenti) ? movimenti.filter(m => m && m.data) : [];
     const box = document.getElementById("movimenti-container");
+    const riass = document.getElementById("mov-riassunto");
     if (!_movimenti.length) {
       box.innerHTML = '<p class="mov-vuoto">Nessun movimento registrato ancora.</p>';
-      document.getElementById("mov-riassunto").textContent = "";
+      riass.textContent = "";
       return;
     }
-    // Mesi dal primo movimento al mese corrente (inclusi i mesi senza movimenti)
-    const primo = _movimenti.map(m => m.data.slice(0, 7)).sort()[0];
-    const ora   = new Date();
-    const fine  = `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, "0")}`;
-    const mesi  = [];
-    let [y, m]  = primo.split("-").map(Number);
-    while (`${y}-${String(m).padStart(2, "0")}` <= fine && mesi.length < 240) {
-      mesi.push(`${y}-${String(m).padStart(2, "0")}`);
-      if (++m > 12) { m = 1; y++; }
-    }
-    const piuAnni = new Set(mesi.map(k => k.slice(0, 4))).size > 1;
-    box.innerHTML = `
-      <div class="mesi-pillole" id="mesi-pillole">
-        ${mesi.map(k => {
-          const [yy, mm] = k.split("-");
-          const label = MESI_BREVI[parseInt(mm)] + (piuAnni ? " " + yy.slice(2) : "");
-          return `<button class="mese-pillola" data-mese="${k}" onclick="mostraMese('${k}')">${label}</button>`;
-        }).join("")}
-      </div>
-      <div id="mese-dettaglio"></div>`;
-    mostraMese(mesi[mesi.length - 1]);
+    const imp  = m => parseFloat(m.importo) || 0;
+    const tot  = lista => ({
+      e: lista.filter(m => m.tipo === "entrata").reduce((t, m) => t + imp(m), 0),
+      u: lista.filter(m => m.tipo === "uscita").reduce((t, m) => t + imp(m), 0)
+    });
+    const totaliHtml = t => `
+      <span class="mov-tot-sum"><span class="mov-pos">+ ${formatEuro(t.e)}</span><span class="mov-neg">− ${formatEuro(t.u)}</span></span>`;
+
+    // Raggruppa: anno → mese
+    const anni = {};
+    _movimenti.forEach(m => {
+      const y = m.data.slice(0, 4), k = m.data.slice(0, 7);
+      ((anni[y] = anni[y] || {})[k] = anni[y][k] || []).push(m);
+    });
+    const anniOrdinati = Object.keys(anni).sort().reverse();
+
+    box.innerHTML = anniOrdinati.map((y, i) => {
+      const mesi = anni[y];
+      const tutti = Object.values(mesi).flat();
+      return `
+        <details class="tendina tendina-anno"${i === 0 ? " open" : ""}>
+          <summary>
+            <span class="tendina-titolo">${y}</span>
+            ${totaliHtml(tot(tutti))}
+            <span class="tendina-freccia">▼</span>
+          </summary>
+          <div class="tendina-corpo">
+            ${Object.keys(mesi).sort().reverse().map(k => {
+              const lista = mesi[k].sort((a, b) => b.data.localeCompare(a.data));
+              return `
+              <details class="tendina tendina-mese">
+                <summary>
+                  <span class="tendina-titolo">${MESI_LUNGHI[parseInt(k.slice(5, 7))].replace(/^./, c => c.toUpperCase())}</span>
+                  ${totaliHtml(tot(lista))}
+                  <span class="tendina-freccia">▼</span>
+                </summary>
+                <div class="tendina-corpo">${dettaglioMese(lista)}</div>
+              </details>`;
+            }).join("")}
+          </div>
+        </details>`;
+    }).join("");
+
+    const tAnno = tot(Object.values(anni[anniOrdinati[0]]).flat());
+    riass.textContent = `${anniOrdinati[0]}: + ${formatEuro(tAnno.e)} · − ${formatEuro(tAnno.u)}`;
   }
 
-  function mostraMese(chiave) {
-    document.querySelectorAll(".mese-pillola").forEach(b =>
-      b.classList.toggle("attiva", b.dataset.mese === chiave));
-    const attiva = document.querySelector(".mese-pillola.attiva");
-    const fila = document.getElementById("mesi-pillole");
-    if (attiva && fila) fila.scrollLeft = attiva.offsetLeft - fila.clientWidth / 2 + attiva.clientWidth / 2;
-
-    const delMese = _movimenti
-      .filter(m => m.data.slice(0, 7) === chiave)
-      .sort((a, b) => b.data.localeCompare(a.data));
+  function dettaglioMese(lista) {
     const imp = m => parseFloat(m.importo) || 0;
-    const entrate = delMese.filter(m => m.tipo === "entrata");
-    const uscite  = delMese.filter(m => m.tipo === "uscita");
+    const entrate = lista.filter(m => m.tipo === "entrata");
+    const uscite  = lista.filter(m => m.tipo === "uscita");
     const totE = entrate.reduce((t, m) => t + imp(m), 0);
     const totU = uscite.reduce((t, m) => t + imp(m), 0);
     const diff = totE - totU;
-    const [yy, mm] = chiave.split("-");
-    document.getElementById("mov-riassunto").textContent = `${MESI_LUNGHI[parseInt(mm)]} ${yy}`;
-
-    const perCategoria = lista => {
-      const tot = {};
-      lista.forEach(m => { const c = CATEGORIE_MOV[m.categoria] || m.categoria || "Altro"; tot[c] = (tot[c] || 0) + imp(m); });
-      return Object.entries(tot).map(([c, v]) =>
+    const perCategoria = l => {
+      const t = {};
+      l.forEach(m => { const c = CATEGORIE_MOV[m.categoria] || m.categoria || "Altro"; t[c] = (t[c] || 0) + imp(m); });
+      return Object.entries(t).map(([c, v]) =>
         `<div class="mov-riga"><span>${escHtml(c)}</span><span class="mov-riga-importo">${formatEuro(v)}</span></div>`).join("");
     };
-
     let html = `
       <div class="mov-totali">
         <div class="mov-totale"><div class="mov-totale-label">Entrate</div><div class="mov-totale-valore mov-pos">${formatEuro(totE)}</div></div>
         <div class="mov-totale"><div class="mov-totale-label">Uscite</div><div class="mov-totale-valore mov-neg">${formatEuro(totU)}</div></div>
         <div class="mov-totale"><div class="mov-totale-label">Differenza</div><div class="mov-totale-valore ${diff >= 0 ? "mov-pos" : "mov-neg"}">${diff >= 0 ? "+ " : "− "}${formatEuro(Math.abs(diff))}</div></div>
       </div>`;
-
-    if (!delMese.length) {
-      html += `<p class="mov-vuoto">Nessun movimento a ${MESI_LUNGHI[parseInt(mm)]} ${yy}.</p>`;
-    } else {
-      if (entrate.length) html += `<div class="mov-sezione">Entrate per causale</div>${perCategoria(entrate)}`;
-      if (uscite.length)  html += `<div class="mov-sezione">Uscite per causale</div>${perCategoria(uscite)}`;
-      html += `<div class="mov-sezione">Tutti i movimenti del mese</div>` + delMese.map(m => `
-        <div class="mov-riga">
-          <div>
-            <div>${escHtml(CATEGORIE_MOV[m.categoria] || m.categoria || "—")}</div>
-            ${m.note ? `<div class="mov-riga-sub">${escHtml(m.note)}</div>` : ""}
-          </div>
-          <span class="mov-riga-importo ${m.tipo === "uscita" ? "mov-neg" : "mov-pos"}">${m.tipo === "uscita" ? "− " : "+ "}${formatEuro(imp(m))}</span>
-        </div>`).join("");
-    }
-    document.getElementById("mese-dettaglio").innerHTML = html;
+    if (entrate.length) html += `<div class="mov-sezione">Entrate per causale</div>${perCategoria(entrate)}`;
+    if (uscite.length)  html += `<div class="mov-sezione">Uscite per causale</div>${perCategoria(uscite)}`;
+    html += `<div class="mov-sezione">Tutti i movimenti</div>` + lista.map(m => `
+      <div class="mov-riga">
+        <div>
+          <div>${escHtml(CATEGORIE_MOV[m.categoria] || m.categoria || "—")}</div>
+          ${m.note ? `<div class="mov-riga-sub">${escHtml(m.note)}</div>` : ""}
+        </div>
+        <span class="mov-riga-importo ${m.tipo === "uscita" ? "mov-neg" : "mov-pos"}">${m.tipo === "uscita" ? "− " : "+ "}${formatEuro(imp(m))}</span>
+      </div>`).join("");
+    return html;
   }
 
   function badgeScadenza(scadenza, oggi, tipo_rinnovo) {
