@@ -343,7 +343,9 @@
         // Reply-To dal servizio Outlook collegato a EmailJS, che rifiuta valori
         // non validi (es. "(non specificata)").
         email: email || DESTINATARIO,
-        messaggio
+        messaggio,
+        // destinatario: il template e' condiviso con gli ordini della libreria
+        to_email: DESTINATARIO
       });
       mostraAvviso('✅ Segnalazione inviata, grazie! Ti risponderemo se hai lasciato la tua email.');
       document.getElementById('segMessaggio').value = '';

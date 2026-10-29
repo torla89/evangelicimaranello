@@ -173,6 +173,34 @@
     .badge-ok    { background: rgba(80,200,120,0.14); border: 1px solid rgba(80,200,120,0.34); color: #6ddb90; }
     .badge-last  { background: rgba(255,200,80,0.13);  border: 1px solid rgba(255,200,80,0.32);  color: #ffd060; }
     .badge-out   { background: rgba(230,110,110,0.13); border: 1px solid rgba(230,110,110,0.32); color: #ef9a9a; }
+    .badge-ord   { background: rgba(120,170,255,0.12); border: 1px solid rgba(120,170,255,0.34); color: #a9c8ff; }
+
+    .disp-nota { font-size: 0.80rem; line-height: 1.55; color: rgba(255,255,255,0.58); margin: -4px 0 14px; }
+    .disp-nota.ok  { color: rgba(109,219,144,0.85); }
+
+    .btn-ordina {
+      background: #ffd060; border-color: #ffd060; color: #2a1a04;
+    }
+    .btn-ordina:hover { background: #ffdc85; border-color: #ffdc85; }
+    .btn-ordina.nel-carrello { background: rgba(80,200,120,0.16); border-color: rgba(80,200,120,0.55); color: #fff; }
+
+    /* barra carrello */
+    .carrello-bar {
+      position: fixed; right: 18px; bottom: 78px; z-index: 80;
+      display: flex; align-items: center; gap: 12px;
+      background: #ffd060; color: #2a1a04; text-decoration: none;
+      border-radius: 40px; padding: 11px 20px 11px 16px;
+      font-weight: 700; font-size: 0.92rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      transform: translateY(20px); opacity: 0; pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    .carrello-bar.show { transform: none; opacity: 1; pointer-events: all; }
+    .carrello-bar .num {
+      background: #2a1a04; color: #ffd060; border-radius: 20px;
+      min-width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; padding: 0 7px;
+    }
 
     .libro-desc {
       font-size: 0.92rem; line-height: 1.75; color: rgba(255,255,255,0.78);
@@ -277,6 +305,7 @@
       .cover-wrap { max-width: 210px; margin: 0 auto; }
       .btn-row { flex-direction: column; }
       .btn-link { justify-content: center; }
+      .carrello-bar { left: 18px; right: 18px; justify-content: center; }
       .lb-flip { height: min(62vh, 560px); }
       .lb-hint { font-size: 0.76rem; text-align: center; }
     }
@@ -320,11 +349,16 @@
       <p class="label">📚 Libreria</p>
       <h1>Libreria cristiana gratuita</h1>
       <p class="sottotitolo">I libri che abbiamo a disposizione, offerti a chiunque li desideri. Clicca sulla copertina per vedere il retro del libro.</p>
+      <p class="sottotitolo" style="margin-top:8px;font-size:0.88rem;">
+        <span class="badge badge-ok">Pronta consegna</span> disponibile subito in libreria &nbsp;·&nbsp;
+        <span class="badge badge-ord">Su ordinazione</span> arriva dal magazzino del distributore in circa 7 giorni lavorativi
+      </p>
     </div>
 
     <div class="gratis-box">
       <strong>Tutti i libri sono completamente gratuiti.</strong> Non chiediamo offerte, donazioni,
-      iscrizioni o contributi di alcun tipo: se un libro ti interessa, scrivici e te lo regaliamo.
+      iscrizioni o contributi di alcun tipo: se un libro ti interessa, premi <strong style="color:#ffd060">Ordina</strong>
+      e scegli se ritirarlo in libreria o riceverlo a casa.
       L'unico desiderio è che questi testi possano essere letti.
     </div>
 
@@ -356,6 +390,14 @@
           <select id="fEditore" onchange="applicaFiltri()"></select>
         </div>
         <div class="filtro-campo">
+          <label for="fDisp">Disponibilità</label>
+          <select id="fDisp" onchange="applicaFiltri()">
+            <option value="">Tutti i libri</option>
+            <option value="pronta">Pronta consegna</option>
+            <option value="ordinazione">Su ordinazione</option>
+          </select>
+        </div>
+        <div class="filtro-campo">
           <label for="fCerca">Cerca nel titolo</label>
           <input type="search" id="fCerca" placeholder="Titolo o parola chiave…" oninput="applicaFiltri()">
         </div>
@@ -366,7 +408,7 @@
       </div>
     </div>
 
-    <div class="sezione-titolo">📖 Libri disponibili</div>
+    <div class="sezione-titolo">📖 Catalogo</div>
 
     <div id="libriList">
       <div class="stato-box"><span class="emoji">📚</span>Caricamento del catalogo…</div>
@@ -382,6 +424,10 @@
 
   </main>
 </div>
+
+<a href="ordine.html" class="carrello-bar" id="carrelloBar">
+  <span class="num" id="carrelloNum">0</span><span id="carrelloTesto">Completa l'ordine</span><span>→</span>
+</a>
 
 <!-- MOBILE MENU -->
 <div class="mob-menu" id="mob">
@@ -407,9 +453,10 @@
 </div>
 
 <!-- ══ CATALOGO LIBRERIA ══ -->
+<script src="libreria-ordini.js"></script>
 <script>
-  const WHATSAPP = '393394514698';
-  const EMAIL    = 'libreria@evangelicimaranello.it';
+  const WHATSAPP = LibreriaOrdini.CONFIG.whatsapp;
+  const EMAIL    = LibreriaOrdini.CONFIG.email;
   let   LIBRI    = [];
 
   function esc(s) {
@@ -418,22 +465,39 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function disponibilita(copie) {
-    const n = parseInt(copie);
-    if (isNaN(n) || n <= 0) return { cls: 'badge-out',  txt: 'Momentaneamente esaurito', ok: false };
-    if (n === 1)            return { cls: 'badge-last', txt: 'Ultima copia',              ok: true  };
-    return                         { cls: 'badge-ok',   txt: 'Disponibile',               ok: true  };
+  function disponibilita(l) {
+    const T = LibreriaOrdini.TESTI;
+    return l.pronta
+      ? { cls: 'badge-ok',  txt: T.prontaBadge,      nota: T.prontaNota,      notaCls: 'ok' }
+      : { cls: 'badge-ord', txt: T.ordinazioneBadge, nota: T.ordinazioneNota, notaCls: ''   };
+  }
+
+  function bottoneOrdina(l, i) {
+    return LibreriaOrdini.contiene(l.titolo)
+      ? `<a class="btn-link btn-ordina nel-carrello" href="ordine.html">✓ Nel carrello · completa l'ordine</a>`
+      : `<button class="btn-link btn-ordina" style="font-family:inherit;cursor:pointer" onclick="ordina(${i})">🛒 Ordina</button>`;
+  }
+
+  function ordina(i) {
+    const l = LIBRI[i];
+    if (!l) return;
+    LibreriaOrdini.aggiungi(l.titolo, l.autore);
+    window.location.href = 'ordine.html';
+  }
+
+  function aggiornaCarrello() {
+    const n = LibreriaOrdini.leggi().length;
+    document.getElementById('carrelloNum').textContent = n;
+    document.getElementById('carrelloTesto').textContent =
+      n === 1 ? "1 libro scelto · completa l'ordine" : n + " libri scelti · completa l'ordine";
+    document.getElementById('carrelloBar').classList.toggle('show', n > 0);
   }
 
   function schedaLibro(l, i) {
-    const disp   = disponibilita(l.copie);
+    const disp   = disponibilita(l);
     const titolo = esc(l.titolo || 'Senza titolo');
     const msg    = encodeURIComponent(
-      `Ciao! Ho visto sul sito della Chiesa Evangelica di Maranello il libro "${l.titolo}" e vorrei riceverlo. Grazie!`
-    );
-    const oggetto = encodeURIComponent('Richiesta libro: ' + (l.titolo || ''));
-    const corpo   = encodeURIComponent(
-      `Buongiorno,\nho visto sul sito il libro "${l.titolo}"${l.autore ? ' di ' + l.autore : ''} e vorrei riceverlo.\n\nNome e cognome:\nComune:\n\nGrazie!`
+      `Ciao! Ho una domanda sul libro "${l.titolo}" che ho visto sul sito della Chiesa Evangelica di Maranello.`
     );
 
     const chips = [];
@@ -467,6 +531,8 @@
           ${chips.map(c => `<span class="chip">${c}</span>`).join('')}
         </div>
 
+        <div class="disp-nota ${disp.notaCls}">${disp.nota}</div>
+
         <div class="libro-desc${lunga ? ' collapsed' : ''}" id="desc-${i}">${desc}</div>
         ${lunga ? `<button class="leggi-tutto" onclick="apriDesc(${i}, this)">Leggi tutto</button>` : ''}
 
@@ -474,11 +540,9 @@
         ${l.note ? `<div class="autore-bio">${esc(l.note)}</div>` : ''}
 
         <div class="btn-row">
-          <a class="btn-link btn-form"
-             href="segnalazioni.html?tipo=${encodeURIComponent('Richiesta libri')}&libro=${encodeURIComponent(l.titolo || '')}&autore=${encodeURIComponent(l.autore || '')}">📝 Richiedilo dal sito</a>
+          ${bottoneOrdina(l, i)}
           <a class="btn-link btn-wa" target="_blank" rel="noopener"
-             href="https://wa.me/${WHATSAPP}?text=${msg}">💬 WhatsApp</a>
-          <a class="btn-link" href="mailto:${EMAIL}?subject=${oggetto}&body=${corpo}">✉️ Email</a>
+             href="https://wa.me/${WHATSAPP}?text=${msg}">💬 Hai domande?</a>
         </div>
       </div>
     </div>`;
@@ -568,17 +632,19 @@
     const t = document.getElementById('fTipo').value;
     const e = document.getElementById('fEditore').value;
     const q = document.getElementById('fCerca').value.trim().toLowerCase();
+    const dsp = document.getElementById('fDisp').value;
 
     const risultati = LIBRI.filter(l =>
       (!a || (l.autore  || '').trim() === a) &&
       (!g || (l.genere  || '').trim() === g) &&
       (!t || (l.tipo    || '').trim() === t) &&
       (!e || (l.editore || '').trim() === e) &&
+      (!dsp || (dsp === 'pronta') === !!l.pronta) &&
       (!q || ((l.titolo || '') + ' ' + (l.autore || '') + ' ' + (l.descrizione || ''))
                .toLowerCase().indexOf(q) !== -1)
     );
 
-    const attivi = !!(a || g || t || e || q);
+    const attivi = !!(a || g || t || e || q || dsp);
     document.getElementById('btnAzzera').hidden = !attivi;
     document.getElementById('conteggio').innerHTML = attivi
       ? `<strong>${risultati.length}</strong> ${risultati.length === 1 ? 'libro trovato' : 'libri trovati'} su ${LIBRI.length}`
@@ -599,16 +665,14 @@
     document.getElementById('fTipo').value    = '';
     document.getElementById('fEditore').value = '';
     document.getElementById('fCerca').value   = '';
+    document.getElementById('fDisp').value    = '';
     applicaFiltri();
   }
 
   async function caricaLibreria() {
     const c = document.getElementById('libriList');
     try {
-      const res = await fetch('dati.json?t=' + Date.now());
-      if (!res.ok) throw new Error('fetch');
-      const dati = await res.json();
-      const libri = Array.isArray(dati.libreria) ? dati.libreria : [];
+      const libri = await LibreriaOrdini.catalogo();
       LIBRI = libri;
       if (!libri.length) {
         c.innerHTML = `<div class="stato-box"><span class="emoji">📭</span>
@@ -627,10 +691,13 @@
     }
   }
 
+  function avvio() { aggiornaCarrello(); caricaLibreria(); }
+  // tornando indietro dalla pagina dell'ordine il carrello potrebbe essere cambiato
+  window.addEventListener('pageshow', () => { aggiornaCarrello(); if (LIBRI.length) applicaFiltri(); });
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', caricaLibreria);
+    document.addEventListener('DOMContentLoaded', avvio);
   } else {
-    caricaLibreria();
+    avvio();
   }
 </script>
 
