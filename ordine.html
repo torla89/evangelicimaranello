@@ -317,7 +317,105 @@
 
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
-<script src="libreria-ordini.js"></script>
+<script>
+/* configurazione ordini libreria (stessa in libreria.html e ordine.html) */
+/**
+ * libreria-ordini.js — condiviso da libreria.html e ordine.html
+ * Configurazione degli ordini, carrello (nel browser del visitatore) e
+ * calcolo della disponibilita' reale (copie in dati.json meno quelle gia'
+ * prenotate con un ordine dal sito).
+ */
+(function () {
+  "use strict";
+
+  const CONFIG = {
+    // Indirizzo del Cloudflare Worker "libreria-ordini" (vedi
+    // Gestore biblioteca/server-ordini/ISTRUZIONI.txt). Se resta vuoto gli
+    // ordini arrivano lo stesso via email, ma le copie non calano da sole.
+    worker: "https://libreria-ordini.torla-89.workers.dev",
+
+    // EmailJS: stesso account e servizio del modulo segnalazioni.
+    // templateLibreria = template che spedisce a libreria@evangelicimaranello.it
+    // (se vuoto si usa quello delle segnalazioni).
+    emailjsPublicKey: "c8AZw9t_jFrlFmaK-",
+    emailjsService: "service_ay33ukk",
+    templateLibreria: "",
+    templateSegnalazioni: "template_6pvireb",
+
+    email: "libreria@evangelicimaranello.it",
+    whatsapp: "393394514698",
+  };
+
+  const CHIAVE_CARRELLO = "cem_carrello_libreria";
+  let MEMORIA = [];   // ripiego se il browser blocca localStorage
+
+  /* ── carrello ─────────────────────────────────────────────── */
+  function leggi() {
+    try {
+      const v = JSON.parse(localStorage.getItem(CHIAVE_CARRELLO) || "[]");
+      return Array.isArray(v) ? v.filter(x => x && x.titolo) : [];
+    } catch (e) { return MEMORIA.slice(); }
+  }
+  function scrivi(lista) {
+    MEMORIA = lista.slice();
+    try { localStorage.setItem(CHIAVE_CARRELLO, JSON.stringify(lista)); } catch (e) { /* solo in memoria */ }
+    document.dispatchEvent(new CustomEvent("carrello-cambiato", { detail: lista }));
+  }
+  function aggiungi(titolo, autore) {
+    const l = leggi();
+    if (!l.some(x => x.titolo === titolo)) l.push({ titolo, autore: autore || "" });
+    scrivi(l);
+  }
+  function togli(titolo) { scrivi(leggi().filter(x => x.titolo !== titolo)); }
+  function contiene(titolo) { return leggi().some(x => x.titolo === titolo); }
+  function svuota() { scrivi([]); }
+
+  /* ── catalogo con disponibilita' reale ────────────────────── */
+  async function conTimeout(promessa, ms) {
+    return Promise.race([promessa, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), ms))]);
+  }
+
+  async function catalogo() {
+    const pDati = fetch("dati.json?t=" + Date.now()).then(r => { if (!r.ok) throw new Error("dati"); return r.json(); });
+    const pPren = CONFIG.worker
+      ? conTimeout(fetch(CONFIG.worker.replace(/\/$/, "") + "/disponibilita").then(r => r.json()), 4000)
+          .catch(() => null)
+      : Promise.resolve(null);
+
+    const [dati, pren] = await Promise.all([pDati, pPren]);
+    const libri = Array.isArray(dati.libreria) ? dati.libreria : [];
+
+    const meno = {};
+    if (pren && Array.isArray(pren.prenotate)) {
+      const copiePerTitolo = {};
+      libri.forEach(l => { copiePerTitolo[l.titolo] = parseInt(l.copie) || 0; });
+      pren.prenotate.forEach(p => {
+        const copie = copiePerTitolo[p.titolo];
+        if (copie == null) return;
+        // base = copie quando il Gestore ha scaricato l'ordine: appena il sito
+        // pubblica il numero nuovo la prenotazione non va piu' sottratta
+        if (p.base == null || copie >= p.base) meno[p.titolo] = (meno[p.titolo] || 0) + 1;
+      });
+    }
+    libri.forEach(l => {
+      l.libere = Math.max(0, (parseInt(l.copie) || 0) - (meno[l.titolo] || 0));
+      l.pronta = l.libere > 0;
+    });
+    return libri;
+  }
+
+  window.LibreriaOrdini = {
+    CONFIG, leggi, aggiungi, togli, contiene, svuota, catalogo,
+    TESTI: {
+      prontaBadge: "Pronta consegna",
+      prontaNota: "Disponibile subito presso la nostra libreria.",
+      ordinazioneBadge: "Su ordinazione · circa 7 giorni",
+      ordinazioneNota: "Al momento esaurito in sede: lo richiediamo al magazzino del distributore. " +
+                       "Consegna prevista in circa 7 giorni lavorativi.",
+    },
+  };
+})();
+</script>
 <script>
   const LO = LibreriaOrdini;
   const CFG = LO.CONFIG;
