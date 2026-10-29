@@ -65,6 +65,73 @@
     }
     .gratis-box strong { color: #6ddb90; }
 
+    .nb-box .nb-altro[hidden] { display: none; }
+    .nb-box button {
+      background: none; border: none; color: #ffd060; font: inherit; font-size: 0.82rem;
+      text-decoration: underline; cursor: pointer; padding: 0; margin-left: 4px;
+    }
+
+    /* ── GRIGLIA ── */
+    .griglia {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      gap: 18px 16px;
+    }
+    .card {
+      display: flex; flex-direction: column; cursor: pointer;
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.16); border-radius: 10px;
+      padding: 12px 12px 12px; transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.40); transform: translateY(-2px); }
+    .card-cover {
+      width: 100%; aspect-ratio: 0.685; object-fit: contain; display: block;
+      border-radius: 3px; background: rgba(255,255,255,0.03);
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5)); margin-bottom: 10px;
+    }
+    .card .badge { align-self: flex-start; font-size: 0.62rem; padding: 2px 8px; margin-bottom: 7px; }
+    .card-titolo {
+      font-size: 0.92rem; font-weight: 700; line-height: 1.28; margin-bottom: 3px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-autore {
+      font-size: 0.78rem; color: rgba(255,255,255,0.60); margin-bottom: 10px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-ordina {
+      margin-top: auto; width: 100%; border: none; border-radius: 7px; padding: 8px 6px;
+      background: #ffd060; color: #2a1a04; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      text-align: center; text-decoration: none; display: block;
+    }
+    .card-ordina:hover { background: #ffdc85; }
+    .card-ordina.nel-carrello { background: rgba(80,200,120,0.18); color: #fff; border: 1px solid rgba(80,200,120,0.55); }
+
+    .mostra-altri {
+      display: block; margin: 26px auto 0; padding: 11px 26px; border-radius: 24px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.30);
+      color: #fff; font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    }
+    .mostra-altri:hover { background: rgba(255,255,255,0.16); }
+
+    /* ── SCHEDA (dettaglio libro) ── */
+    .scheda-bg {
+      position: fixed; inset: 0; z-index: 1100; background: rgba(4,2,0,0.82); backdrop-filter: blur(6px);
+      display: flex; align-items: flex-start; justify-content: center; overflow-y: auto;
+      padding: 40px 16px 90px; opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    }
+    .scheda-bg.open { opacity: 1; pointer-events: all; }
+    .scheda {
+      position: relative; width: 100%; max-width: 860px;
+      background: #1c1208; border: 1px solid rgba(255,255,255,0.20); border-radius: 14px;
+    }
+    .scheda .libro { margin: 0; border: none; background: none; backdrop-filter: none; padding: 28px; }
+    .scheda .libro:hover { border: none; }
+    .scheda-chiudi {
+      position: absolute; top: 12px; right: 12px; z-index: 2; width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25); color: #fff;
+      font-size: 1rem; cursor: pointer;
+    }
+    .scheda-chiudi:hover { background: rgba(255,255,255,0.20); }
+
     /* N.B. sul controllo dei contenuti */
     .nb-box {
       background: rgba(255,200,80,0.07);
@@ -306,6 +373,10 @@
       .btn-row { flex-direction: column; }
       .btn-link { justify-content: center; }
       .carrello-bar { left: 18px; right: 18px; justify-content: center; }
+      .griglia { grid-template-columns: repeat(2, 1fr); gap: 14px 12px; }
+      .card { padding: 10px; }
+      .scheda-bg { padding: 12px 8px 80px; }
+      .scheda .libro { padding: 50px 16px 20px; }
       .lb-flip { height: min(62vh, 560px); }
       .lb-hint { font-size: 0.76rem; text-align: center; }
     }
@@ -320,6 +391,33 @@
     .mob-menu a { font-size: 1.7rem; color: #fff; text-decoration: none; }
 
     body { padding-bottom: 62px !important; }
+
+    .avviso-carrello {
+      position: fixed; left: 50%; bottom: 140px; z-index: 1300; transform: translate(-50%, 20px);
+      background: rgba(20,14,6,0.96); border: 1px solid rgba(80,200,120,0.5); color: #fff;
+      padding: 10px 18px; border-radius: 24px; font-size: 0.88rem; max-width: 90vw; text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;
+    }
+    .avviso-carrello.show { opacity: 1; transform: translate(-50%, 0); }
+    .carrello-bar { z-index: 1250; }
+
+    /* riquadri compatti in testa (dopo le regole originali, cosi' prevalgono) */
+    .gratis-box { padding: 11px 16px; margin: 0 0 10px; font-size: 0.9rem; line-height: 1.55; }
+    .nb-box { margin: 0 0 26px; padding: 10px 16px; font-size: 0.86rem; line-height: 1.6; }
+    .btn-link.btn-ordina { background: #ffd060; border-color: #ffd060; color: #2a1a04; }
+    .btn-link.btn-ordina:hover { background: #ffdc85; border-color: #ffdc85; }
+    .btn-link.btn-ordina.nel-carrello { background: rgba(80,200,120,0.16); border-color: rgba(80,200,120,0.55); color: #fff; }
+
+    /* filtri su telefono: si vede la ricerca, il resto si apre con un pulsante */
+    .btn-filtri { display: none; }
+    @media (max-width: 680px) {
+      .filtri .filtro-campo.extra { display: none; }
+      .filtri.aperti .filtro-campo.extra { display: flex; }
+      .btn-filtri {
+        display: inline-block; background: none; border: 1px solid rgba(255,255,255,0.25); border-radius: 20px;
+        color: #fff; font: inherit; font-size: 0.8rem; padding: 6px 14px; cursor: pointer;
+      }
+    }
   </style>
 </head>
 <body>
@@ -348,7 +446,7 @@
     <div class="page-header">
       <p class="label">📚 Libreria</p>
       <h1>Libreria cristiana gratuita</h1>
-      <p class="sottotitolo">I libri che abbiamo a disposizione, offerti a chiunque li desideri. Clicca sulla copertina per vedere il retro del libro.</p>
+      <p class="sottotitolo">I libri che abbiamo a disposizione, offerti a chiunque li desideri. Clicca su un libro per leggerne la descrizione e vedere il retro della copertina.</p>
       <p class="sottotitolo" style="margin-top:8px;font-size:0.88rem;">
         <span class="badge badge-ok">Pronta consegna</span> disponibile subito in libreria &nbsp;·&nbsp;
         <span class="badge badge-ord">Su ordinazione</span> arriva dal magazzino del distributore in circa 5 giorni lavorativi
@@ -356,40 +454,38 @@
     </div>
 
     <div class="gratis-box">
-      <strong>Tutti i libri sono completamente gratuiti.</strong> Non chiediamo offerte, donazioni,
-      iscrizioni o contributi di alcun tipo: se un libro ti interessa, premi <strong style="color:#ffd060">Ordina</strong>
-      e scegli se ritirarlo in libreria o riceverlo a casa.
-      L'unico desiderio è che questi testi possano essere letti.
+      <strong>Tutti i libri sono gratuiti:</strong> nessuna offerta o contributo. Premi
+metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e completa l'ordine, scegliendo se ritirarli in libreria o riceverli a casa.
     </div>
 
     <div class="nb-box">
-      <strong>N.B.</strong> Alcuni dei libri che offriamo sono stati letti personalmente dai membri
-      della nostra associazione. Quelli che nessuno di noi ha ancora letto passano comunque da un
-      controllo: un programma automatico li esamina per individuare contenuti non coerenti con la
-      dottrina evangelica. È un primo filtro e non sostituisce la lettura: se in un libro trovi
-      qualcosa che non ti convince, <a href="mailto:libreria@evangelicimaranello.it">scrivici</a>
-      e lo verificheremo.
+      <strong>N.B.</strong> Non tutti i libri sono stati letti da noi, ma ognuno passa da un controllo
+      sulla coerenza con la dottrina evangelica.<button type="button" onclick="mostraNB(this)">Leggi di più</button>
+      <span class="nb-altro" id="nbAltro" hidden><br>Alcuni libri sono stati letti personalmente dai membri della
+      nostra associazione; gli altri vengono esaminati da un programma automatico per individuare contenuti non
+      coerenti con la dottrina evangelica. È un primo filtro e non sostituisce la lettura: se in un libro trovi
+      qualcosa che non ti convince, <a href="mailto:libreria@evangelicimaranello.it">scrivici</a> e lo verificheremo.</span>
     </div>
 
     <div class="filtri" id="filtri" hidden>
       <div class="filtri-riga">
-        <div class="filtro-campo">
+        <div class="filtro-campo extra">
           <label for="fAutore">Autore</label>
           <select id="fAutore" onchange="applicaFiltri()"></select>
         </div>
-        <div class="filtro-campo">
+        <div class="filtro-campo extra">
           <label for="fTipo">Tipo</label>
           <select id="fTipo" onchange="applicaFiltri()"></select>
         </div>
-        <div class="filtro-campo">
+        <div class="filtro-campo extra">
           <label for="fGenere">Genere</label>
           <select id="fGenere" onchange="applicaFiltri()"></select>
         </div>
-        <div class="filtro-campo">
+        <div class="filtro-campo extra">
           <label for="fEditore">Editore</label>
           <select id="fEditore" onchange="applicaFiltri()"></select>
         </div>
-        <div class="filtro-campo">
+        <div class="filtro-campo extra">
           <label for="fDisp">Disponibilità</label>
           <select id="fDisp" onchange="applicaFiltri()">
             <option value="">Tutti i libri</option>
@@ -404,6 +500,7 @@
       </div>
       <div class="filtri-sotto">
         <span class="conteggio" id="conteggio"></span>
+        <button class="btn-filtri" type="button" onclick="this.closest('.filtri').classList.toggle('aperti'); this.textContent = this.closest('.filtri').classList.contains('aperti') ? 'Nascondi filtri' : 'Filtri ▾'">Filtri ▾</button>
         <button class="btn-azzera" id="btnAzzera" onclick="azzeraFiltri()" hidden>Azzera i filtri</button>
       </div>
     </div>
@@ -425,6 +522,7 @@
   </main>
 </div>
 
+<div class="avviso-carrello" id="avvisoCarrello" role="status"></div>
 <a href="ordine.html" class="carrello-bar" id="carrelloBar">
   <span class="num" id="carrelloNum">0</span><span id="carrelloTesto">Completa l'ordine</span><span>→</span>
 </a>
@@ -437,6 +535,14 @@
   <a href="comunita.html"      onclick="document.getElementById('mob').classList.remove('open')">Attività</a>
   <a href="risorse.html"       onclick="document.getElementById('mob').classList.remove('open')">Risorse</a>
   <a href="contatti.html"      onclick="document.getElementById('mob').classList.remove('open')">Contattaci</a>
+</div>
+
+<!-- ══ SCHEDA LIBRO ══ -->
+<div class="scheda-bg" id="schedaBg" onclick="if (event.target === this) chiudiScheda()">
+  <div class="scheda" role="dialog" aria-modal="true">
+    <button class="scheda-chiudi" onclick="chiudiScheda()" aria-label="Chiudi">✕</button>
+    <div id="schedaCorpo"></div>
+  </div>
 </div>
 
 <!-- ══ LIGHTBOX COPERTINA ══ -->
@@ -569,15 +675,37 @@
 
   function bottoneOrdina(l, i) {
     return LibreriaOrdini.contiene(l.titolo)
-      ? `<a class="btn-link btn-ordina nel-carrello" href="ordine.html">✓ Nel carrello · completa l'ordine</a>`
-      : `<button class="btn-link btn-ordina" style="font-family:inherit;cursor:pointer" onclick="ordina(${i})">🛒 Ordina</button>`;
+      ? `<button class="btn-link btn-ordina nel-carrello" style="font-family:inherit;cursor:pointer" title="Togli dal carrello" onclick="ordina(${i})">✓ Nel carrello · togli</button>
+         <a class="btn-link btn-ordina" href="ordine.html">Completa l'ordine →</a>`
+      : `<button class="btn-link btn-ordina" style="font-family:inherit;cursor:pointer" onclick="ordina(${i})">🛒 Metti nel carrello</button>`;
   }
 
+  /* Mette o toglie il libro dal carrello restando sulla pagina */
   function ordina(i) {
     const l = LIBRI[i];
     if (!l) return;
-    LibreriaOrdini.aggiungi(l.titolo, l.autore);
-    window.location.href = 'ordine.html';
+    if (LibreriaOrdini.contiene(l.titolo)) {
+      LibreriaOrdini.togli(l.titolo);
+      avvisoCarrello('Tolto dal carrello: «' + l.titolo + '»');
+    } else {
+      LibreriaOrdini.aggiungi(l.titolo, l.autore);
+      avvisoCarrello('✓ Aggiunto al carrello: «' + l.titolo + '»');
+    }
+    aggiornaCarrello();
+    // ridisegno solo i pulsanti di quel libro (griglia e scheda aperta)
+    document.querySelectorAll('[data-carrello="' + i + '"]').forEach(el => { el.outerHTML = pulsanteCard(l); });
+    const sc = document.getElementById('schedaBg');
+    const box = document.getElementById('schedaOrdina');
+    if (box && sc.classList.contains('open') && sc.dataset.libro == i) box.innerHTML = bottoneOrdina(l, i);
+  }
+
+  let avvisoTimer = null;
+  function avvisoCarrello(testo) {
+    const t = document.getElementById('avvisoCarrello');
+    t.textContent = testo;
+    t.classList.add('show');
+    clearTimeout(avvisoTimer);
+    avvisoTimer = setTimeout(() => t.classList.remove('show'), 2200);
   }
 
   function aggiornaCarrello() {
@@ -635,12 +763,75 @@
         ${l.note ? `<div class="autore-bio">${esc(l.note)}</div>` : ''}
 
         <div class="btn-row">
-          ${bottoneOrdina(l, i)}
+          <span id="schedaOrdina" style="display:contents">${bottoneOrdina(l, i)}</span>
           <a class="btn-link btn-wa" target="_blank" rel="noopener"
              href="https://wa.me/${WHATSAPP}?text=${msg}">💬 Hai domande?</a>
         </div>
       </div>
     </div>`;
+  }
+
+  /* ── GRIGLIA: una copertina per libro, la scheda completa si apre al clic ── */
+  const PER_BLOCCO = 30;
+  let mostrati = PER_BLOCCO;
+  let RISULTATI = [];
+
+  function cardLibro(l) {
+    const i = l._i;
+    const pronto = !!l.pronta;
+    const titolo = esc(l.titolo || 'Senza titolo');
+    const ordina = pulsanteCard(l);
+    return `
+    <div class="card" onclick="apriScheda(${i})" title="${titolo}">
+      <img class="card-cover" src="${esc(l.copertina)}" alt="Copertina di ${titolo}" loading="lazy" onerror="this.style.opacity=0.15">
+      <span class="badge ${pronto ? 'badge-ok' : 'badge-ord'}">${pronto ? 'Pronta consegna' : 'Su ordinazione'}</span>
+      <div class="card-titolo">${titolo}</div>
+      <div class="card-autore">${esc(l.autore || '')}&nbsp;</div>
+      ${ordina}
+    </div>`;
+  }
+
+  function pulsanteCard(l) {
+    const i = l._i;
+    return LibreriaOrdini.contiene(l.titolo)
+      ? `<button class="card-ordina nel-carrello" data-carrello="${i}" title="Togli dal carrello" onclick="event.stopPropagation(); ordina(${i})">✓ Nel carrello</button>`
+      : `<button class="card-ordina" data-carrello="${i}" onclick="event.stopPropagation(); ordina(${i})">🛒 Metti nel carrello</button>`;
+  }
+
+  function disegnaGriglia() {
+    const c = document.getElementById('libriList');
+    if (!RISULTATI.length) {
+      c.innerHTML = `<div class="stato-box"><span class="emoji">🔎</span>
+           Nessun libro corrisponde a questa ricerca.<br>
+           <button class="btn-azzera" style="margin-top:14px" onclick="azzeraFiltri()">Azzera i filtri</button>
+         </div>`;
+      return;
+    }
+    const visibili = RISULTATI.slice(0, mostrati);
+    const resto = RISULTATI.length - visibili.length;
+    c.innerHTML = `<div class="griglia">${visibili.map(cardLibro).join('')}</div>` +
+      (resto > 0 ? `<button class="mostra-altri" onclick="mostraAltri()">Mostra altri ${Math.min(resto, PER_BLOCCO)} libri (ne restano ${resto})</button>` : '');
+  }
+
+  function mostraAltri() { mostrati += PER_BLOCCO; disegnaGriglia(); }
+
+  function apriScheda(i) {
+    const l = LIBRI[i];
+    if (!l) return;
+    document.getElementById('schedaCorpo').innerHTML = schedaLibro(l, i);
+    document.getElementById('schedaBg').dataset.libro = i;
+    document.getElementById('schedaBg').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function chiudiScheda() {
+    document.getElementById('schedaBg').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function mostraNB(btn) {
+    document.getElementById('nbAltro').hidden = false;
+    btn.remove();
   }
 
   /* ── LIGHTBOX: primo clic ingrandisce, i clic successivi girano il libro ── */
@@ -682,11 +873,13 @@
   function chiudiLightbox(e) {
     if (e) e.stopPropagation();
     document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
+    if (!document.getElementById('schedaBg').classList.contains('open')) document.body.style.overflow = '';
   }
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') chiudiLightbox();
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('lightbox').classList.contains('open')) chiudiLightbox();
+    else chiudiScheda();
   });
 
   function apriDesc(i, btn) {
@@ -745,13 +938,10 @@
       ? `<strong>${risultati.length}</strong> ${risultati.length === 1 ? 'libro trovato' : 'libri trovati'} su ${LIBRI.length}`
       : `<strong>${LIBRI.length}</strong> libri in catalogo`;
 
-    const c = document.getElementById('libriList');
-    c.innerHTML = risultati.length
-      ? risultati.map(l => schedaLibro(l, l._i)).join('')
-      : `<div class="stato-box"><span class="emoji">🔎</span>
-           Nessun libro corrisponde a questa ricerca.<br>
-           <button class="btn-azzera" style="margin-top:14px" onclick="azzeraFiltri()">Azzera i filtri</button>
-         </div>`;
+    const firma = JSON.stringify([a, g, t, e, q, dsp]);
+    if (firma !== applicaFiltri._firma) { mostrati = PER_BLOCCO; applicaFiltri._firma = firma; }
+    RISULTATI = risultati;
+    disegnaGriglia();
   }
 
   function azzeraFiltri() {
