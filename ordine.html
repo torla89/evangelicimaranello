@@ -276,9 +276,10 @@
         <section class="card">
           <h2><span class="n">3</span> I tuoi dati</h2>
           <div class="griglia">
-            <div class="campo"><label for="fNome">Nome e cognome</label><input id="fNome" autocomplete="name"></div>
-            <div class="campo c3"><label for="fTel">Telefono</label><input id="fTel" type="tel" autocomplete="tel" placeholder="es. 333 1234567"></div>
+            <div class="campo"><label for="fNome">Nome</label><input id="fNome" autocomplete="given-name"></div>
+            <div class="campo c3"><label for="fTel">Telefono <span class="fac">(facoltativo)</span></label><input id="fTel" type="tel" autocomplete="tel" placeholder="es. 333 1234567"></div>
             <div class="campo c3"><label for="fEmail">Email <span class="fac">(facoltativa)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="nome@esempio.it"></div>
+            <div class="campo"><p style="font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:-4px">Lasciaci almeno un recapito, telefono o email, per avvisarti quando i libri sono pronti.</p></div>
             <div class="campo"><label for="fNote">Note per noi <span class="fac">(facoltativo)</span></label>
               <textarea id="fNote" placeholder="es. orari in cui sei reperibile, richieste particolari…"></textarea></div>
             <div class="trappola" aria-hidden="true"><label>Sito web<input id="fSito" tabindex="-1" autocomplete="off"></label></div>
@@ -387,14 +388,11 @@
 
     const meno = {};
     if (pren && Array.isArray(pren.prenotate)) {
-      const copiePerTitolo = {};
-      libri.forEach(l => { copiePerTitolo[l.titolo] = parseInt(l.copie) || 0; });
+      // ordini gia' scaricati dal Gestore Biblioteca: la copia e' gia' tolta in dati.json
+      const applicati = new Set(Array.isArray(dati.ordini_web_applicati) ? dati.ordini_web_applicati : []);
       pren.prenotate.forEach(p => {
-        const copie = copiePerTitolo[p.titolo];
-        if (copie == null) return;
-        // base = copie quando il Gestore ha scaricato l'ordine: appena il sito
-        // pubblica il numero nuovo la prenotazione non va piu' sottratta
-        if (p.base == null || copie >= p.base) meno[p.titolo] = (meno[p.titolo] || 0) + 1;
+        if (applicati.has(p.id)) return;
+        meno[p.titolo] = (meno[p.titolo] || 0) + 1;
       });
     }
     libri.forEach(l => {
@@ -409,9 +407,9 @@
     TESTI: {
       prontaBadge: "Pronta consegna",
       prontaNota: "Disponibile subito presso la nostra libreria.",
-      ordinazioneBadge: "Su ordinazione · circa 7 giorni",
+      ordinazioneBadge: "Su ordinazione · circa 5 giorni lavorativi",
       ordinazioneNota: "Al momento esaurito in sede: lo richiediamo al magazzino del distributore. " +
-                       "Consegna prevista in circa 7 giorni lavorativi.",
+                       "Consegna prevista in circa 5 giorni lavorativi.",
     },
   };
 })();
@@ -490,9 +488,9 @@
         : '<strong>Tutti i libri sono in pronta consegna.</strong> Puoi ritirarli già dal prossimo martedì o venerdì di apertura (10:00–13:00).';
     } else if (daOrdinare === scelti.length) {
       t = '<strong>I libri scelti sono su ordinazione:</strong> li richiediamo al magazzino del distributore e ' +
-          (dom ? 'li consegneremo' : 'saranno pronti per il ritiro') + ' in circa 7 giorni lavorativi. Ti avviseremo appena arrivano.';
+          (dom ? 'li consegneremo' : 'saranno pronti per il ritiro') + ' in circa 5 giorni lavorativi. Ti avviseremo appena arrivano.';
     } else {
-      t = '<strong>Alcuni libri sono su ordinazione</strong> e arriveranno in circa 7 giorni lavorativi. ' +
+      t = '<strong>Alcuni libri sono su ordinazione</strong> e arriveranno in circa 5 giorni lavorativi. ' +
           (dom ? 'Ti contatteremo per concordare se ricevere tutto insieme o in due consegne.'
                : 'Potrai ritirare subito quelli in pronta consegna; per gli altri ti avviseremo appena arrivano.');
     }
@@ -524,8 +522,12 @@
     let primo = null;
     const ctrl = (id, cond) => { if (segnaErrore(id, cond) && !primo) primo = id; };
     ctrl('fNome', !d.nome);
-    ctrl('fTel', !d.telefono || d.telefono.replace(/\D/g, '').length < 6);
+    ctrl('fTel', !!d.telefono && d.telefono.replace(/\D/g, '').length < 6);
     ctrl('fEmail', !!d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email));
+    if (!primo && !d.telefono && !d.email) {
+      segnaErrore('fTel', true); segnaErrore('fEmail', true);
+      $('fTel').focus(); avviso('⚠ Lasciaci almeno un recapito: telefono oppure email.'); return false;
+    }
     if (d.modalita === 'domicilio') {
       ctrl('fVia', !d.via);
       ctrl('fCivico', !d.civico);
@@ -558,7 +560,7 @@
     r.push('');
     r.push('CLIENTE');
     r.push('Nome: ' + d.nome);
-    r.push('Telefono: ' + d.telefono);
+    if (d.telefono) r.push('Telefono: ' + d.telefono);
     if (d.email) r.push('Email: ' + d.email);
     if (d.note) { r.push(''); r.push('NOTE'); r.push(d.note); }
     return r.join('\n');
@@ -638,14 +640,14 @@
     const quando = d.modalita === 'ritiro'
       ? (tuttePronte
           ? 'Puoi passare a ritirare i libri in <strong>Viale della Resistenza 71, Maranello</strong>, il martedì o il venerdì dalle 10:00 alle 13:00.'
-          : 'Ti avviseremo quando i libri su ordinazione saranno arrivati (circa 7 giorni lavorativi). Ritiro in <strong>Viale della Resistenza 71, Maranello</strong>, martedì e venerdì dalle 10:00 alle 13:00.')
-      : 'Ti contatteremo al numero indicato per concordare la consegna a domicilio.';
+          : 'Ti avviseremo quando i libri su ordinazione saranno arrivati (circa 5 giorni lavorativi). Ritiro in <strong>Viale della Resistenza 71, Maranello</strong>, martedì e venerdì dalle 10:00 alle 13:00.')
+      : 'Ti contatteremo ' + (d.telefono ? 'al numero indicato' : "all'email indicata") + ' per concordare la consegna a domicilio.';
     $('vistaOrdine').hidden = true;
     const v = $('vistaConferma');
     v.hidden = false;
     v.innerHTML = `<section class="card conferma">
       <span class="emoji">✅</span>
-      <h2>Grazie, ${esc(d.nome.split(' ')[0])}! Abbiamo ricevuto il tuo ordine.</h2>
+      <h2>Grazie, ${esc(d.nome)}! Abbiamo ricevuto il tuo ordine.</h2>
       ${id ? `<p>Numero d'ordine <span class="codice">${esc(id)}</span></p>` : ''}
       <p>${quando}</p>
       <ul>${righe.map(l => `<li><span>${esc(l.titolo)}</span>${badge(l.stato === 'pronta')}</li>`).join('')}</ul>

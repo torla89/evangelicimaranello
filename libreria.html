@@ -351,7 +351,7 @@
       <p class="sottotitolo">I libri che abbiamo a disposizione, offerti a chiunque li desideri. Clicca sulla copertina per vedere il retro del libro.</p>
       <p class="sottotitolo" style="margin-top:8px;font-size:0.88rem;">
         <span class="badge badge-ok">Pronta consegna</span> disponibile subito in libreria &nbsp;·&nbsp;
-        <span class="badge badge-ord">Su ordinazione</span> arriva dal magazzino del distributore in circa 7 giorni lavorativi
+        <span class="badge badge-ord">Su ordinazione</span> arriva dal magazzino del distributore in circa 5 giorni lavorativi
       </p>
     </div>
 
@@ -523,14 +523,11 @@
 
     const meno = {};
     if (pren && Array.isArray(pren.prenotate)) {
-      const copiePerTitolo = {};
-      libri.forEach(l => { copiePerTitolo[l.titolo] = parseInt(l.copie) || 0; });
+      // ordini gia' scaricati dal Gestore Biblioteca: la copia e' gia' tolta in dati.json
+      const applicati = new Set(Array.isArray(dati.ordini_web_applicati) ? dati.ordini_web_applicati : []);
       pren.prenotate.forEach(p => {
-        const copie = copiePerTitolo[p.titolo];
-        if (copie == null) return;
-        // base = copie quando il Gestore ha scaricato l'ordine: appena il sito
-        // pubblica il numero nuovo la prenotazione non va piu' sottratta
-        if (p.base == null || copie >= p.base) meno[p.titolo] = (meno[p.titolo] || 0) + 1;
+        if (applicati.has(p.id)) return;
+        meno[p.titolo] = (meno[p.titolo] || 0) + 1;
       });
     }
     libri.forEach(l => {
@@ -545,9 +542,9 @@
     TESTI: {
       prontaBadge: "Pronta consegna",
       prontaNota: "Disponibile subito presso la nostra libreria.",
-      ordinazioneBadge: "Su ordinazione · circa 7 giorni",
+      ordinazioneBadge: "Su ordinazione · circa 5 giorni lavorativi",
       ordinazioneNota: "Al momento esaurito in sede: lo richiediamo al magazzino del distributore. " +
-                       "Consegna prevista in circa 7 giorni lavorativi.",
+                       "Consegna prevista in circa 5 giorni lavorativi.",
     },
   };
 })();
