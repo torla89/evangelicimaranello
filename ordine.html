@@ -97,6 +97,13 @@
     .riga-titolo { font-weight: 700; font-size: 0.98rem; line-height: 1.25; }
     .riga-autore { font-size: 0.82rem; color: rgba(255,255,255,0.62); margin: 2px 0 6px; }
     .riga-nota { font-size: 0.76rem; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.45; }
+    .quante { display: block; margin-top: 7px; font-size: 0.8rem; color: rgba(255,255,255,0.75); }
+    .quante select {
+      margin-left: 4px; font: inherit; font-size: 0.85rem; color: #fff; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.28); border-radius: 6px; padding: 3px 6px;
+    }
+    .quante select option { background: #24160a; }
+    .quante .fac { opacity: 0.7; font-size: 0.74rem; }
     .btn-togli {
       background: none; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.7);
       border-radius: 20px; padding: 5px 12px; font: inherit; font-size: 0.76rem; cursor: pointer;
@@ -364,10 +371,14 @@
   }
   function aggiungi(titolo, autore) {
     const l = leggi();
-    if (!l.some(x => x.titolo === titolo)) l.push({ titolo, autore: autore || "" });
+    if (!l.some(x => x.titolo === titolo)) l.push({ titolo, autore: autore || "", quantita: 1 });
     scrivi(l);
   }
   function togli(titolo) { scrivi(leggi().filter(x => x.titolo !== titolo)); }
+  // quantita' (solo i calendari possono arrivare a 10 copie)
+  function imposta(titolo, q) {
+    scrivi(leggi().map(x => x.titolo === titolo ? Object.assign({}, x, { quantita: Math.max(1, Math.min(10, parseInt(q) || 1)) }) : x));
+  }
   function contiene(titolo) { return leggi().some(x => x.titolo === titolo); }
   function svuota() { scrivi([]); }
 
@@ -392,7 +403,7 @@
       const applicati = new Set(Array.isArray(dati.ordini_web_applicati) ? dati.ordini_web_applicati : []);
       pren.prenotate.forEach(p => {
         if (applicati.has(p.id)) return;
-        meno[p.titolo] = (meno[p.titolo] || 0) + 1;
+        meno[p.titolo] = (meno[p.titolo] || 0) + (parseInt(p.n) || 1);
       });
     }
     libri.forEach(l => {
@@ -403,7 +414,8 @@
   }
 
   window.LibreriaOrdini = {
-    CONFIG, leggi, aggiungi, togli, contiene, svuota, catalogo,
+    CONFIG, leggi, aggiungi, togli, contiene, svuota, catalogo, imposta,
+    MAX_CALENDARI: 10,
     TESTI: {
       prontaBadge: "Pronta consegna",
       prontaNota: "Disponibile subito presso la nostra libreria.",
@@ -430,6 +442,22 @@
 
   function libroDaCatalogo(titolo) { return CATALOGO.find(l => l.titolo === titolo); }
 
+  function eCalendario(l) { return (l && (l.tipo || '').toLowerCase() === 'calendario'); }
+
+  // quante copie di questa riga sono subito disponibili
+  function statoRiga(s) {
+    const l = libroDaCatalogo(s.titolo) || {};
+    const q = eCalendario(l) ? Math.max(1, Math.min(LO.MAX_CALENDARI, parseInt(s.quantita) || 1)) : 1;
+    const pronte = Math.min(q, l.libere || 0);
+    return { l, q, pronte, stato: pronte === q ? 'pronta' : (pronte > 0 ? 'parziale' : 'ordinazione') };
+  }
+
+  function badgeRiga(stato, q, pronte) {
+    if (stato === 'parziale')
+      return `<span class="badge badge-ok">${pronte} in pronta consegna</span> <span class="badge badge-ord">${q - pronte} su ordinazione</span>`;
+    return badge(stato === 'pronta');
+  }
+
   function badge(pronta) {
     return pronta
       ? `<span class="badge badge-ok">${LO.TESTI.prontaBadge}</span>`
@@ -449,14 +477,26 @@
     $('aggiungiAltri').hidden = false;
     $('formOrdine').hidden = false;
     box.innerHTML = scelti.map(s => {
-      const l = libroDaCatalogo(s.titolo) || { titolo: s.titolo, autore: s.autore, pronta: false };
-      const nota = l.pronta ? LO.TESTI.prontaNota : LO.TESTI.ordinazioneNota;
+      const r = statoRiga(s);
+      const l = r.l.titolo ? r.l : { titolo: s.titolo, autore: s.autore };
+      const nota = r.stato === 'pronta' ? LO.TESTI.prontaNota
+                 : r.stato === 'parziale' ? `Ne abbiamo ${r.pronte} in sede; le altre ${r.q - r.pronte} le richiediamo al distributore (circa 5 giorni lavorativi).`
+                 : LO.TESTI.ordinazioneNota;
+      const enc = encodeURIComponent(s.titolo);
+      const quante = eCalendario(l)
+        ? `<label class="quante">Copie:
+             <select onchange="cambiaQuantita('${enc}', this.value)">
+               ${Array.from({ length: LO.MAX_CALENDARI }, (_, k) => k + 1).map(n =>
+                 `<option value="${n}"${n === r.q ? ' selected' : ''}>${n}</option>`).join('')}
+             </select> <span class="fac">(calendari: fino a ${LO.MAX_CALENDARI})</span></label>`
+        : '';
       return `<div class="riga-libro">
         ${l.copertina ? `<img src="${esc(l.copertina)}" alt="" loading="lazy">` : '<img alt="">'}
         <div>
           <div class="riga-titolo">${esc(l.titolo)}</div>
           ${l.autore ? `<div class="riga-autore">${esc(l.autore)}</div>` : ''}
-          ${badge(l.pronta)}
+          ${badgeRiga(r.stato, r.q, r.pronte)}
+          ${quante}
           <div class="riga-nota">${nota}</div>
         </div>
         <button type="button" class="btn-togli" onclick="togliLibro('${encodeURIComponent(s.titolo)}')">Rimuovi</button>
@@ -466,6 +506,7 @@
   }
 
   function togliLibro(t) { LO.togli(decodeURIComponent(t)); disegnaLibri(); }
+  function cambiaQuantita(t, q) { LO.imposta(decodeURIComponent(t), q); disegnaLibri(); }
 
   function modalita() { return document.querySelector('input[name="modalita"]:checked').value; }
 
@@ -478,8 +519,8 @@
   }
 
   function aggiornaTempi() {
-    const scelti = LO.leggi().map(s => libroDaCatalogo(s.titolo) || { pronta: false });
-    const daOrdinare = scelti.filter(l => !l.pronta).length;
+    const scelti = LO.leggi().map(statoRiga);
+    const daOrdinare = scelti.filter(r => r.stato !== 'pronta').length;
     const dom = modalita() === 'domicilio';
     let t;
     if (!daOrdinare) {
@@ -547,7 +588,11 @@
     if (!registrato) r.push('⚠ Ordine NON registrato in automatico: scala tu le copie dal Gestore Biblioteca.');
     r.push('');
     r.push('LIBRI');
-    righe.forEach(l => r.push(`• ${l.titolo}${l.autore ? ' — ' + l.autore : ''}  [${l.stato === 'pronta' ? 'PRONTA CONSEGNA' : 'DA ORDINARE AL DISTRIBUTORE'}]`));
+    righe.forEach(l => {
+      const q = l.quantita || 1, k = l.pronte != null ? l.pronte : (l.stato === 'pronta' ? 1 : 0);
+      const st = k === q ? 'PRONTA CONSEGNA' : (k > 0 ? `${k} PRONTE + ${q - k} DA ORDINARE` : 'DA ORDINARE AL DISTRIBUTORE');
+      r.push(`• ${q > 1 ? q + ' × ' : ''}${l.titolo}${l.autore ? ' — ' + l.autore : ''}  [${st}]`);
+    });
     r.push('');
     if (d.modalita === 'ritiro') {
       r.push('MODALITÀ: RITIRO IN LIBRERIA (Viale della Resistenza 71 — mar e ven 10:00–13:00)');
@@ -571,7 +616,7 @@
     try {
       const res = await fetch(CFG.worker.replace(/\/$/, '') + '/ordine', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...d, libri: scelti }),
+        body: JSON.stringify({ ...d, libri: scelti.map(s => ({ titolo: s.titolo, quantita: statoRiga(s).q })) }),
       });
       return await res.json();
     } catch (e) {
@@ -602,8 +647,8 @@
     const registrato = !!(srv && srv.ok);
     const id = registrato ? srv.id : '';
     const righe = registrato && srv.libri ? srv.libri : scelti.map(s => {
-      const l = libroDaCatalogo(s.titolo) || {};
-      return { titolo: s.titolo, autore: s.autore || l.autore || '', stato: l.pronta ? 'pronta' : 'ordinazione' };
+      const r = statoRiga(s);
+      return { titolo: s.titolo, autore: s.autore || r.l.autore || '', quantita: r.q, pronte: r.pronte, stato: r.stato };
     });
 
     // 2) email a libreria@evangelicimaranello.it
@@ -636,7 +681,7 @@
   }
 
   function mostraConferma(d, id, righe) {
-    const tuttePronte = righe.every(l => l.stato === 'pronta');
+    const tuttePronte = righe.every(l => l.stato === 'pronta');  // 'parziale' conta come da ordinare
     const quando = d.modalita === 'ritiro'
       ? (tuttePronte
           ? 'Puoi passare a ritirare i libri in <strong>Viale della Resistenza 71, Maranello</strong>, il martedì o il venerdì dalle 10:00 alle 13:00.'
@@ -650,7 +695,7 @@
       <h2>Grazie, ${esc(d.nome)}! Abbiamo ricevuto il tuo ordine.</h2>
       ${id ? `<p>Numero d'ordine <span class="codice">${esc(id)}</span></p>` : ''}
       <p>${quando}</p>
-      <ul>${righe.map(l => `<li><span>${esc(l.titolo)}</span>${badge(l.stato === 'pronta')}</li>`).join('')}</ul>
+      <ul>${righe.map(l => `<li><span>${(l.quantita || 1) > 1 ? (l.quantita + ' × ') : ''}${esc(l.titolo)}</span><span>${badgeRiga(l.stato, l.quantita || 1, l.pronte != null ? l.pronte : (l.stato === 'pronta' ? 1 : 0))}</span></li>`).join('')}</ul>
       <p style="font-size:0.85rem;color:rgba(255,255,255,0.55)">Per qualsiasi domanda scrivici a
         <a href="mailto:${CFG.email}" style="color:#ffd060">${CFG.email}</a> o su
         <a href="https://wa.me/${CFG.whatsapp}" target="_blank" rel="noopener" style="color:#ffd060">WhatsApp</a>.</p>

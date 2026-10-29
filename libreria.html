@@ -605,10 +605,14 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
   }
   function aggiungi(titolo, autore) {
     const l = leggi();
-    if (!l.some(x => x.titolo === titolo)) l.push({ titolo, autore: autore || "" });
+    if (!l.some(x => x.titolo === titolo)) l.push({ titolo, autore: autore || "", quantita: 1 });
     scrivi(l);
   }
   function togli(titolo) { scrivi(leggi().filter(x => x.titolo !== titolo)); }
+  // quantita' (solo i calendari possono arrivare a 10 copie)
+  function imposta(titolo, q) {
+    scrivi(leggi().map(x => x.titolo === titolo ? Object.assign({}, x, { quantita: Math.max(1, Math.min(10, parseInt(q) || 1)) }) : x));
+  }
   function contiene(titolo) { return leggi().some(x => x.titolo === titolo); }
   function svuota() { scrivi([]); }
 
@@ -633,7 +637,7 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
       const applicati = new Set(Array.isArray(dati.ordini_web_applicati) ? dati.ordini_web_applicati : []);
       pren.prenotate.forEach(p => {
         if (applicati.has(p.id)) return;
-        meno[p.titolo] = (meno[p.titolo] || 0) + 1;
+        meno[p.titolo] = (meno[p.titolo] || 0) + (parseInt(p.n) || 1);
       });
     }
     libri.forEach(l => {
@@ -644,7 +648,8 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
   }
 
   window.LibreriaOrdini = {
-    CONFIG, leggi, aggiungi, togli, contiene, svuota, catalogo,
+    CONFIG, leggi, aggiungi, togli, contiene, svuota, catalogo, imposta,
+    MAX_CALENDARI: 10,
     TESTI: {
       prontaBadge: "Pronta consegna",
       prontaNota: "Disponibile subito presso la nostra libreria.",
@@ -755,6 +760,7 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
         </div>
 
         <div class="disp-nota ${disp.notaCls}">${disp.nota}</div>
+        ${(l.tipo || '').toLowerCase() === 'calendario' ? `<div class="disp-nota">📅 Puoi prenderne fino a ${LibreriaOrdini.MAX_CALENDARI} copie: scegli quante nel carrello.</div>` : ''}
 
         <div class="libro-desc${lunga ? ' collapsed' : ''}" id="desc-${i}">${desc}</div>
         ${lunga ? `<button class="leggi-tutto" onclick="apriDesc(${i}, this)">Leggi tutto</button>` : ''}
