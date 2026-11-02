@@ -255,7 +255,7 @@
               <div class="scelta-titolo">🏛 Ritiro in libreria</div>
               <div class="scelta-testo">
                 <strong>Viale della Resistenza 71, Maranello (MO)</strong><br>
-                Martedì e venerdì, dalle 10:00 alle 13:00
+                Martedì e venerdì, dalle 10:00 alle 14:00
               </div>
             </label>
             <label class="scelta" id="sceltaDomicilio">
@@ -526,7 +526,7 @@
     if (!daOrdinare) {
       t = dom
         ? '<strong>Tutti i libri sono in pronta consegna.</strong> Ti contatteremo a breve per concordare la consegna.'
-        : '<strong>Tutti i libri sono in pronta consegna.</strong> Puoi ritirarli già dal prossimo martedì o venerdì di apertura (10:00–13:00).';
+        : '<strong>Tutti i libri sono in pronta consegna.</strong> Puoi ritirarli già dal prossimo martedì o venerdì di apertura (10:00–14:00).';
     } else if (daOrdinare === scelti.length) {
       t = '<strong>I libri scelti sono su ordinazione:</strong> li richiediamo al magazzino del distributore e ' +
           (dom ? 'li consegneremo' : 'saranno pronti per il ritiro') + ' in circa 5 giorni lavorativi. Ti avviseremo appena arrivano.';
@@ -595,7 +595,7 @@
     });
     r.push('');
     if (d.modalita === 'ritiro') {
-      r.push('MODALITÀ: RITIRO IN LIBRERIA (Viale della Resistenza 71 — mar e ven 10:00–13:00)');
+      r.push('MODALITÀ: RITIRO IN LIBRERIA (Viale della Resistenza 71 — mar e ven 10:00–14:00)');
     } else {
       r.push('MODALITÀ: CONSEGNA A DOMICILIO');
       r.push(`${d.via} ${d.civico}`);
@@ -684,8 +684,8 @@
     const tuttePronte = righe.every(l => l.stato === 'pronta');  // 'parziale' conta come da ordinare
     const quando = d.modalita === 'ritiro'
       ? (tuttePronte
-          ? 'Puoi passare a ritirare i libri in <strong>Viale della Resistenza 71, Maranello</strong>, il martedì o il venerdì dalle 10:00 alle 13:00.'
-          : 'Ti avviseremo quando i libri su ordinazione saranno arrivati (circa 5 giorni lavorativi). Ritiro in <strong>Viale della Resistenza 71, Maranello</strong>, martedì e venerdì dalle 10:00 alle 13:00.')
+          ? 'Puoi passare a ritirare i libri in <strong>Viale della Resistenza 71, Maranello</strong>, il martedì o il venerdì dalle 10:00 alle 14:00.'
+          : 'Ti avviseremo quando i libri su ordinazione saranno arrivati (circa 5 giorni lavorativi). Ritiro in <strong>Viale della Resistenza 71, Maranello</strong>, martedì e venerdì dalle 10:00 alle 14:00.')
       : 'Ti contatteremo ' + (d.telefono ? 'al numero indicato' : "all'email indicata") + ' per concordare la consegna a domicilio.';
     $('vistaOrdine').hidden = true;
     const v = $('vistaConferma');
