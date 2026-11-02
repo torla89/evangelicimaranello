@@ -151,6 +151,49 @@
     .domicilio[hidden] { display: none; }
     .nota-inpost { font-size: 0.82rem; line-height: 1.55; color: rgba(255,255,255,0.65); margin-bottom: 12px; }
     .nota-inpost a { color: #ffd060; }
+    .ip-cerca { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .ip-cerca input {
+      flex: 1 1 220px; min-width: 0; font: inherit; font-size: 0.92rem; color: #fff;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.22); border-radius: 8px; padding: 10px 12px;
+    }
+    .ip-cerca input:focus { outline: none; border-color: #ffd060; }
+    .ip-cerca button {
+      font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 9px 14px;
+      background: rgba(255,208,96,0.12); color: #ffd060; border: 1px solid rgba(255,208,96,0.5);
+    }
+    .ip-cerca button:hover { background: rgba(255,208,96,0.22); }
+    .ip-area { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+    .ip-mappa { height: 340px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.18); background: #222; }
+    .ip-lista { height: 340px; overflow-y: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.18); }
+    .ip-vuoto { padding: 16px; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .ip-punto {
+      display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: #fff; font: inherit; padding: 10px 12px; cursor: pointer;
+    }
+    .ip-punto:hover { background: rgba(255,255,255,0.06); }
+    .ip-punto.scelto { background: rgba(255,208,96,0.12); box-shadow: inset 3px 0 0 #ffd060; }
+    .ip-punto b { display: block; font-size: 0.88rem; }
+    .ip-punto span { display: block; font-size: 0.78rem; color: rgba(255,255,255,0.65); line-height: 1.45; }
+    .ip-punto .km { color: #ffd060; }
+    .ip-scelto {
+      margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 0.88rem; line-height: 1.55;
+      background: rgba(80,200,120,0.10); border: 1px solid rgba(80,200,120,0.4);
+    }
+    .ip-scelto[hidden] { display: none; }
+    .ip-scelto strong { color: #6ddb90; }
+    .ip-mano { margin-top: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+    .ip-mano summary { cursor: pointer; }
+    .campo.errore ~ .x, .ip-errore { border-color: #ef9a9a !important; }
+    .leaflet-container { font: inherit; }
+    .ip-pin {
+      width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+      background: #ffcd00; border: 2px solid #2a2a2a; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .ip-pin.scelto { background: #6ddb90; }
+    @media (max-width: 680px) {
+      .ip-area { grid-template-columns: 1fr; }
+      .ip-mappa { height: 260px; } .ip-lista { height: 220px; }
+    }
     .domicilio { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
     .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
@@ -210,6 +253,7 @@
 
     body { padding-bottom: 62px !important; }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 </head>
 <body>
 <div class="bg"></div>
@@ -279,21 +323,6 @@
             </label>
           </div>
 
-          <div class="domicilio" id="boxInpost" hidden>
-            <p class="nota-inpost">Cerca il punto più comodo sulla
-              <a href="https://inpost.it/trova-un-locker" target="_blank" rel="noopener">mappa dei punti InPost ↗</a>
-              e scrivi qui il suo codice (es. ITMOD01234) o il nome, con l'indirizzo.
-              InPost ti avviserà con un SMS e un'email quando il pacco è arrivato:
-              per questo servono <strong>cellulare ed email</strong>.</p>
-            <div class="griglia">
-              <div class="campo c2"><label for="fPunto">Codice del punto</label><input id="fPunto" placeholder="es. ITMOD01234" style="text-transform:uppercase"></div>
-              <div class="campo c4"><label for="fPuntoNome">Nome / indirizzo del punto</label><input id="fPuntoNome" placeholder="es. Locker Conad, via Vittorio Veneto 10"></div>
-              <div class="campo c2 cap"><label for="fPuntoCap">CAP</label><input id="fPuntoCap" inputmode="numeric" maxlength="5"></div>
-              <div class="campo c3"><label for="fPuntoComune">Comune</label><input id="fPuntoComune"></div>
-              <div class="campo c1 prov"><label for="fPuntoProv">Prov.</label><input id="fPuntoProv" maxlength="2" style="text-transform:uppercase"></div>
-            </div>
-          </div>
-
           <div class="domicilio" id="boxDomicilio" hidden>
             <div class="griglia">
               <div class="campo c4"><label for="fVia">Via / piazza</label><input id="fVia" autocomplete="address-line1"></div>
@@ -303,6 +332,32 @@
               <div class="campo c1 prov"><label for="fProv">Prov.</label><input id="fProv" maxlength="2" style="text-transform:uppercase" autocomplete="address-level1"></div>
               <div class="campo"><label for="fPresso">Presso / citofono / scala <span class="fac">(facoltativo)</span></label><input id="fPresso"></div>
             </div>
+          </div>
+          <div class="domicilio" id="boxInpost" hidden>
+            <p class="nota-inpost">Scrivi il tuo <strong>CAP</strong>, il <strong>comune</strong> o un indirizzo e scegli
+              il punto sulla mappa o nell'elenco. InPost ti avviserà con un SMS e un'email quando il pacco è arrivato:
+              per questo servono <strong>cellulare ed email</strong>.</p>
+            <div class="ip-cerca">
+              <input id="ipCerca" placeholder="es. 41053, Modena, via Emilia 10 Sassuolo" autocomplete="postal-code"
+                     onkeydown="if (event.key === 'Enter') { event.preventDefault(); ipCercaZona(); }">
+              <button type="button" onclick="ipCercaZona()">🔎 Cerca</button>
+              <button type="button" onclick="ipVicinoAMe()" title="Usa la tua posizione">📍 Vicino a me</button>
+            </div>
+            <div class="ip-area">
+              <div id="ipMappa" class="ip-mappa"></div>
+              <div id="ipLista" class="ip-lista"><div class="ip-vuoto">Caricamento dei punti…</div></div>
+            </div>
+            <div id="ipScelto" class="ip-scelto" hidden></div>
+            <details class="ip-mano" id="ipMano">
+              <summary>Non trovi il punto? Inseriscilo a mano</summary>
+              <div class="griglia" style="margin-top:12px">
+                <div class="campo c2"><label for="fPunto">Codice del punto</label><input id="fPunto" placeholder="es. ITMAR44839M" style="text-transform:uppercase"></div>
+                <div class="campo c4"><label for="fPuntoNome">Nome / indirizzo del punto</label><input id="fPuntoNome" placeholder="es. Stazione ENI, via Abetone Inferiore 2"></div>
+                <div class="campo c2 cap"><label for="fPuntoCap">CAP</label><input id="fPuntoCap" inputmode="numeric" maxlength="5"></div>
+                <div class="campo c3"><label for="fPuntoComune">Comune</label><input id="fPuntoComune"></div>
+                <div class="campo c1 prov"><label for="fPuntoProv">Prov.</label><input id="fPuntoProv" maxlength="2" style="text-transform:uppercase"></div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -540,6 +595,7 @@
     const m = modalita();
     $('boxDomicilio').hidden = m !== 'domicilio';
     $('boxInpost').hidden = m !== 'inpost';
+    if (m === 'inpost') ipApri();
     $('sceltaRitiro').classList.toggle('attiva', m === 'ritiro');
     $('sceltaDomicilio').classList.toggle('attiva', m === 'domicilio');
     $('sceltaInpost').classList.toggle('attiva', m === 'inpost');
@@ -547,6 +603,146 @@
     document.querySelectorAll('label[for="fTel"] .fac, label[for="fEmail"] .fac')
       .forEach(el => { el.hidden = m === 'inpost'; });
     aggiornaTempi();
+  }
+
+  /* ── PUNTI INPOST: mappa (OpenStreetMap) + elenco ufficiale dei punti InPost ──
+     L'elenco arriva dall'API pubblica dei punti InPost Italia, senza account. */
+  const IP_API = 'https://api-it-points.easypack24.net/v1/points';
+  const IP_CENTRO = [44.5257, 10.8665];          // la nostra libreria, Maranello
+  let ipMap = null, ipLayer = null, ipPunti = [], ipScelto = null, ipTimer = null, ipUltimo = '';
+
+  function ipCaricaLeaflet() {
+    if (window.L) return Promise.resolve();
+    return new Promise((ok, no) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      sc.onload = ok; sc.onerror = no;
+      document.head.appendChild(sc);
+    });
+  }
+
+  let ipAvvio = null;
+  function ipApri() {
+    if (ipMap) { setTimeout(() => ipMap.invalidateSize(), 50); return Promise.resolve(); }
+    if (!ipAvvio) ipAvvio = ipCrea();          // una sola volta, anche se si clicca piu' volte
+    return ipAvvio;
+  }
+
+  async function ipCrea() {
+    try { await ipCaricaLeaflet(); }
+    catch (e) {
+      $('ipLista').innerHTML = '<div class="ip-vuoto">La mappa non si è caricata: inserisci il punto a mano qui sotto.</div>';
+      $('ipMano').open = true; return;
+    }
+    ipMap = L.map('ipMappa', { scrollWheelZoom: false }).setView(IP_CENTRO, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap · punti InPost'
+    }).addTo(ipMap);
+    ipLayer = L.layerGroup().addTo(ipMap);
+    ipMap.on('moveend', () => { clearTimeout(ipTimer); ipTimer = setTimeout(ipCaricaZona, 350); });
+    ipCaricaZona();
+  }
+
+  function ipRaggio() {
+    const b = ipMap.getBounds();
+    const m = ipMap.distance(b.getNorthEast(), b.getSouthWest()) / 2;
+    return Math.max(1500, Math.min(25000, Math.round(m)));
+  }
+
+  async function ipCaricaZona() {
+    if (!ipMap) return;
+    const c = ipMap.getCenter();
+    const chiave = c.lat.toFixed(3) + ',' + c.lng.toFixed(3) + ',' + ipMap.getZoom();
+    if (chiave === ipUltimo) return;
+    ipUltimo = chiave;
+    try {
+      const url = `${IP_API}?relative_point=${c.lat.toFixed(5)},${c.lng.toFixed(5)}&max_distance=${ipRaggio()}&per_page=60&status=Operating`;
+      const j = await (await fetch(url)).json();
+      ipPunti = (j.items || []).filter(p => p.location);
+      ipDisegna();
+    } catch (e) {
+      $('ipLista').innerHTML = '<div class="ip-vuoto">Non riesco a caricare i punti InPost. Riprova o inseriscilo a mano qui sotto.</div>';
+    }
+  }
+
+  function ipIndirizzo(p) {
+    const a = p.address_details || {};
+    const via = [a.street, a.building_number].filter(Boolean).join(' ');
+    return { via, cap: a.post_code || '', comune: a.city || '', prov: (a.province || '').slice(0, 2).toUpperCase() };
+  }
+
+  function ipDisegna() {
+    ipLayer.clearLayers();
+    const centro = ipMap.getCenter();
+    ipPunti.forEach(p => { p._km = ipMap.distance(centro, [p.location.latitude, p.location.longitude]) / 1000; });
+    ipPunti.sort((a, b) => a._km - b._km);
+    ipPunti.forEach((p, i) => {
+      const sel = ipScelto && ipScelto.name === p.name;
+      const ic = L.divIcon({ className: '', html: `<div class="ip-pin${sel ? ' scelto' : ''}"></div>`, iconSize: [26, 26], iconAnchor: [4, 26] });
+      const ind = ipIndirizzo(p);
+      L.marker([p.location.latitude, p.location.longitude], { icon: ic, title: p.location_description || p.name })
+        .addTo(ipLayer)
+        .bindTooltip(`<b>${esc(p.location_description || 'Punto InPost')}</b><br>${esc(ind.via)}, ${esc(ind.comune)}`)
+        .on('click', () => ipScegli(i));
+    });
+    $('ipLista').innerHTML = ipPunti.length ? ipPunti.map((p, i) => {
+      const ind = ipIndirizzo(p);
+      const tipo = (p.type || []).includes('parcel_locker') ? 'Locker' : 'Punto InPost';
+      return `<button type="button" class="ip-punto${ipScelto && ipScelto.name === p.name ? ' scelto' : ''}" onclick="ipScegli(${i}, true)">
+        <b>${esc(p.location_description || tipo)}</b>
+        <span>${esc(ind.via)} · ${esc(ind.cap)} ${esc(ind.comune)}</span>
+        <span>${tipo} · ${esc(p.name)} · <span class="km" style="display:inline">${p._km < 1 ? Math.round(p._km * 1000) + ' m' : p._km.toFixed(1) + ' km'}</span></span>
+      </button>`;
+    }).join('') : '<div class="ip-vuoto">Nessun punto InPost in questa zona: sposta la mappa o cerca un altro CAP.</div>';
+  }
+
+  function ipScegli(i) {
+    const p = ipPunti[i];
+    if (!p) return;
+    ipScelto = p;
+    const ind = ipIndirizzo(p);
+    const nome = [p.location_description, ind.via].filter(Boolean).join(', ');
+    $('fPunto').value = p.name;
+    $('fPuntoNome').value = nome;
+    $('fPuntoCap').value = ind.cap;
+    $('fPuntoComune').value = ind.comune;
+    $('fPuntoProv').value = ind.prov;
+    ['fPunto','fPuntoNome','fPuntoComune'].forEach(id => $(id).closest('.campo').classList.remove('errore'));
+    $('ipScelto').hidden = false;
+    $('ipScelto').innerHTML = `✓ <strong>Punto scelto:</strong> ${esc(nome)} — ${esc(ind.cap)} ${esc(ind.comune)}${ind.prov ? ' (' + esc(ind.prov) + ')' : ''}
+      <br><span style="font-size:0.8rem;color:rgba(255,255,255,0.6)">Codice ${esc(p.name)}${p.opening_hours ? ' · ' + esc(p.opening_hours) : (p.location_247 ? ' · aperto 24 ore su 24' : '')}</span>`;
+    ipDisegna();     // la mappa resta ferma: le distanze restano quelle dalla zona cercata
+  }
+
+  async function ipCercaZona() {
+    const q = $('ipCerca').value.trim();
+    if (!q || !ipMap) return;
+    $('ipLista').innerHTML = '<div class="ip-vuoto">Cerco…</div>';
+    try {
+      let lat, lng;
+      if (/^\d{5}$/.test(q)) {                 // CAP: chiedo direttamente a InPost i punti di quel CAP
+        const j = await (await fetch(`${IP_API}?relative_post_code=${q}&per_page=1`)).json();
+        const p = (j.items || [])[0];
+        if (p && p.location) { lat = p.location.latitude; lng = p.location.longitude; }
+      }
+      if (lat == null) {                       // comune / indirizzo: lo trovo su OpenStreetMap
+        const g = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&accept-language=it&q=' + encodeURIComponent(q))).json();
+        if (g && g[0]) { lat = parseFloat(g[0].lat); lng = parseFloat(g[0].lon); }
+      }
+      if (lat == null) { $('ipLista').innerHTML = '<div class="ip-vuoto">Non ho trovato questo luogo. Prova con il CAP.</div>'; return; }
+      ipUltimo = '';
+      ipMap.setView([lat, lng], 14);
+    } catch (e) {
+      $('ipLista').innerHTML = '<div class="ip-vuoto">Ricerca non riuscita. Riprova fra poco.</div>';
+    }
+  }
+
+  function ipVicinoAMe() {
+    if (!navigator.geolocation || !ipMap) return;
+    navigator.geolocation.getCurrentPosition(
+      pos => { ipUltimo = ''; ipMap.setView([pos.coords.latitude, pos.coords.longitude], 15); },
+      () => { $('ipLista').innerHTML = '<div class="ip-vuoto">Posizione non disponibile: scrivi il CAP o il comune.</div>'; },
+      { timeout: 8000 });
   }
 
   function aggiornaTempi() {
@@ -609,6 +805,10 @@
     if (d.modalita === 'inpost') {
       ctrl('fTel', d.telefono.replace(/\D/g, '').length < 9);
       ctrl('fEmail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email));
+      if (!d.punto && !d.punto_nome) {
+        $('ipLista').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        avviso('⚠ Scegli il punto InPost sulla mappa o nell\'elenco.'); return false;
+      }
       ctrl('fPunto', !d.punto && !d.punto_nome);
       ctrl('fPuntoNome', !d.punto_nome && !d.punto);
       ctrl('fPuntoComune', !d.punto_comune);
@@ -623,6 +823,7 @@
       ctrl('fComune', !d.comune);
       ctrl('fProv', !/^[A-Z]{2}$/.test(d.provincia));
     }
+    if (primo && primo.indexOf('fPunto') === 0) $('ipMano').open = true;
     if (primo) { $(primo).focus(); avviso('⚠ Controlla i campi evidenziati.'); return false; }
     if (!$('fConsenso').checked) { avviso('⚠ Per inviare l\'ordine serve il consenso al trattamento dei dati.'); return false; }
     return true;
