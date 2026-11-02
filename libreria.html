@@ -142,6 +142,44 @@
     .nb-box strong { color: #ffd060; }
     .nb-box a { color: #ffd060; }
 
+    /* ── COLLANA «OGNI TIPO DI INSEGNAMENTO» ── */
+    .collana-box {
+      background: rgba(0,0,0,0.22); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,208,96,0.30); border-radius: 12px;
+      padding: 20px 20px 16px; margin-bottom: 38px;
+    }
+    .collana-box[hidden] { display: none; }
+    .collana-box h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
+    .collana-box p { font-size: 0.9rem; line-height: 1.65; color: rgba(255,255,255,0.75); margin-bottom: 14px; }
+    .collana-box p a { color: #ffd060; }
+    .collana-scroll {
+      display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 12px;
+      scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+    }
+    .collana-vol {
+      flex: 0 0 118px; scroll-snap-align: start; cursor: pointer; background: none; border: none;
+      color: #fff; font: inherit; text-align: left; padding: 0;
+    }
+    .collana-vol img {
+      width: 118px; aspect-ratio: 0.707; object-fit: cover; display: block; border-radius: 3px;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5)); transition: transform 0.2s; margin-bottom: 7px;
+    }
+    .collana-vol:hover img { transform: translateY(-3px); }
+    .collana-vol .n { font-size: 0.7rem; color: #ffd060; font-weight: 700; letter-spacing: 0.05em; }
+    .collana-vol .t { font-size: 0.8rem; font-weight: 600; line-height: 1.25; }
+    .collana-azioni { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+    .collana-azioni button {
+      padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.30); color: #fff; font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    }
+    .collana-azioni button:hover { background: rgba(255,255,255,0.16); }
+    .btn-dvd {
+      display: inline-block; margin: 12px 0 14px; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+      background: rgba(255,208,96,0.10); border: 1px solid rgba(255,208,96,0.40); color: #ffd060;
+      font: inherit; font-size: 0.85rem; font-weight: 600;
+    }
+    .btn-dvd:hover { background: rgba(255,208,96,0.20); }
+
     /* SEZIONE */
     .sezione-titolo {
       font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
@@ -505,7 +543,21 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
       </div>
     </div>
 
-    <div class="sezione-titolo">📖 Catalogo</div>
+    <section class="collana-box" id="collanaBox" hidden>
+      <div class="sezione-titolo" style="margin-bottom:10px">📘 Collana</div>
+      <h2>«Ogni tipo di insegnamento»</h2>
+      <p>Quattordici volumetti con gli studi biblici di <strong>Ellero Balzani</strong>, raccolti per temi:
+        amore e famiglia, sofferenza, vita e morte, il cuore e le relazioni. Insieme ai volumetti puoi chiedere il
+        <strong>DVD</strong> con studi, podcast e predicazioni. Gli studi si possono ascoltare inquadrando il codice QR sul retro, oppure su
+        <a href="https://ognitipodiinsegnamento.it" target="_blank" rel="noopener">ognitipodiinsegnamento.it</a>.
+        Come tutto il resto, sono gratuiti.</p>
+      <div class="collana-scroll" id="collanaScroll"></div>
+      <div class="collana-azioni">
+        <button type="button" onclick="filtraCollana('')">Mostra tutta la collana nel catalogo</button>
+      </div>
+    </section>
+
+    <div class="sezione-titolo" id="titoloCatalogo">📖 Catalogo</div>
 
     <div id="libriList">
       <div class="stato-box"><span class="emoji">📚</span>Caricamento del catalogo…</div>
@@ -765,6 +817,15 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
         <div class="libro-desc${lunga ? ' collapsed' : ''}" id="desc-${i}">${desc}</div>
         ${lunga ? `<button class="leggi-tutto" onclick="apriDesc(${i}, this)">Leggi tutto</button>` : ''}
 
+        ${(() => {
+          // volumetti della collana <-> DVD «Ogni tipo di insegnamento»
+          if ((l.note || '').indexOf('Collana «Ogni tipo di insegnamento»') !== 0) return '';
+          if (l.tipo === 'DVD')
+            return `<button type="button" class="btn-dvd" onclick="chiudiScheda(); filtraCollana('')">📘 Vedi i volumetti della collana</button>`;
+          const dvd = LIBRI.find(x => x.tipo === 'DVD' && (x.note || '').indexOf('Collana «Ogni tipo di insegnamento»') === 0);
+          return dvd ? `<button type="button" class="btn-dvd" onclick="apriScheda(${dvd._i})">📀 C'è anche il DVD «Ogni tipo di insegnamento»</button>` : '';
+        })()}
+
         ${l.autore_bio ? `<div class="autore-bio">${esc(l.autore_bio)}</div>` : ''}
         ${l.note ? `<div class="autore-bio">${esc(l.note)}</div>` : ''}
 
@@ -972,6 +1033,7 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
         return;
       }
       LIBRI.forEach((l, i) => { l._i = i; });
+      disegnaCollana();
       costruisciFiltri();
       document.getElementById('filtri').hidden = false;
       applicaFiltri();
@@ -980,6 +1042,34 @@ metti nel <strong style="color:#ffd060">carrello</strong> i libri che desideri e
         Non è stato possibile caricare il catalogo.<br>Riprova fra poco o scrivici a
         <a href="mailto:${EMAIL}" style="color:rgba(255,255,255,0.75)">${EMAIL}</a>.</div>`;
     }
+  }
+
+  /* ── COLLANA «OGNI TIPO DI INSEGNAMENTO»: riconosciuta dalla nota del libro ── */
+  const COLLANA = 'Collana «Ogni tipo di insegnamento»';
+  function numeroCollana(l) {
+    const m = (l.note || '').match(/n\.\s*(\d+)/);
+    return m ? parseInt(m[1]) : 99;
+  }
+  function disegnaCollana() {
+    const tutti = LIBRI.filter(l => (l.note || '').indexOf(COLLANA) === 0);
+    const vol = tutti.filter(l => l.tipo !== 'DVD').sort((a, b) => numeroCollana(a) - numeroCollana(b))
+                     .concat(tutti.filter(l => l.tipo === 'DVD'));
+    if (!vol.length) return;
+    document.getElementById('collanaScroll').innerHTML = vol.map(l => `
+      <button type="button" class="collana-vol" onclick="apriScheda(${l._i})" title="${esc(l.titolo)}">
+        <img src="${esc(l.copertina)}" alt="Copertina di ${esc(l.titolo)}" loading="lazy"${l.tipo === 'DVD' ? ' style="object-fit:contain"' : ''}>
+        <div class="n">${l.tipo === 'DVD' ? '📀 DVD' : 'N. ' + numeroCollana(l)}</div>
+        <div class="t">${esc(l.titolo)}</div>
+      </button>`).join('');
+    document.getElementById('collanaBox').hidden = false;
+  }
+  function filtraCollana(tipo) {
+    azzeraFiltri();
+    document.getElementById('fCerca').value = 'Ogni tipo di insegnamento';
+    document.getElementById('fAutore').value = 'Ellero Balzani';
+    document.getElementById('fTipo').value = tipo;
+    applicaFiltri();
+    document.getElementById('titoloCatalogo').scrollIntoView({ behavior: 'smooth' });
   }
 
   function avvio() { aggiornaCarrello(); caricaLibreria(); }
