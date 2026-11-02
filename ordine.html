@@ -151,6 +151,11 @@
     .domicilio[hidden] { display: none; }
     .nota-inpost { font-size: 0.82rem; line-height: 1.55; color: rgba(255,255,255,0.65); margin-bottom: 12px; }
     .nota-inpost a { color: #ffd060; }
+    .nota-privacy {
+      font-size: 0.8rem; line-height: 1.5; color: rgba(255,255,255,0.72); margin-top: 6px;
+      background: rgba(80,200,120,0.07); border: 1px solid rgba(80,200,120,0.28); border-radius: 8px; padding: 8px 12px;
+    }
+    .nota-privacy strong { color: #6ddb90; }
     .ip-cerca { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
     .ip-cerca input {
       flex: 1 1 220px; min-width: 0; font: inherit; font-size: 0.92rem; color: #fff;
@@ -367,7 +372,9 @@
             <div class="campo"><label for="fNome">Nome</label><input id="fNome" autocomplete="given-name"></div>
             <div class="campo c3"><label for="fTel">Telefono <span class="fac">(facoltativo)</span></label><input id="fTel" type="tel" autocomplete="tel" placeholder="es. 333 1234567"></div>
             <div class="campo c3"><label for="fEmail">Email <span class="fac">(facoltativa)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="nome@esempio.it"></div>
-            <div class="campo"><p style="font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:-4px">Lasciaci almeno un recapito, telefono o email, per avvisarti quando i libri sono pronti.</p></div>
+            <div class="campo"><p style="font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:-4px" id="notaRecapiti">Lasciaci almeno un recapito, telefono o email, per avvisarti quando i libri sono pronti.</p>
+              <p class="nota-privacy">🔒 <strong>Niente pubblicità:</strong> non ti contatteremo per altro. Telefono ed email
+                servono solo per i messaggi di testo sul tuo ordine e sulla spedizione.</p></div>
             <div class="campo"><label for="fNote">Note per noi <span class="fac">(facoltativo)</span></label>
               <textarea id="fNote" placeholder="es. orari in cui sei reperibile, richieste particolari…"></textarea></div>
             <div class="trappola" aria-hidden="true"><label>Sito web<input id="fSito" tabindex="-1" autocomplete="off"></label></div>
@@ -602,6 +609,9 @@
     // per InPost cellulare ed email servono entrambi (arrivano SMS ed email col codice di ritiro)
     document.querySelectorAll('label[for="fTel"] .fac, label[for="fEmail"] .fac')
       .forEach(el => { el.hidden = m === 'inpost'; });
+    $('notaRecapiti').textContent = m === 'inpost'
+      ? 'Per la spedizione InPost servono entrambi: InPost ti manda per SMS ed email il codice per ritirare il pacco.'
+      : 'Lasciaci almeno un recapito, telefono o email, per avvisarti quando i libri sono pronti.';
     aggiornaTempi();
   }
 
