@@ -503,7 +503,7 @@
       "descrizione": "«Gli uomini e non Dio hanno inventato strumenti di tortura, prigioni, schiavitù, fucili, bombe; è per l’avarizia o la stupidità umana, non per la villania della natura, che abbiamo la povertà e il superlavoro. Ma anche se tutte le sofferenze fossero causate dall’uomo, vorremmo ancora sapere la ragione per cui Dio permette ai peggiori fra gli uomini di torturare i loro fratelli.» Il classico di C. S. Lewis sul dolore e sulla bontà di Dio.",
       "copertina": "libreria/il-problema-della-sofferenza-fronte.webp",
       "retro": "libreria/il-problema-della-sofferenza-retro.webp",
-      "copie": 1,
+      "copie": 0,
       "note": ""
     },
     {
@@ -6630,7 +6630,8 @@
   "ordini_web_applicati": [
     "261029-B0XY",
     "261101-Q9PC",
-    "261102-WMS8"
+    "261102-WMS8",
+    "261107-FTH7"
   ],
   "riservato": {
     "v": 1,
